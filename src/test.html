@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- web3 -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.3.5/web3.min.js"
+      integrity="sha512-S/O+gH5szs/+/dUylm15Jp/JZJsIoWlpSVMwT6yAS4Rh7kazaRUxSzFBwnqE2/jBphcr7xovTQJaopiEZAzi+A=="
+      crossorigin="anonymous"
+    ></script>
+    <!-- custom provider -->
+    <script src="./bundle.js"></script>
+
+    <title>Custom Provider</title>
+  </head>
+  <body>
+    <div id="info">waiting for responses...</div>
+    <script>
+      (async function init() {
+        const Web3 = window.Web3;
+        const provider = new BloctoProvider();
+
+        const web3 = new Web3(provider);
+        const response = await provider.enable();
+
+        const [accounts, hashRate, isMining] = await Promise.all([
+          web3.eth.getAccounts(),
+          web3.eth.getHashrate(),
+          web3.eth.isMining(),
+        ]);
+        const infoDOM = document.getElementById("info");
+        let info = "";
+        info += `<p>Accounts: ${accounts.join(",")}</p>`;
+        info += `<p>Hash Rate: ${hashRate}</p>`;
+        info += `<p>Is Mining: ${isMining}</p>`;
+        infoDOM.innerHTML = info;
+      })();
+    </script>
+  </body>
+</html>
