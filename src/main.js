@@ -1,164 +1,107 @@
 import dotenv from "dotenv";
-import ProviderEngine from "web3-provider-engine";
-import CacheSubprovider from "web3-provider-engine/subproviders/cache";
-import FixtureSubprovider from "web3-provider-engine/subproviders/fixture";
-import FilterSubprovider from "web3-provider-engine/subproviders/filters";
-import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
-import NonceSubprovider from "web3-provider-engine/subproviders/nonce-tracker";
-import SubscriptionsSubprovider from "web3-provider-engine/subproviders/subscriptions";
-
 dotenv.config();
 
-const noop = (_) => _;
+const CHAIN_ID_RPC_MAPPING = {
+  // BSC mainnet
+  56: "https://bsc-dataseed1.binance.org",
+  // BSC testnet
+  97: "https://data-seed-prebsc-1-s1.binance.org:8545",
+};
 
-const formatResponse = (payload, result) => ({
-  id: payload.id,
-  jsonrpc: payload.jsonrpc,
-  result,
-});
+const CHAIN_ID_NET_MAPPING = {
+  1: "mainnet",
+  3: "ropsten",
+  4: "rinkeby",
+  5: "goerli",
+  42: "kovan",
+};
 
-class BloctoProvider extends ProviderEngine {
+class BloctoProvider {
   isBlocto = true;
 
   isConnecting = false;
   connected = false;
   server = process.env.SERVER;
+  infuraId = process.env.INFURA;
 
-  constructor() {
-    super({});
-    this.setup();
-  }
+  chain = null;
+  net = null;
+  rpc = null;
+  chainId = null;
+  networkId = null;
 
-  setup() {
-    // static results
-    this.addProvider(
-      new FixtureSubprovider({
-        web3_clientVersion: "Blocto/v0.0.0/javascript",
-        net_listening: true,
-        eth_hashrate: "0x00",
-        eth_mining: false,
-        eth_syncing: true,
-      })
-    );
-
-    // cache layer
-    this.addProvider(new CacheSubprovider());
-
-    // filters
-    this.addProvider(new FilterSubprovider());
-
-    // pending nonce
-    this.addProvider(new NonceSubprovider());
-    this.addProvider(new SubscriptionsSubprovider());
-
-    // id mgmt
-    this.addProvider(
-      new HookedWalletSubprovider({
-        getAccounts: async (cb) => {
-          try {
-            const accounts = await this.fetchAccounts();
-            if (accounts && accounts.length) {
-              cb(null, accounts);
-            } else {
-              cb(new Error("Failed to get accounts"));
-            }
-          } catch (error) {
-            cb(error);
-          }
-        },
-      })
-    );
-
-    this.addProvider({
-      handleRequest: async (payload, next, end) => {
-        try {
-          const { result } = await this.handleRequest(payload);
-          end(null, result);
-        } catch (error) {
-          end(error);
+  constructor({ chain = "ethereum", net = "rinkeby", rpc } = {}) {
+    // resolve rpc
+    if (rpc) {
+      this.rpc = rpc;
+      for (let id of Object.keys(CHAIN_ID_RPC_MAPPING)) {
+        if (CHAIN_ID_RPC_MAPPING[id].includes(rpc)) {
+          this.chainId = id;
+          this.chain = "bsc";
         }
-      },
-      setEngine: noop,
-    });
-
-    // network connectivity error
-    this.on("error", function (err) {
-      // report connectivity errors
-      console.error(err.stack);
-    });
-
-    // start polling for blocks
-    this.start();
+      }
+    } else {
+      this.chain = chain || "ethereum";
+      this.net = net || "ropsten";
+      for (let id of Object.keys(CHAIN_ID_NET_MAPPING)) {
+        if (CHAIN_ID_NET_MAPPING[id] === net) this.chainId = id;
+      }
+      this.rpc = `https://${net}.infura.io/v3/${this.infuraId}`;
+    }
+    this.networkId = this.chainId;
   }
 
-  async handleRequest(payload) {
+  async request(payload) {
     try {
       let response = null;
       let result = null;
       switch (payload.method) {
         case "eth_accounts":
-          const accounts = await this.fetchAccounts();
-          result = accounts;
-        case "eth_blockNumber":
-        case "eth_getBlockByNumber":
-        case "eth_protocolVersion":
-        case "eth_syncing":
+          result = await this.fetchAccounts();
+          break;
         case "eth_coinbase":
-        case "eth_gasPrice":
-        case "eth_getBalance":
-        case "eth_getStorageAt":
-        case "eth_getTransactionCount":
-        case "eth_getBlockTransactionCountByHash":
-        case "eth_getBlockTransactionCountByNumber":
-        case "eth_getUncleCountByBlockHash":
-        case "eth_getUncleCountByBlockNumber":
-        case "eth_getCode":
+          const accounts = await this.fetchAccounts();
+          result = accounts[0];
+          break;
+        case "eth_chainId":
+          result = this.chainId;
+          result = "0x" + result.toString(16);
+          break;
+        case "net_version":
+          result = this.networkId || this.chainId;
+          result = "0x" + result.toString(16);
+          break;
         case "eth_sign":
-        case "eth_signTransaction":
+          result = await this.handleSign(payload);
+          result = result.signature
+          break
         case "eth_sendTransaction":
+        case "eth_signTransaction":
         case "eth_sendRawTransaction":
-        case "eth_call":
         case "eth_estimateGas":
-        case "eth_getBlockByHash":
-        case "eth_getTransactionByHash":
-        case "eth_getTransactionByBlockHashAndIndex":
-        case "eth_getTransactionByBlockNumberAndIndex":
-        case "eth_getTransactionReceipt":
-        case "eth_getUncleByBlockHashAndIndex":
-        case "eth_getUncleByBlockNumberAndIndex":
-        case "eth_getCompilers":
-        case "eth_compileLLL":
-        case "eth_compileSolidity":
-        case "eth_compileSerpent":
-        case "eth_newFilter":
-        case "eth_newBlockFilter":
-        case "eth_newPendingTransactionFilter":
-        case "eth_uninstallFilter":
-        case "eth_getFilterChanges":
-        case "eth_getFilterLogs":
-        case "eth_getLogs":
-        case "eth_getWork":
-        case "eth_submitWork":
-        case "eth_submitHashrate":
+          result = null
+          break;
         default:
-          result = "Unsupported method";
+          response = await this.handleReadRequests({ id: 1, jsonrpc:"2.0", ...payload });
       }
-      if (response) return response;
-      return formatResponse(payload, result);
+      if (response) return response.result;
+      return result
     } catch (error) {
-      this.emit("error", error);
+      console.error(error)
+      // this.emit("error", error);
       throw error;
     }
   }
 
   enable() {
     return new Promise((resolve, reject) => {
-      if (typeof window === "undefined") reject("Currently ");
+      if (typeof window === "undefined")
+        reject("Currently only supported in browser");
       const loginFrame = document.createElement("iframe");
 
       loginFrame.setAttribute(
         "src",
-        `${this.server}/authn?l6n=${encodeURIComponent(window.location.origin)}`
+        `${this.server}/authn?l6n=${encodeURIComponent(window.location.origin)}&chain=${this.chain}`
       );
       loginFrame.setAttribute(
         "style",
@@ -168,6 +111,7 @@ class BloctoProvider extends ProviderEngine {
       document.body.appendChild(loginFrame);
 
       let eventListener = null;
+
       const loginEventHandler = (e) => {
         if (e.origin === this.server) {
           // @todo: try with another more general event types
@@ -175,6 +119,7 @@ class BloctoProvider extends ProviderEngine {
             window.removeEventListener("message", eventListener);
             document.body.removeChild(loginFrame);
             this.code = e.data.code;
+            this.connected = true;
             resolve();
           }
 
@@ -188,11 +133,34 @@ class BloctoProvider extends ProviderEngine {
       eventListener = window.addEventListener("message", loginEventHandler);
     });
   }
+
   async fetchAccounts() {
     const { accounts } = await fetch(
-      `${this.server}/api/ethereum/accounts?code=${this.code}`
+      `${this.server}/api/${this.chain}/accounts?code=${this.code}`
     ).then((response) => response.json());
     return accounts;
+  }
+
+  async handleReadRequests(payload) {
+    return await fetch(this.rpc, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }).then((response) => response.json());
+  }
+
+  async handleSign({ params }) {
+    return await fetch(`${this.server}/api/${this.chain}/sign?code=${this.code}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: params[1],
+      }),
+    }).then((response) => response.json());
   }
 }
 

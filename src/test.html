@@ -26,16 +26,45 @@
         const web3 = new Web3(provider);
         const response = await provider.enable();
 
-        const [accounts, hashRate, isMining] = await Promise.all([
+        const [
+          accounts,
+          hashRate,
+          blockNumber,
+          isMining,
+          isSyncing,
+          chainId,
+          protocolVersion,
+        ] = await Promise.all([
           web3.eth.getAccounts(),
           web3.eth.getHashrate(),
+          web3.eth.getBlockNumber(),
           web3.eth.isMining(),
+          web3.eth.isSyncing(),
+          web3.eth.getChainId(),
+          web3.eth.getProtocolVersion(),
         ]);
+
+        const balance = web3.utils.fromWei(
+          await web3.eth.getBalance(accounts[0]),
+          "ether"
+        );
+
+        const message = 'Hello world'
+        const signature = await web3.eth.sign(message, accounts[0]);
+
         const infoDOM = document.getElementById("info");
         let info = "";
         info += `<p>Accounts: ${accounts.join(",")}</p>`;
+        info += `<p>Balance of ${accounts[0]}: ${balance}</p>`;
+
+        info += `<p>Block number ${blockNumber}</p>`;
+
         info += `<p>Hash Rate: ${hashRate}</p>`;
         info += `<p>Is Mining: ${isMining}</p>`;
+        info += `<p>Is Syncing: ${isSyncing}</p>`;
+        info += `<p>Chain Id: ${chainId}</p>`;
+        info += `<p>Protocol Version: ${protocolVersion}</p>`;
+        info += `<p style="word-break:break-all">Signature for "${message}": ${signature}</p>`;
         infoDOM.innerHTML = info;
       })();
     </script>
