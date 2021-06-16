@@ -11,25 +11,101 @@
       integrity="sha512-S/O+gH5szs/+/dUylm15Jp/JZJsIoWlpSVMwT6yAS4Rh7kazaRUxSzFBwnqE2/jBphcr7xovTQJaopiEZAzi+A=="
       crossorigin="anonymous"
     ></script>
-    <!-- blocto provider -->
-    <script src="/dist/bundle.js"></script>
+    <!-- custom provider -->
+    <script src="./bundle.js"></script>
 
-    <title>Blocto Provider Test</title>
+    <title>Custom Provider</title>
   </head>
   <body>
-    <div id="info">waiting for responses...</div>
+    <div id="actions" hidden>
+      <form>
+        <fieldset>
+          <legend>Sign Message</legend>
+          <input id="message" type="text" />
+          <button type="button" onclick="signMessage()">Sign</button>
+          <div id="signature" style="word-break:break-all"></div>
+        </fieldset>
+        <fieldset>
+          <legend>Send Transaction</legend>
+          <input id="toAddress" type="text" placeholder="To" />
+          <input id="value" tpye="number" placeholder="0" />
+          <button type="button" onclick="sendTransaction()">Send</button>
+          <div id="receipt"></div>
+        </fieldset>
+      </form>
+    </div>
+    <div id="info">Enabling account ...</div>
     <script>
+      let account = null;
+      let web3 = null;
+
+      async function sendTransaction() {
+        const transaction = {
+          from: account,
+          to: document.getElementById('toAddress').value,
+          value: document.getElementById('value').value,
+        }
+        document.getElementById('receipt').innerHTML = "Processing Transaction ...";
+        const receipt = await web3.eth.sendTransaction(transaction)
+        document.getElementById('receipt').innerHTML = `TX hash: ${receipt.transactionHash}`
+        updateInfo();
+      }
+
+      async function signMessage() {
+        const message = document.getElementById('message').value;
+        document.getElementById('signature').innerHTML = `Signing Message ...`
+        const signature = await web3.eth.sign(message, account);
+        document.getElementById('signature').innerHTML = `Signature: ${signature}`
+      }
+
+      async function updateInfo() {
+        const [
+          accounts,
+          hashRate,
+          blockNumber,
+          isMining,
+          isSyncing,
+          chainId,
+          protocolVersion,
+        ] = await Promise.all([
+          web3.eth.getAccounts(),
+          web3.eth.getHashrate(),
+          web3.eth.getBlockNumber(),
+          web3.eth.isMining(),
+          web3.eth.isSyncing(),
+          web3.eth.getChainId(),
+          web3.eth.getProtocolVersion(),
+        ]);
+        account = accounts[0]
+
+        const balance = web3.utils.fromWei(
+          await web3.eth.getBalance(account),
+          "ether"
+        );
+
+        const message = 'Hello world'
+        
+
+        const infoDOM = document.getElementById("info");
+        let info = "";
+        info += `<p>Account: ${account}</p>`;
+        info += `<p>Balance of ${account}: ${balance}</p>`;
+
+        info += `<p>Block number ${blockNumber}</p>`;
+
+        info += `<p>Chain Id: ${chainId}</p>`;
+        info += `<p>Protocol Version: ${protocolVersion}</p>`;
+        infoDOM.innerHTML = info;
+      }
+
       (async function init() {
         const Web3 = window.Web3;
         const provider = new BloctoProvider();
 
-        const web3 = new Web3(provider);
+        web3 = new Web3(provider);
         const response = await provider.enable();
-
-        const accounts = await web3.eth.getAccounts();
-        const infoDOM = document.getElementById("info");
-        let info = `<p>Accounts: ${accounts.join(",")}</p>`;
-        infoDOM.innerHTML = info;
+        document.getElementById('actions').removeAttribute('hidden')
+        updateInfo(); 
       })();
     </script>
   </body>

@@ -5,8 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "dotenv": "^10.0.0",
-    "ethereumjs-vm": "^4.2.0",
-    "web3-provider-engine": "^16.0.1"
+    "ethereumjs-vm": "^4.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.14.0",

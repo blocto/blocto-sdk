@@ -76,9 +76,10 @@ class BloctoProvider {
           result = result.signature
           break
         case "eth_sendTransaction":
+          result = await this.handleSendTransaction(payload);
+          break;
         case "eth_signTransaction":
         case "eth_sendRawTransaction":
-        case "eth_estimateGas":
           result = null
           break;
         default:
@@ -161,6 +162,38 @@ class BloctoProvider {
         message: params[1],
       }),
     }).then((response) => response.json());
+  }
+
+  async handleSendTransaction({ params }) {
+    // estimate point
+    const { cost } = await fetch(`${this.server}/api/${this.chain}/estimatePoint?code=${this.code}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params[0]),
+    }).then(response => response.json())
+    
+    if (typeof window === "undefined" || !window.confirm)
+      throw(new Error("Currently only supported in browser"));
+    // transaction dialog
+    const transactionDetails = Object
+      .entries(params[0])
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n')
+      + '\n' + `Point cost: ${cost}`
+    if(!window.confirm(transactionDetails)) throw(new Error("Transaction Canceled"));
+
+    // send transaction after confirmed
+    return fetch(`${this.server}/api/${this.chain}/sendTransaction?code=${this.code}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...params[0], point: cost }),
+    })
+      .then(response => response.json())
+      .then(({ receipt }) => receipt)
   }
 }
 
