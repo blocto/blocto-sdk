@@ -1,6 +1,6 @@
 {
-  "name": "test-provider",
-  "version": "1.0.0",
+  "name": "blocto-sdk",
+  "version": "0.0.1",
   "author": "Yang Lin",
   "license": "MIT",
   "dependencies": {
