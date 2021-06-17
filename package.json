@@ -1,8 +1,9 @@
 {
   "name": "blocto-sdk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Yang Lin",
   "license": "MIT",
+  "repository": "git@github.com:portto/blocto-sdk.git",
   "dependencies": {
     "dotenv": "^10.0.0",
     "ethereumjs-vm": "^4.2.0"
