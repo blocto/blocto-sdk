@@ -118,7 +118,7 @@ class BloctoProvider {
           // @todo: try with another more general event types
           if (e.data.type === "FCL::CHALLENGE::RESPONSE") {
             window.removeEventListener("message", eventListener);
-            document.body.removeChild(loginFrame);
+            loginFrame.parentNode.removeChild(loginFrame);
             this.code = e.data.code;
             this.connected = true;
             resolve();
@@ -126,7 +126,7 @@ class BloctoProvider {
 
           if (e.data.type === "FCL::CHALLENGE::CANCEL") {
             window.removeEventListener("message", eventListener);
-            document.body.removeChild(loginFrame);
+            loginFrame.parentNode.removeChild(loginFrame);
             reject();
           }
         }

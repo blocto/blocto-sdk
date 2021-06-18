@@ -30,7 +30,8 @@ bower_components
 .lock-wscript
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
-build/Release
+dist
+es
 
 # dev build
 src/bundle.js
