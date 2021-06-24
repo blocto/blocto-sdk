@@ -34,9 +34,9 @@
   "scripts": {
     "clean": "rimraf dist",
     "rollup-watch": "NODE_ENV=development rollup -c rollup.config.dev.js --watch",
-    "serve": "live-server --port=7777 --https=dev-cert/index.js src",
+    "serve": "live-server --port=7777 --https=dev-cert/index.js dev",
     "start": "npm-run-all --parallel rollup-watch serve",
-    "build": "NODE_ENV=production rollup -c rollup.config.prod.js",
+    "build": "NODE_ENV=production rollup -c",
     "prepublishOnly": "npm-run-all clean build"
   }
 }

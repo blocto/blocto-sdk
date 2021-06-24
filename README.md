@@ -2,14 +2,18 @@
 
 Blocto Crosschain SDK
 ## `Setup`
-
 ```
-yarn
+yarn 
+
 # generate local https cert
 brew install mkcert
 mkcert -install
 cd dev-cert
 mkcert localhost
+
+# make dev directory
+mkdir dev
+ln -s src/main.js dev/main.js
 ```
 
 ## `Scripts`

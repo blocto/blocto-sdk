@@ -34,7 +34,7 @@ dist
 es
 
 # dev build
-src/bundle.js
+dev
 
 # Dependency directories
 node_modules/

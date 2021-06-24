@@ -9,7 +9,7 @@ import dotenv from "rollup-plugin-dotenv";
 const config = {
   input: "src/main.js",
   output: {
-    file: "src/bundle.js",
+    file: "dev/bundle.js",
     format: "umd",
     name: "BloctoProvider",
   },
