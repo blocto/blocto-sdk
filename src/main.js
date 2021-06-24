@@ -212,7 +212,6 @@ class BloctoProvider {
       }).then(response => response.json());
 
       if (status === 'APPROVED') {
-        console.log(transactionHash)
         authzFrame.parentNode.removeChild(authzFrame);
         return transactionHash;
       }
