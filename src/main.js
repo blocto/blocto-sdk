@@ -1,6 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+function timeout(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const CHAIN_ID_RPC_MAPPING = {
   // BSC mainnet
   56: "https://bsc-dataseed1.binance.org",
@@ -172,28 +176,54 @@ class BloctoProvider {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(params[0]),
-    }).then(response => response.json())
-    
-    if (typeof window === "undefined" || !window.confirm)
-      throw(new Error("Currently only supported in browser"));
-    // transaction dialog
-    const transactionDetails = Object
-      .entries(params[0])
-      .map(([key, value]) => `${key}: ${value}`)
-      .join('\n')
-      + '\n' + `Point cost: ${cost}`
-    if(!window.confirm(transactionDetails)) throw(new Error("Transaction Canceled"));
+    }).then(response => response.json());
 
-    // send transaction after confirmed
-    return fetch(`${this.server}/api/${this.chain}/sendTransaction?code=${this.code}`, {
+    const { authorizationId } = await fetch(`${this.server}/api/${this.chain}/authz?code=${this.code}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ ...params[0], point: cost }),
-    })
-      .then(response => response.json())
-      .then(({ receipt }) => receipt)
+    }).then(response => response.json());
+    
+    if (typeof window === "undefined") {
+      throw(new Error("Currently only supported in browser"));
+    }
+
+    const authzFrame = document.createElement("iframe");
+
+    authzFrame.setAttribute(
+      "src",
+      `${this.server}/authz/${this.chain}/${authorizationId}`
+    );
+    authzFrame.setAttribute(
+      "style",
+      "width:100vw;height:100vh;position:fixed;top:0;left:0"
+    );
+
+    document.body.appendChild(authzFrame);
+
+    while(true) {
+      const { status, transactionHash } = await fetch(`${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then(response => response.json());
+
+      if (status === 'APPROVED') {
+        console.log(transactionHash)
+        authzFrame.parentNode.removeChild(authzFrame);
+        return transactionHash;
+      }
+
+      if (status === 'DECLINED') {
+        authzFrame.parentNode.removeChild(authzFrame);
+        throw(new Error("Transaction Canceled"));
+      }
+
+      await timeout(1000);
+    }
   }
 }
 
