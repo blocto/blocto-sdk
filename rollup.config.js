@@ -10,7 +10,7 @@ import dotenv from "rollup-plugin-dotenv";
 
 import pkg from './package.json'
 
-const babelRuntimeVersion = pkg.dependencies['@babel/runtime'].replace(
+const babelRuntimeVersion = pkg.devDependencies['@babel/runtime'].replace(
   /^[^0-9]*/,
   ''
 )
