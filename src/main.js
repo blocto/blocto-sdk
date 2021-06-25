@@ -20,12 +20,18 @@ const CHAIN_ID_NET_MAPPING = {
   42: "kovan",
 };
 
+const CHAIN_ID_SERVER_MAPPING = {
+  1: "https://wallet.blocto.app",
+  4: "https://wallet-testnet.blocto.app",
+  56: "https://wallet.blocto.app",
+  97: "https://wallet-testnet.blocto.app",
+}
+
 class BloctoProvider {
   isBlocto = true;
 
   isConnecting = false;
   connected = false;
-  server = process.env.SERVER;
   infuraId = process.env.INFURA;
 
   chain = null;
@@ -33,6 +39,7 @@ class BloctoProvider {
   rpc = null;
   chainId = null;
   networkId = null;
+  server = null;
 
   constructor({ chain = "ethereum", net = "rinkeby", rpc } = {}) {
     // resolve rpc
@@ -53,6 +60,7 @@ class BloctoProvider {
       this.rpc = `https://${net}.infura.io/v3/${this.infuraId}`;
     }
     this.networkId = this.chainId;
+    this.server = process.env.SERVER || CHAIN_ID_SERVER_MAPPING[this.chainId]
   }
 
   async request(payload) {
