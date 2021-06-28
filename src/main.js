@@ -43,6 +43,7 @@ const CHAIN_ID_SERVER_MAPPING = {
   97: "https://wallet-testnet.blocto.app",
 }
 
+const PERMITTED_EVENTS = ['connect', 'disconnect', 'message', 'chainChanged', 'accountsChanged']
 class BloctoProvider {
   isBlocto = true;
 
@@ -56,6 +57,9 @@ class BloctoProvider {
   rpc = null;
   server = null;
   appId = null;
+
+  eventListeners = {}
+
 
   constructor({ chainId, rpc, server, appId } = {}) {
     invariant(chainId, "'chainId' is required");
@@ -80,6 +84,11 @@ class BloctoProvider {
 
     this.server = process.env.SERVER || server || CHAIN_ID_SERVER_MAPPING[this.chainId];
     this.appId = process.env.APP_ID || appId;
+
+    // init event listeners
+    PERMITTED_EVENTS.forEach(event => {
+      this.eventListeners[event] = []
+    })
   }
 
   async request(payload) {
@@ -95,6 +104,9 @@ class BloctoProvider {
       let response = null;
       let result = null;
       switch (payload.method) {
+        case "eth_requestAccounts":
+          result = await this.fetchAccounts();
+          break;
         case "eth_accounts":
           result = await this.fetchAccounts();
           break;
@@ -133,6 +145,7 @@ class BloctoProvider {
     }
   }
 
+  // eip-1102 alias
   enable() {
     if (window.ethereum && window.ethereum.isBlocto) {
       return window.ethereum.enable();
@@ -164,7 +177,10 @@ class BloctoProvider {
             loginFrame.parentNode.removeChild(loginFrame);
             this.code = e.data.code;
             this.connected = true;
+
+            this.eventListeners['connect'].forEach(listener => listener(this.chainId));
             resolve([e.data.addr]);
+
           }
 
           if (e.data.type === "FCL::CHALLENGE::CANCEL") {
@@ -263,6 +279,23 @@ class BloctoProvider {
       await timeout(1000);
     }
   }
+
+  on(event, listener) {
+    if(!PERMITTED_EVENTS.includes(event))return;
+    if(!listener instanceof Function)return;
+
+    this.eventListeners[event].push(listener)
+  }
+  
+  removeListener(event, listener) {
+    const listeners = this.eventListeners[event]
+    const index = listeners.findIndex(listener)
+    if(index !== -1) {
+      this.eventListener[event].splice(index, 1);
+    }
+  }
+  // alias removeListener
+  off = removeEventListener
 }
 
 export default BloctoProvider;
