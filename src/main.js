@@ -32,16 +32,16 @@ class BloctoProvider {
 
   isConnecting = false;
   connected = false;
-  infuraId = process.env.INFURA;
 
   chain = null;
   net = null;
   rpc = null;
   chainId = null;
   networkId = null;
+  infuraId = null;
   server = null;
 
-  constructor({ chain = "ethereum", net = "rinkeby", rpc } = {}) {
+  constructor({ chain = "ethereum", net = "rinkeby", rpc, infuraId } = {}) {
     // resolve rpc
     if (rpc) {
       this.rpc = rpc;
@@ -53,7 +53,8 @@ class BloctoProvider {
       }
     } else {
       this.chain = chain || "ethereum";
-      this.net = net || "ropsten";
+      this.net = net || "mainnet";
+      this.infuraId = infuraId || process.env.INFURA;
       for (let id of Object.keys(CHAIN_ID_NET_MAPPING)) {
         if (CHAIN_ID_NET_MAPPING[id] === net) this.chainId = id;
       }
