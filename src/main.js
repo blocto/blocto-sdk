@@ -83,6 +83,10 @@ class BloctoProvider {
   }
 
   async request(payload) {
+    if (window.ethereum && window.ethereum.isBlocto) {
+      return window.ethereum.request(payload);
+    }
+
     try {
       let response = null;
       let result = null;
@@ -126,6 +130,10 @@ class BloctoProvider {
   }
 
   enable() {
+    if (window.ethereum && window.ethereum.isBlocto) {
+      return window.ethereum.enable();
+    }
+
     return new Promise((resolve, reject) => {
       if (typeof window === "undefined")
         reject("Currently only supported in browser");
