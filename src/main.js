@@ -1,4 +1,6 @@
+import invariant from 'invariant'
 import dotenv from "dotenv";
+
 dotenv.config();
 
 function timeout(ms) {
@@ -14,13 +16,20 @@ const CHAIN_ID_RPC_MAPPING = {
   97: "https://data-seed-prebsc-1-s1.binance.org:8545",
 };
 
+const CHAIN_ID_CHAIN_MAPPING = {
+  // Ethereum
+  1: "ethereum",
+  4: "ethereum",
+
+  // BSC
+  56: "bsc",
+  97: "bsc",
+};
+
 const CHAIN_ID_NET_MAPPING = {
   // Ethereum
   1: "mainnet",
-  3: "ropsten",
   4: "rinkeby",
-  5: "goerli",
-  42: "kovan",
 
   // BSC
   56: "mainnet",
@@ -40,35 +49,35 @@ class BloctoProvider {
   isConnecting = false;
   connected = false;
 
+  chainId = null;
+  networkId = null;
   chain = null;
   net = null;
   rpc = null;
-  chainId = null;
-  networkId = null;
-  infuraId = null;
   server = null;
 
-  constructor({ chain = "ethereum", net = "mainnet", rpc, infuraId } = {}) {
-    // resolve rpc
-    if (rpc) {
-      this.rpc = rpc;
-      for (let id of Object.keys(CHAIN_ID_RPC_MAPPING)) {
-        if (CHAIN_ID_RPC_MAPPING[id].includes(rpc)) {
-          this.chainId = id;
-          this.chain = "bsc";
-        }
-      }
+  constructor({ chainId, rpc, server } = {}) {
+    invariant(chainId, "'chainId' is required");
+
+    if (typeof chainId === 'number') {
+      this.chainId = chainId;
+    } else if (chainId.includes('0x')) {
+      this.chainId = parseInt(chainId, 16)
     } else {
-      this.chain = chain || "ethereum";
-      this.net = net || "mainnet";
-      this.infuraId = infuraId || process.env.INFURA;
-      for (let id of Object.keys(CHAIN_ID_NET_MAPPING)) {
-        if (CHAIN_ID_NET_MAPPING[id] === net) this.chainId = id;
-      }
-      this.rpc = `https://${net}.infura.io/v3/${this.infuraId}`;
+      this.chainId = parseInt(chainId, 10)
     }
+
     this.networkId = this.chainId;
-    this.server = process.env.SERVER || CHAIN_ID_SERVER_MAPPING[this.chainId]
+    this.chain = CHAIN_ID_CHAIN_MAPPING[this.chainId]
+    this.net = CHAIN_ID_NET_MAPPING[this.chainId]
+
+    invariant(this.chain, `unsupported 'chainId': ${this.chainId}`);
+
+    this.rpc = process.env.RPC || rpc || CHAIN_ID_RPC_MAPPING[this.chainId];
+
+    invariant(this.rpc, "'rpc' is required for Ethereum")
+
+    this.server = process.env.SERVER || server || CHAIN_ID_SERVER_MAPPING[this.chainId];
   }
 
   async request(payload) {
