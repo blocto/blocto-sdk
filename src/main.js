@@ -55,8 +55,9 @@ class BloctoProvider {
   net = null;
   rpc = null;
   server = null;
+  appId = null;
 
-  constructor({ chainId, rpc, server } = {}) {
+  constructor({ chainId, rpc, server, appId } = {}) {
     invariant(chainId, "'chainId' is required");
 
     if (typeof chainId === 'number') {
@@ -78,6 +79,7 @@ class BloctoProvider {
     invariant(this.rpc, "'rpc' is required for Ethereum")
 
     this.server = process.env.SERVER || server || CHAIN_ID_SERVER_MAPPING[this.chainId];
+    this.appId = process.env.APP_ID || appId;
   }
 
   async request(payload) {
