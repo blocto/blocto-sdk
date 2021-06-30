@@ -87,6 +87,10 @@ class BloctoProvider {
       return window.ethereum.request(payload);
     }
 
+    if (!this.connected) {
+      await this.enable();
+    }
+
     try {
       let response = null;
       let result = null;
