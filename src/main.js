@@ -5,6 +5,8 @@ function timeout(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const IFRAME_STYLE = "width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:1000;border:none;";
+
 const CHAIN_ID_RPC_MAPPING = {
   // BSC mainnet
   56: "https://bsc-dataseed1.binance.org",
@@ -13,11 +15,16 @@ const CHAIN_ID_RPC_MAPPING = {
 };
 
 const CHAIN_ID_NET_MAPPING = {
+  // Ethereum
   1: "mainnet",
   3: "ropsten",
   4: "rinkeby",
   5: "goerli",
   42: "kovan",
+
+  // BSC
+  56: "mainnet",
+  97: "testnet",
 };
 
 const CHAIN_ID_SERVER_MAPPING = {
@@ -41,7 +48,7 @@ class BloctoProvider {
   infuraId = null;
   server = null;
 
-  constructor({ chain = "ethereum", net = "rinkeby", rpc, infuraId } = {}) {
+  constructor({ chain = "ethereum", net = "mainnet", rpc, infuraId } = {}) {
     // resolve rpc
     if (rpc) {
       this.rpc = rpc;
@@ -119,7 +126,7 @@ class BloctoProvider {
       );
       loginFrame.setAttribute(
         "style",
-        "width:100vw;height:100vh;position:fixed;top:0;left:0"
+        IFRAME_STYLE
       );
 
       document.body.appendChild(loginFrame);
@@ -134,7 +141,7 @@ class BloctoProvider {
             loginFrame.parentNode.removeChild(loginFrame);
             this.code = e.data.code;
             this.connected = true;
-            resolve();
+            resolve([e.data.addr]);
           }
 
           if (e.data.type === "FCL::CHALLENGE::CANCEL") {
@@ -207,7 +214,7 @@ class BloctoProvider {
     );
     authzFrame.setAttribute(
       "style",
-      "width:100vw;height:100vh;position:fixed;top:0;left:0"
+      IFRAME_STYLE
     );
 
     document.body.appendChild(authzFrame);
