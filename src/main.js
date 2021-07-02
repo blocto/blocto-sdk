@@ -105,8 +105,6 @@ class BloctoProvider {
       let result = null;
       switch (payload.method) {
         case "eth_requestAccounts":
-          result = await this.fetchAccounts();
-          break;
         case "eth_accounts":
           result = await this.fetchAccounts();
           break;
@@ -225,7 +223,7 @@ class BloctoProvider {
 
   async handleSendTransaction({ params }) {
     // estimate point
-    const { cost } = await fetch(`${this.server}/api/${this.chain}/estimatePoint?code=${this.code}`, {
+    const { cost, error_code: estimatePointError } = await fetch(`${this.server}/api/${this.chain}/estimatePoint?code=${this.code}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -233,12 +231,14 @@ class BloctoProvider {
       body: JSON.stringify(params[0]),
     }).then(response => response.json());
 
+    const mayFail = estimatePointError === 'tx_may_fail';
+
     const { authorizationId } = await fetch(`${this.server}/api/${this.chain}/authz?code=${this.code}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ...params[0], point: cost }),
+      body: JSON.stringify({ ...params[0], point: cost, mayFail }),
     }).then(response => response.json());
     
     if (typeof window === "undefined") {
