@@ -132,7 +132,7 @@ class BloctoProvider {
           result = null
           break;
         default:
-          response = await this.handleReadRequests({ id: 1, jsonrpc:"2.0", ...payload });
+          response = await this.handleReadRequests({ id: 1, jsonrpc: "2.0", ...payload });
       }
       if (response) return response.result;
       return result
@@ -222,8 +222,7 @@ class BloctoProvider {
   }
 
   async handleSendTransaction({ params }) {
-    // estimate point
-    const { cost, error_code: estimatePointError } = await fetch(`${this.server}/api/${this.chain}/estimatePoint?code=${this.code}`, {
+    const { authorizationId } = await fetch(`${this.server}/api/${this.chain}/authz?code=${this.code}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -231,18 +230,8 @@ class BloctoProvider {
       body: JSON.stringify(params[0]),
     }).then(response => response.json());
 
-    const mayFail = estimatePointError === 'tx_may_fail';
-
-    const { authorizationId } = await fetch(`${this.server}/api/${this.chain}/authz?code=${this.code}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ ...params[0], point: cost, mayFail }),
-    }).then(response => response.json());
-    
     if (typeof window === "undefined") {
-      throw(new Error("Currently only supported in browser"));
+      throw (new Error("Currently only supported in browser"));
     }
 
     const authzFrame = document.createElement("iframe");
@@ -258,7 +247,7 @@ class BloctoProvider {
 
     document.body.appendChild(authzFrame);
 
-    while(true) {
+    while (true) {
       const { status, transactionHash } = await fetch(`${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
         method: "GET",
         headers: {
@@ -273,7 +262,7 @@ class BloctoProvider {
 
       if (status === 'DECLINED') {
         authzFrame.parentNode.removeChild(authzFrame);
-        throw(new Error("Transaction Canceled"));
+        throw (new Error("Transaction Canceled"));
       }
 
       await timeout(1000);
@@ -281,16 +270,16 @@ class BloctoProvider {
   }
 
   on(event, listener) {
-    if(!PERMITTED_EVENTS.includes(event))return;
-    if(!listener instanceof Function)return;
+    if (!PERMITTED_EVENTS.includes(event)) return;
+    if (!listener instanceof Function) return;
 
     this.eventListeners[event].push(listener)
   }
-  
+
   removeListener(event, listener) {
     const listeners = this.eventListeners[event]
     const index = listeners.findIndex(listener)
-    if(index !== -1) {
+    if (index !== -1) {
       this.eventListener[event].splice(index, 1);
     }
   }
