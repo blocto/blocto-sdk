@@ -1,23 +1,23 @@
-import commonjs from "rollup-plugin-commonjs";
-import resolve from "rollup-plugin-node-resolve";
-import json from "rollup-plugin-json";
-import polyfills from "rollup-plugin-node-polyfills";
-import alias from "@rollup/plugin-alias";
-import { babel } from "@rollup/plugin-babel";
-import dotenv from "rollup-plugin-dotenv";
+import commonjs from 'rollup-plugin-commonjs';
+import resolve from 'rollup-plugin-node-resolve';
+import json from 'rollup-plugin-json';
+import polyfills from 'rollup-plugin-node-polyfills';
+import alias from '@rollup/plugin-alias';
+import { babel } from '@rollup/plugin-babel';
+import dotenv from 'rollup-plugin-dotenv';
 
 const config = {
-  input: "src/main.js",
+  input: 'src/main.js',
   output: {
-    file: "dev/bundle.js",
-    format: "umd",
-    name: "BloctoProvider",
+    file: 'dev/bundle.js',
+    format: 'umd',
+    name: 'BloctoProvider',
   },
   plugins: [
     dotenv(),
     alias({
       entries: {
-        "readable-stream": "stream",
+        'readable-stream': 'stream',
       },
     }),
     resolve({
@@ -27,9 +27,9 @@ const config = {
     commonjs(),
     json(),
     babel({
-      babelHelpers: "inline",
-      exclude: "node_modules/**",
-      presets: [["@babel/preset-env"]],
+      babelHelpers: 'inline',
+      exclude: 'node_modules/**',
+      presets: [['@babel/preset-env']],
     }),
     polyfills(),
   ],

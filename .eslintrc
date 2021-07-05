@@ -1,0 +1,12 @@
+{
+  "parser": "@babel/eslint-parser",
+  "extends": "@portto/eslint-config-portto/node",
+  "plugins": ["@babel"],
+  "rules": {
+    "@babel/semi": ["error"]
+  },
+  "env": {
+    "browser": true,
+    "node": true
+  }
+}
