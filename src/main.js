@@ -110,11 +110,56 @@ class BloctoProvider {
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
   // web3 v1.x BatchRequest still depends on it so we need to implement anyway ¯\_(ツ)_/¯
   async sendAsync(payload, callback) {
+    const handleRequest = new Promise((resolve) => {
+      // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
+      if (Array.isArray(payload)) {
+        // collect transactions and send batch with custom method
+        const transactions = payload
+          .filter(request => request.method === 'eth_sendTransaction')
+          .map(request => request.params[0]);
+
+        const idBase = parseInt(Math.random() * 10000, 10);
+
+        const batchedRequestPayload = {
+          method: 'blocto_sendBatchTransaction',
+          params: transactions,
+        };
+
+        const batchResponsePromise = this.request(batchedRequestPayload);
+
+        const requests = payload.map(({ method, params }, index) => (
+          method === 'eth_sendTransaction'
+            ? batchResponsePromise
+            : this.request({
+              id: idBase + index + 1,
+              jsonrpc: '2.0',
+              method,
+              params,
+            })));
+
+        // resolve response when all request are executed
+        Promise.allSettled(requests).then(responses =>
+          resolve(
+            responses.map((response, index) => ({
+              id: idBase + index + 1,
+              jsonrpc: '2.0',
+              result: response.status === 'fulfilled' ? response.value : undefined,
+              error: response.status !== 'fulfilled' ? response.value : undefined,
+            }))
+          )
+        );
+      } else {
+        this.request(payload).then(data => resolve(null, data));
+      }
+    });
+
+    // execute callback or return promise, depdends on callback arg given or not
     if (callback) {
-      this.request(payload).then(callback);
+      handleRequest
+        .then(data => callback(null, data))
+        .catch(error => callback(error));
     } else {
-      // return promise if no callback provided
-      return this.request(payload);
+      return handleRequest;
     }
   }
 
@@ -162,6 +207,9 @@ class BloctoProvider {
           break;
         case 'eth_signTransaction':
         case 'eth_sendRawTransaction':
+          result = null;
+          break;
+        case 'blocto_sendBatchTransaction':
           result = null;
           break;
         default:
