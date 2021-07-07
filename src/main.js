@@ -202,14 +202,12 @@ class BloctoProvider {
           result = result.signature;
           break;
         }
+        case 'blocto_sendBatchTransaction':
         case 'eth_sendTransaction':
           result = await this.handleSendTransaction(payload);
           break;
         case 'eth_signTransaction':
         case 'eth_sendRawTransaction':
-          result = null;
-          break;
-        case 'blocto_sendBatchTransaction':
           result = null;
           break;
         default:
@@ -301,13 +299,13 @@ class BloctoProvider {
     }).then(response => response.json());
   }
 
-  async handleSendTransaction({ params }) {
+  async handleSendTransaction(payload) {
     const { authorizationId } = await fetch(`${this.server}/api/${this.chain}/authz?code=${this.code}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(params[0]),
+      body: JSON.stringify(payload.params),
     }).then(response => response.json());
 
     if (typeof window === 'undefined') {
