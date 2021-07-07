@@ -1,13 +1,8 @@
 import invariant from 'invariant';
 import dotenv from 'dotenv';
+import { createFrame, attachFrame, detatchFrame } from './lib/frame';
 
 dotenv.config();
-
-function timeout(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-const IFRAME_STYLE = 'width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:1000;border:none;';
 
 const CHAIN_ID_RPC_MAPPING = {
   // BSC mainnet
@@ -231,18 +226,10 @@ class BloctoProvider {
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') { reject('Currently only supported in browser'); }
-      const loginFrame = document.createElement('iframe');
+      const location = encodeURIComponent(window.location.origin);
+      const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=${this.chain}`);
 
-      loginFrame.setAttribute(
-        'src',
-        `${this.server}/authn?l6n=${encodeURIComponent(window.location.origin)}&chain=${this.chain}`
-      );
-      loginFrame.setAttribute(
-        'style',
-        IFRAME_STYLE
-      );
-
-      document.body.appendChild(loginFrame);
+      attachFrame(loginFrame);
 
       let eventListener = null;
 
@@ -251,7 +238,8 @@ class BloctoProvider {
           // @todo: try with another more general event types
           if (e.data.type === 'FCL::CHALLENGE::RESPONSE') {
             window.removeEventListener('message', eventListener);
-            loginFrame.parentNode.removeChild(loginFrame);
+            detatchFrame(loginFrame);
+
             this.code = e.data.code;
             this.connected = true;
 
@@ -312,42 +300,38 @@ class BloctoProvider {
       throw (new Error('Currently only supported in browser'));
     }
 
-    const authzFrame = document.createElement('iframe');
+    const authzFrame = createFrame(`${this.server}/authz/${this.chain}/${authorizationId}`);
 
-    authzFrame.setAttribute(
-      'src',
-      `${this.server}/authz/${this.chain}/${authorizationId}`
-    );
-    authzFrame.setAttribute(
-      'style',
-      IFRAME_STYLE
-    );
+    attachFrame(authzFrame);
 
-    document.body.appendChild(authzFrame);
+    return new Promise((resolve, reject) => {
+      let pollingId = null;
+      const pollAuthzStatus = () => fetch(
+        `${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(response => response.json())
+        .then(({ status, transactionHash }) => {
+          if (status === 'APPROVED') {
+            detatchFrame(authzFrame);
+            clearInterval(pollingId);
 
-    // eslint-disable-next-line
-    while (true) {
-      // eslint-disable-next-line
-      const { status, transactionHash } = await fetch(`${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }).then(response => response.json());
+            resolve(transactionHash);
+          }
 
-      if (status === 'APPROVED') {
-        authzFrame.parentNode.removeChild(authzFrame);
-        return transactionHash;
-      }
+          if (status === 'DECLINED') {
+            detatchFrame(authzFrame);
+            clearInterval(pollingId);
 
-      if (status === 'DECLINED') {
-        authzFrame.parentNode.removeChild(authzFrame);
-        throw (new Error('Transaction Canceled'));
-      }
+            reject('Transaction Canceled');
+          }
+        });
 
-      // eslint-disable-next-line
-      await timeout(1000);
-    }
+      pollingId = setInterval(pollAuthzStatus, 1000);
+    });
   }
 
   on(event, listener) {
