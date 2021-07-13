@@ -164,9 +164,9 @@ class BloctoProvider {
           result = `0x${result.toString(16)}`;
           break;
         }
+        case 'personal_sign':
         case 'eth_sign': {
           result = await this.handleSign(payload);
-          result = result.signature;
           break;
         }
         case 'blocto_sendBatchTransaction':
@@ -222,7 +222,7 @@ class BloctoProvider {
 
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
             window.removeEventListener('message', eventListener);
-            loginFrame.parentNode.removeChild(loginFrame);
+            detatchFrame(loginFrame);
             reject();
           }
         }
@@ -249,16 +249,56 @@ class BloctoProvider {
     }).then(response => response.json());
   }
 
-  async handleSign({ params }) {
-    return fetch(`${this.server}/api/${this.chain}/sign?code=${this.code}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: params[1],
-      }),
-    }).then(response => response.json());
+  async handleSign({ method, params }) {
+    const url = `${this.server}/user-signature/${this.chain}`;
+    const signFrame = createFrame(url);
+
+    attachFrame(signFrame);
+
+    let message = null;
+    if (method === 'eth_sign') {
+      message = params[1].slice(2);
+    } else if (method === 'personal_sign') {
+      message = params[0].slice(2);
+    }
+
+    let readyStateListener = null;
+
+    const readyStateHandler = (e) => {
+      if (e.origin === this.server && e.data.type === 'ETH:FRAME:READY') {
+        signFrame.contentWindow.postMessage({
+          type: 'ETH:FRAME:READY:RESPONSE',
+          method,
+          message,
+          chain: this.chain,
+        }, url);
+        window.removeEventListener('message', readyStateListener);
+      }
+    };
+
+    readyStateListener = window.addEventListener('message', readyStateHandler);
+
+    return new Promise((resolve, reject) => {
+      let signingstatusListener = null;
+
+      const signingEventHandler = (e) => {
+        if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
+          if (e.data.status === 'APPROVED') {
+            window.removeEventListener('message', signingstatusListener);
+            detatchFrame(signFrame);
+            resolve(e.data.signature);
+          }
+
+          if (e.data.status === 'DECLINED') {
+            window.removeEventListener('message', signingstatusListener);
+            detatchFrame(signFrame);
+            reject();
+          }
+        }
+      };
+
+      signingstatusListener = window.addEventListener('message', signingEventHandler);
+    });
   }
 
   async handleSendTransaction(payload) {
@@ -282,11 +322,11 @@ class BloctoProvider {
       let pollingId = null;
       const pollAuthzStatus = () => fetch(
         `${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
         .then(response => response.json())
         .then(({ status, transactionHash }) => {
           if (status === 'APPROVED') {
