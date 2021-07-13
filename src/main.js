@@ -214,9 +214,10 @@ class BloctoProvider {
 
             this.code = e.data.code;
             this.connected = true;
+            this.accounts = [e.data.addr];
 
             this.eventListeners.connect.forEach(listener => listener(this.chainId));
-            resolve([e.data.addr]);
+            resolve(this.accounts);
           }
 
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
