@@ -216,7 +216,8 @@ class BloctoProvider {
             this.connected = true;
 
             this.eventListeners.connect.forEach(listener => listener(this.chainId));
-            resolve([e.data.addr]);
+            this.accounts = [e.data.addr];
+            resolve(this.accounts);
           }
 
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
@@ -280,11 +281,11 @@ class BloctoProvider {
       let pollingId = null;
       const pollAuthzStatus = () => fetch(
         `${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
         .then(response => response.json())
         .then(({ status, transactionHash }) => {
           if (status === 'APPROVED') {
