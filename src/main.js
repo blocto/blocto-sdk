@@ -147,7 +147,7 @@ class BloctoProvider {
           this.accounts = await this.fetchAccounts();
         // eslint-disable-next-line
         case 'eth_accounts':
-          result = this.accounts;
+          result = this.accounts.length ? this.accounts : await this.fetchAccounts();
           break;
         case 'eth_coinbase': {
           // eslint-disable-next-line
@@ -235,6 +235,7 @@ class BloctoProvider {
     const { accounts } = await fetch(
       `${this.server}/api/${this.chain}/accounts?code=${this.code}`
     ).then(response => response.json());
+    this.accounts = accounts;
     return accounts;
   }
 
