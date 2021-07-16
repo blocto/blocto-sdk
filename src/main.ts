@@ -11,25 +11,41 @@ import {
 
 
 dotenv.config();
+
+
+interface BloctoSDKParams {
+  chainId: string | number | null;
+  rpc?: string;
+  server?: string;
+  appId: string | null;
+}
+
+interface EIP1193RequestPayload {
+  id?: number;
+  jsonrpc?: string;
+  method: string;
+  params: Array<any>;
+}
+
 class BloctoProvider {
   isBlocto = true;
 
   isConnecting = false;
   connected = false;
 
-  chainId = null;
-  networkId = null;
-  chain = null;
-  net = null;
-  rpc = null;
-  server = null;
-  appId = null;
+  code: string | null = null;
+  chainId: string | number;
+  networkId: string | number;
+  chain: string;
+  net: string;
+  rpc: string;
+  server: string;
+  appId: string | null;
 
-  eventListeners = {};
-  accounts = [];
+  eventListeners: { [key: string]: Array<Function> } = {};
+  accounts: Array<string> = [];
 
-
-  constructor({ chainId, rpc, server, appId } = {}) {
+  constructor({ chainId = null, rpc, server, appId = null }: BloctoSDKParams) {
     invariant(chainId, "'chainId' is required");
 
     if (typeof chainId === 'number') {
@@ -60,13 +76,13 @@ class BloctoProvider {
   }
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
-  async send(arg1, arg2) {
+  async send(arg1: any, arg2: any) {
     switch (true) {
       // signature type 1: arg1 - JSON-RPC payload, arg2 - callback;
       case arg2 instanceof Function:
         return this.sendAsync(arg1, arg2);
       // signature type 2: arg1 - JSON-RPC method name, arg2 - params array;
-      case typeof arg1 === 'string' && Array.isA:
+      case typeof arg1 === 'string' && Array.isArray(arg2):
         return this.sendAsync({ method: arg1, params: arg2 });
       // signature type 3: arg1 - JSON-RPC payload(should be synchronous methods)
       default:
@@ -76,7 +92,7 @@ class BloctoProvider {
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
   // web3 v1.x BatchRequest still depends on it so we need to implement anyway ¯\_(ツ)_/¯
-  async sendAsync(payload, callback) {
+  async sendAsync(payload: any, callback?: Function) {
     const handleRequest = new Promise((resolve) => {
       // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
       if (Array.isArray(payload)) {
@@ -85,7 +101,7 @@ class BloctoProvider {
           .filter(request => request.method === 'eth_sendTransaction')
           .map(request => request.params[0]);
 
-        const idBase = parseInt(Math.random() * 10000, 10);
+        const idBase = Math.floor(Math.random() * 10000);
 
         const batchedRequestPayload = {
           method: 'blocto_sendBatchTransaction',
@@ -111,12 +127,12 @@ class BloctoProvider {
               id: idBase + index + 1,
               jsonrpc: '2.0',
               result: response.status === 'fulfilled' ? response.value : undefined,
-              error: response.status !== 'fulfilled' ? response.value : undefined,
+              error: response.status !== 'fulfilled' ? response.reason : undefined,
             }))
           )
         );
       } else {
-        this.request(payload).then(data => resolve(null, data));
+        this.request(payload).then(resolve);
       }
     });
 
@@ -130,9 +146,10 @@ class BloctoProvider {
     }
   }
 
-  async request(payload) {
-    if (window.ethereum && window.ethereum.isBlocto) {
-      return window.ethereum.request(payload);
+  async request(payload: EIP1193RequestPayload) {
+    const existedSDK = (window as any).ethereum;
+    if (existedSDK && existedSDK.isBlocto) {
+      return existedSDK.request(payload);
     }
 
     if (!this.connected) {
@@ -192,8 +209,9 @@ class BloctoProvider {
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
   enable() {
-    if (window.ethereum && window.ethereum.isBlocto) {
-      return window.ethereum.enable();
+    const existedSDK = (window as any).ethereum;
+    if (existedSDK && existedSDK.isBlocto) {
+      return existedSDK.enable();
     }
 
     return new Promise((resolve, reject) => {
@@ -203,9 +221,9 @@ class BloctoProvider {
 
       attachFrame(loginFrame);
 
-      let eventListener = null;
+      let eventListener: Function;
 
-      const loginEventHandler = (e) => {
+      const loginEventHandler = (e: MessageEvent) => {
         if (e.origin === this.server) {
           // @todo: try with another more general event types
           if (e.data.type === 'FCL::CHALLENGE::RESPONSE') {
@@ -227,7 +245,8 @@ class BloctoProvider {
           }
         }
       };
-      eventListener = window.addEventListener('message', loginEventHandler);
+      eventListener = () => window.removeEventListener('message', loginEventHandler)
+      window.addEventListener('message', loginEventHandler);
     });
   }
 
@@ -239,7 +258,7 @@ class BloctoProvider {
     return accounts;
   }
 
-  async handleReadRequests(payload) {
+  async handleReadRequests(payload: EIP1193RequestPayload) {
     return fetch(this.rpc, {
       method: 'POST',
       headers: {
@@ -249,22 +268,22 @@ class BloctoProvider {
     }).then(response => response.json());
   }
 
-  async handleSign({ method, params }) {
+  async handleSign({ method, params }: EIP1193RequestPayload) {
     const url = `${this.server}/user-signature/${this.chain}`;
     const signFrame = createFrame(url);
 
     attachFrame(signFrame);
 
-    let message = null;
+    let message: string;
     if (method === 'eth_sign') {
       message = params[1].slice(2);
     } else if (method === 'personal_sign') {
       message = params[0].slice(2);
     }
 
-    let readyStateListener = null;
+    let readyStateListener: number;
 
-    const readyStateHandler = (e) => {
+    const readyStateHandler = (e: MessageEvent) => {
       if (e.origin === this.server && e.data.type === 'ETH:FRAME:READY') {
         signFrame.contentWindow.postMessage({
           type: 'ETH:FRAME:READY:RESPONSE',
@@ -279,9 +298,9 @@ class BloctoProvider {
     readyStateListener = window.addEventListener('message', readyStateHandler);
 
     return new Promise((resolve, reject) => {
-      let signingstatusListener = null;
+      let signingstatusListener: Function;
 
-      const signingEventHandler = (e) => {
+      const signingEventHandler = (e: MessageEvent) => {
         if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {
             window.removeEventListener('message', signingstatusListener);
@@ -301,7 +320,7 @@ class BloctoProvider {
     });
   }
 
-  async handleSendTransaction(payload) {
+  async handleSendTransaction(payload: EIP1193RequestPayload) {
     const { authorizationId } = await fetch(`${this.server}/api/${this.chain}/authz?code=${this.code}`, {
       method: 'POST',
       headers: {
@@ -319,7 +338,7 @@ class BloctoProvider {
     attachFrame(authzFrame);
 
     return new Promise((resolve, reject) => {
-      let pollingId = null;
+      let pollingId: ReturnType<typeof setTimeout>;
       const pollAuthzStatus = () => fetch(
         `${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
           method: 'GET',
@@ -348,18 +367,18 @@ class BloctoProvider {
     });
   }
 
-  on(event, listener) {
+  on(event: string, listener: Function) {
     if (!EIP1193_EVENTS.includes(event)) return;
     if (!(listener instanceof Function)) return;
 
     this.eventListeners[event].push(listener);
   }
 
-  removeListener(event, listener) {
+  removeListener(event: string, listener: Function) {
     const listeners = this.eventListeners[event];
-    const index = listeners.findIndex(listener);
+    const index = listeners.findIndex(item => item === listener);
     if (index !== -1) {
-      this.eventListener[event].splice(index, 1);
+      this.eventListeners[event].splice(index, 1);
     }
   }
   // alias removeListener
