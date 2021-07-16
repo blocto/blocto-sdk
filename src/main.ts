@@ -1,6 +1,7 @@
 import invariant from 'invariant';
 import dotenv from 'dotenv';
 import { createFrame, attachFrame, detatchFrame } from './lib/frame';
+import addSelfRemovableHandler, { RemovableEventHandler } from './lib/addSelfRemovableHandler';
 import {
   CHAIN_ID_RPC_MAPPING,
   CHAIN_ID_CHAIN_MAPPING,
@@ -223,11 +224,12 @@ class BloctoProvider {
 
       let eventListener: Function;
 
-      const loginEventHandler = (e: MessageEvent) => {
+      addSelfRemovableHandler('message', (event: Event, removeListener: Function) => {
+        const e = event as MessageEvent;
         if (e.origin === this.server) {
           // @todo: try with another more general event types
           if (e.data.type === 'FCL::CHALLENGE::RESPONSE') {
-            window.removeEventListener('message', eventListener);
+            removeListener();
             detatchFrame(loginFrame);
 
             this.code = e.data.code;
@@ -239,14 +241,12 @@ class BloctoProvider {
           }
 
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
-            window.removeEventListener('message', eventListener);
+            removeListener();
             detatchFrame(loginFrame);
             reject();
           }
         }
-      };
-      eventListener = () => window.removeEventListener('message', loginEventHandler)
-      window.addEventListener('message', loginEventHandler);
+      })
     });
   }
 
@@ -281,43 +281,37 @@ class BloctoProvider {
       message = params[0].slice(2);
     }
 
-    let readyStateListener: number;
-
-    const readyStateHandler = (e: MessageEvent) => {
+    addSelfRemovableHandler('message', (event: Event, removeListener: Function) => {
+      const e = event as MessageEvent;
       if (e.origin === this.server && e.data.type === 'ETH:FRAME:READY') {
-        signFrame.contentWindow.postMessage({
+        signFrame.contentWindow && signFrame.contentWindow.postMessage({
           type: 'ETH:FRAME:READY:RESPONSE',
           method,
           message,
           chain: this.chain,
         }, url);
-        window.removeEventListener('message', readyStateListener);
+        removeListener();
       }
-    };
+    })
 
-    readyStateListener = window.addEventListener('message', readyStateHandler);
-
-    return new Promise((resolve, reject) => {
-      let signingstatusListener: Function;
-
-      const signingEventHandler = (e: MessageEvent) => {
+    return new Promise((resolve, reject) => 
+      addSelfRemovableHandler('message', (event: Event, removeEventListener: Function) => {
+        const e = event as MessageEvent;
         if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {
-            window.removeEventListener('message', signingstatusListener);
+            removeEventListener();
             detatchFrame(signFrame);
             resolve(e.data.signature);
           }
 
           if (e.data.status === 'DECLINED') {
-            window.removeEventListener('message', signingstatusListener);
+            removeEventListener();
             detatchFrame(signFrame);
             reject();
           }
         }
-      };
-
-      signingstatusListener = window.addEventListener('message', signingEventHandler);
-    });
+      })
+    );
   }
 
   async handleSendTransaction(payload: EIP1193RequestPayload) {
