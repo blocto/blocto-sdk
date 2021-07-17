@@ -12,7 +12,7 @@ const config = {
   output: {
     file: 'dev/bundle.js',
     format: 'umd',
-    name: 'BloctoProvider',
+    name: 'BloctoSDK',
   },
   plugins: [
     dotenv(),

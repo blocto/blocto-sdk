@@ -23,7 +23,7 @@ export default [
     output: {
       file: 'dist/blocto-sdk.js',
       format: 'es',
-      name: 'BloctoProvider',
+      name: 'BloctoSDK',
     },
     plugins: [
       dotenv(),
@@ -59,7 +59,7 @@ export default [
     output: {
       file: 'dist/blocto-sdk.umd.js',
       format: 'umd',
-      name: 'BloctoProvider',
+      name: 'BloctoSDK',
     },
     plugins: [
       dotenv(),
