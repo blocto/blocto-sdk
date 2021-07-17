@@ -1,16 +1,13 @@
 import invariant from 'invariant';
-import { EIP1193Provider } from 'eip1193-provider';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
+import BloctoProvider from './blocto';
 import {
   CHAIN_ID_RPC_MAPPING,
   CHAIN_ID_CHAIN_MAPPING,
   CHAIN_ID_NET_MAPPING,
   CHAIN_ID_SERVER_MAPPING,
-  EIP1193_EVENTS,
 } from '../constants';
-
-
 interface EthereumProviderConfig {
   chainId: string | number | null;
   rpc?: string;
@@ -22,15 +19,10 @@ interface EIP1193RequestPayload {
   id?: number;
   jsonrpc?: string;
   method: string;
-  params: Array<any>;
+  params?: Array<any>;
 }
 
-class EthereumProvider implements EIP1193Provider {
-  isBlocto = true;
-
-  isConnecting = false;
-  connected = false;
-
+class EthereumProvider extends BloctoProvider {
   code: string | null = null;
   chainId: string | number;
   networkId: string | number;
@@ -38,12 +30,11 @@ class EthereumProvider implements EIP1193Provider {
   net: string;
   rpc: string;
   server: string;
-  appId: string | null;
 
-  eventListeners: { [key: string]: Array<Function> } = {};
   accounts: Array<string> = [];
 
   constructor({ chainId = null, rpc, server, appId = null }: EthereumProviderConfig) {
+    super();
     invariant(chainId, "'chainId' is required");
 
     if (typeof chainId === 'number') {
@@ -66,11 +57,6 @@ class EthereumProvider implements EIP1193Provider {
 
     this.server = process.env.SERVER || server || CHAIN_ID_SERVER_MAPPING[this.chainId];
     this.appId = process.env.APP_ID || appId;
-
-    // init event listeners
-    EIP1193_EVENTS.forEach((event) => {
-      this.eventListeners[event] = [];
-    });
   }
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
@@ -219,8 +205,6 @@ class EthereumProvider implements EIP1193Provider {
 
       attachFrame(loginFrame);
 
-      let eventListener: Function;
-
       addSelfRemovableHandler('message', (event: Event, removeListener: Function) => {
         const e = event as MessageEvent;
         if (e.origin === this.server) {
@@ -271,11 +255,13 @@ class EthereumProvider implements EIP1193Provider {
 
     attachFrame(signFrame);
 
-    let message: string;
-    if (method === 'eth_sign') {
-      message = params[1].slice(2);
-    } else if (method === 'personal_sign') {
-      message = params[0].slice(2);
+    let message: string = '';
+    if(Array.isArray(params)) {
+      if (method === 'eth_sign') {
+        message = params[1].slice(2);
+      } else if (method === 'personal_sign') {
+        message = params[0].slice(2);
+      }
     }
 
     addSelfRemovableHandler('message', (event: Event, removeListener: Function) => {
@@ -357,27 +343,6 @@ class EthereumProvider implements EIP1193Provider {
       pollingId = setInterval(pollAuthzStatus, 1000);
     });
   }
-
-  on(event: string, listener: Function) {
-    if (!EIP1193_EVENTS.includes(event)) return;
-    if (!(listener instanceof Function)) return;
-
-    this.eventListeners[event].push(listener);
-  }
-
-  // @todo: implement it
-  once() {}
-
-  removeListener(event: string, listener: Function) {
-    const listeners = this.eventListeners[event];
-    const index = listeners.findIndex(item => item === listener);
-    if (index !== -1) {
-      this.eventListeners[event].splice(index, 1);
-    }
-  }
-
-  // alias removeListener
-  off = removeEventListener;
 }
 
 export default EthereumProvider;
