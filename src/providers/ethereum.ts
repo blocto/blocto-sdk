@@ -8,10 +8,10 @@ import {
   KEY_SESSION,
 } from '../lib/localStorage';
 import {
-  CHAIN_ID_RPC_MAPPING,
-  CHAIN_ID_CHAIN_MAPPING,
-  CHAIN_ID_NET_MAPPING,
-  CHAIN_ID_SERVER_MAPPING,
+  ETH_CHAIN_ID_RPC_MAPPING,
+  ETH_CHAIN_ID_CHAIN_MAPPING,
+  ETH_CHAIN_ID_NET_MAPPING,
+  ETH_CHAIN_ID_SERVER_MAPPING,
   LOGIN_PERSISING_TIME,
 } from '../constants';
 
@@ -54,16 +54,16 @@ class EthereumProvider extends BloctoProvider {
     }
 
     this.networkId = this.chainId;
-    this.chain = CHAIN_ID_CHAIN_MAPPING[this.chainId];
-    this.net = CHAIN_ID_NET_MAPPING[this.chainId];
+    this.chain = ETH_CHAIN_ID_CHAIN_MAPPING[this.chainId];
+    this.net = ETH_CHAIN_ID_NET_MAPPING[this.chainId];
 
     invariant(this.chain, `unsupported 'chainId': ${this.chainId}`);
 
-    this.rpc = process.env.RPC || rpc || CHAIN_ID_RPC_MAPPING[this.chainId];
+    this.rpc = process.env.RPC || rpc || ETH_CHAIN_ID_RPC_MAPPING[this.chainId];
 
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
-    this.server = process.env.SERVER || server || CHAIN_ID_SERVER_MAPPING[this.chainId];
+    this.server = process.env.SERVER || server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId];
     this.appId = process.env.APP_ID || appId;
 
     // load previous connected state
@@ -195,7 +195,7 @@ class EthereumProvider extends BloctoProvider {
           result = null;
           break;
         default:
-          response = await this.handleReadRequests({ id: 1, jsonrpc: '2.0', ...payload });
+          response = await this.handleReadRequests(payload);
       }
       if (response) return response.result;
       return result;
@@ -272,7 +272,7 @@ class EthereumProvider extends BloctoProvider {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ id: 1, jsonrpc: '2.0', ...payload }),
     }).then(response => response.json());
   }
 
