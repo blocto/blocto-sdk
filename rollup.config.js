@@ -1,5 +1,6 @@
 import { terser } from 'rollup-plugin-terser';
 
+import typescript from 'rollup-plugin-typescript';
 import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
 import json from 'rollup-plugin-json';
@@ -18,11 +19,11 @@ const babelRuntimeVersion = pkg.devDependencies['@babel/runtime'].replace(
 export default [
   // es
   {
-    input: 'src/main.js',
+    input: 'src/main.ts',
     output: {
       file: 'dist/blocto-sdk.js',
       format: 'es',
-      name: 'BloctoProvider',
+      name: 'BloctoSDK',
     },
     plugins: [
       dotenv(),
@@ -35,6 +36,7 @@ export default [
         preferBuiltins: true,
         browser: true,
       }),
+      typescript(),
       commonjs(),
       json(),
       babel({
@@ -53,11 +55,11 @@ export default [
   },
   // umd
   {
-    input: 'src/main.js',
+    input: 'src/main.ts',
     output: {
       file: 'dist/blocto-sdk.umd.js',
       format: 'umd',
-      name: 'BloctoProvider',
+      name: 'BloctoSDK',
     },
     plugins: [
       dotenv(),
@@ -70,6 +72,7 @@ export default [
         preferBuiltins: true,
         browser: true,
       }),
+      typescript(),
       commonjs(),
       json(),
       babel({
