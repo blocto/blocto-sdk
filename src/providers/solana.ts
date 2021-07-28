@@ -1,5 +1,4 @@
 import invariant from 'invariant';
-import { RequestArguments } from 'eip1193-provider';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import BloctoProvider from "./blocto";
@@ -12,6 +11,11 @@ interface SolanaProviderConfig {
   net: string | null;
   server?: string;
   appId: string | null;
+}
+
+interface SolanaRequest {
+  method: string;
+  params?: Object;
 }
 
 class SolanaProvider extends BloctoProvider {
@@ -30,11 +34,11 @@ class SolanaProvider extends BloctoProvider {
 
     this.rpc = `https://api.${net}.solana.com`;
 
-    this.server = process.env.SERVER || server || SOL_NET_SERVER_MAPPING[this.net];
+    this.server = server || process.env.SERVER || SOL_NET_SERVER_MAPPING[this.net];
     this.appId = process.env.APP_ID || appId;
   }
 
-  async request(payload: RequestArguments) {
+  async request(payload: SolanaRequest) {
 
     if (!this.connected) {
       await this.connect();
@@ -44,12 +48,24 @@ class SolanaProvider extends BloctoProvider {
       let response = null;
       let result = null;
       switch (payload.method) {
-        case 'sol_requestAccounts':
+        case 'connect':
           result = await this.fetchAccounts();
           break;
         case 'getAccounts':
           result = this.accounts.length ? this.accounts : await this.fetchAccounts();
           break;
+        // custom JSON-RPC method
+        case 'convertToProgramWalletTransaction':
+          // @todo: implementation
+          break;
+        // custom JSON-RPC method
+        case 'signAndSendTransaction':
+          result = await this.handleSignAndSendTransaction(payload);
+          break;
+        // block user from using traditional methods
+        case 'signTransaction':
+        case 'signAllTransactions':
+          throw new Error(`Blocto is program wallet, which doesn\'t support ${payload.method}. Use signAndSendTransaction instead.`);
         default:
           response =  await this.handleReadRequests(payload)
       }
@@ -102,7 +118,7 @@ class SolanaProvider extends BloctoProvider {
     return accounts
   }
 
-  async handleReadRequests(payload: RequestArguments) {
+  async handleReadRequests(payload: SolanaRequest) {
     return fetch(this.rpc, {
       method: 'POST',
       headers: {
@@ -110,6 +126,56 @@ class SolanaProvider extends BloctoProvider {
       },
       body: JSON.stringify({ id: 1, jsonrpc: '2.0', ...payload }),
     }).then(response => response.json());
+  }
+
+  async handleSignAndSendTransaction(payload: SolanaRequest) {
+    const { authorizationId } = await fetch(`${this.server}/api/solana/authz?code=${this.code}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sessionId: this.code,
+        ...payload.params
+      }),
+    }).then(response => response.json());
+
+    if (typeof window === 'undefined') {
+      throw (new Error('Currently only supported in browser'));
+    }
+
+    const authzFrame = createFrame(`${this.server}/authz/solana/${authorizationId}`);
+
+    attachFrame(authzFrame);
+
+    return new Promise((resolve, reject) => {
+      let pollingId: ReturnType<typeof setTimeout>;
+      const pollAuthzStatus = () => fetch(
+        `${this.server}/api/solana/authz?authorizationId=${authorizationId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        .then(response => response.json())
+        .then(({ status, transactionHash }) => {
+          if (status === 'APPROVED') {
+            detatchFrame(authzFrame);
+            clearInterval(pollingId);
+
+            resolve(transactionHash);
+          }
+
+          if (status === 'DECLINED') {
+            detatchFrame(authzFrame);
+            clearInterval(pollingId);
+
+            reject('Transaction Canceled');
+          }
+        });
+
+      pollingId = setInterval(pollAuthzStatus, 1000);
+    });
   }
 }
 
