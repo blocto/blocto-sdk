@@ -6,6 +6,10 @@ import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
 } from '../constants';
+import { Buffer } from 'buffer';
+// @todo: in the long run we want to remove the dependency of solana web3
+import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey } from '@solana/web3.js';
+import bs58 from 'bs58';
 
 interface SolanaProviderConfig {
   net: string | null;
@@ -56,7 +60,7 @@ class SolanaProvider extends BloctoProvider {
           break;
         // custom JSON-RPC method
         case 'convertToProgramWalletTransaction':
-          // @todo: implementation
+          result = await this.handleConvertTransaction(payload);
           break;
         // custom JSON-RPC method
         case 'signAndSendTransaction':
@@ -125,6 +129,67 @@ class SolanaProvider extends BloctoProvider {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ id: 1, jsonrpc: '2.0', ...payload }),
+    }).then(response => response.json());
+  }
+  
+  // solana web3 utility
+  toTransaction(raw: string, signatures: TransactionSignature[]) {
+    const message = Message.from(Buffer.from(raw, 'hex'));
+    const transaction = new Transaction();
+    transaction.recentBlockhash = message.recentBlockhash;
+    if (message.header.numRequiredSignatures > 0) {
+      transaction.feePayer = message.accountKeys[0];
+    }
+    signatures.forEach((signature, index) => {
+      const sigPubkeyPair = {
+        signature:
+          signature == PublicKey.default.toBase58()
+            ? null
+            : bs58.decode(signature),
+        publicKey: message.accountKeys[index],
+      };
+      transaction.signatures.push(sigPubkeyPair);
+    });
+    message.instructions.forEach(instruction => {
+      const keys = instruction.accounts.map(account => {
+        const pubkey = message.accountKeys[account];
+        return {
+          pubkey,
+          isSigner: account < message.header.numRequiredSignatures,
+          isWritable: message.isAccountWritable(account),
+        };
+      });
+      transaction.instructions.push(
+        new TransactionInstruction({
+          keys,
+          programId: message.accountKeys[instruction.programIdIndex],
+          data: bs58.decode(instruction.data),
+        }),
+      );
+    });
+    return transaction;
+  }
+
+  // solana web3 utility
+  async collectSignatures (transaction: Transaction) {
+    return transaction.signatures.reduce((acc, cur) => {
+      if (cur.signature) {
+        acc[cur.publicKey.toBase58()] = cur.signature.toString('hex')
+      }
+      return acc;
+    }, {} as { [key: string]: string })
+  }
+
+  async handleConvertTransaction(payload: SolanaRequest) {
+    return fetch(`${this.server}/api/solana/convertToWalletTx?code=${this.code}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sessionId: this.code,
+        ...payload.params
+      }),
     }).then(response => response.json());
   }
 

@@ -37,7 +37,12 @@ export default [
         browser: true,
       }),
       typescript(),
-      commonjs(),
+      commonjs({
+        namedExports: {
+          'node_modules/tweetnacl/nacl-fast.js': ['sign'],
+          'node_modules/js-sha3/src/sha3.js': ['keccak_256'],
+        },
+      }),
       json(),
       babel({
         babelHelpers: 'runtime',
@@ -73,7 +78,13 @@ export default [
         browser: true,
       }),
       typescript(),
-      commonjs(),
+      commonjs({
+        include: 'node_modules/**',
+        namedExports: {
+          'node_modules/tweetnacl/nacl-fast.js': ['sign'],
+          'node_modules/js-sha3/src/sha3.js': ['keccak_256'],
+        },
+      }),
       json(),
       babel({
         babelHelpers: 'bundled',
