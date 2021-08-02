@@ -131,6 +131,28 @@ class SolanaProvider extends BloctoProvider {
       body: JSON.stringify({ id: 1, jsonrpc: '2.0', ...payload }),
     }).then(response => response.json());
   }
+
+  // solana web3 utility
+  async convertToProgramWalletTransaction(transaction: Transaction) {
+    const message = await this.request({
+      method: 'convertToProgramWalletTransaction',
+      params: {
+        message: transaction.serializeMessage().toString('hex')
+      }
+    })
+    return this.toTransaction(message, []);
+  }
+  
+  // solana web3 utility
+  async signAndSendTransaction(transaction: Transaction) {
+    return this.request({
+      method: 'signAndSendTransaction',
+      params: {
+        signatures: await this.collectSignatures(transaction),
+        message: transaction.serializeMessage().toString('hex')
+      }
+    })
+  }
   
   // solana web3 utility
   toTransaction(raw: string, signatures: TransactionSignature[]) {
