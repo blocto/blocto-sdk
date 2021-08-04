@@ -3,10 +3,16 @@ import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import BloctoProvider from './blocto';
 import {
+  getItemWithExpiry,
+  setItemWithExpiry,
+  KEY_SESSION,
+} from '../lib/localStorage';
+import {
   CHAIN_ID_RPC_MAPPING,
   CHAIN_ID_CHAIN_MAPPING,
   CHAIN_ID_NET_MAPPING,
   CHAIN_ID_SERVER_MAPPING,
+  LOGIN_PERSISING_TIME,
 } from '../constants';
 interface EthereumProviderConfig {
   chainId: string | number | null;
@@ -30,6 +36,7 @@ class EthereumProvider extends BloctoProvider {
   net: string;
   rpc: string;
   server: string;
+  sessionKey: string;
 
   accounts: Array<string> = [];
 
@@ -57,6 +64,14 @@ class EthereumProvider extends BloctoProvider {
 
     this.server = process.env.SERVER || server || CHAIN_ID_SERVER_MAPPING[this.chainId];
     this.appId = process.env.APP_ID || appId;
+
+    // load previous connected state
+    this.sessionKey = `${KEY_SESSION}-${this.chainId}`;
+    const session = getItemWithExpiry(this.sessionKey, {});
+
+    this.connected = Boolean(session && session.code);
+    this.code = session.code || null;
+    this.accounts = session.accounts || [];
   }
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
@@ -200,6 +215,11 @@ class EthereumProvider extends BloctoProvider {
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') { reject('Currently only supported in browser'); }
+
+      if (this.connected) {
+        return resolve(this.accounts);
+      }
+
       const location = encodeURIComponent(window.location.origin);
       const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=${this.chain}`);
 
@@ -218,6 +238,12 @@ class EthereumProvider extends BloctoProvider {
 
             this.eventListeners.connect.forEach(listener => listener(this.chainId));
             this.accounts = [e.data.addr];
+
+            setItemWithExpiry(this.sessionKey, {
+              code: this.code,
+              accounts: this.accounts,
+            }, LOGIN_PERSISING_TIME);
+
             resolve(this.accounts);
           }
 
@@ -256,7 +282,7 @@ class EthereumProvider extends BloctoProvider {
     attachFrame(signFrame);
 
     let message: string = '';
-    if(Array.isArray(params)) {
+    if (Array.isArray(params)) {
       if (method === 'eth_sign') {
         message = params[1].slice(2);
       } else if (method === 'personal_sign') {
@@ -277,7 +303,7 @@ class EthereumProvider extends BloctoProvider {
       }
     })
 
-    return new Promise((resolve, reject) => 
+    return new Promise((resolve, reject) =>
       addSelfRemovableHandler('message', (event: Event, removeEventListener: Function) => {
         const e = event as MessageEvent;
         if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
@@ -318,11 +344,11 @@ class EthereumProvider extends BloctoProvider {
       let pollingId: ReturnType<typeof setTimeout>;
       const pollAuthzStatus = () => fetch(
         `${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
         .then(response => response.json())
         .then(({ status, transactionHash }) => {
           if (status === 'APPROVED') {

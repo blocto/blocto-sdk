@@ -37,3 +37,6 @@ export const CHAIN_ID_SERVER_MAPPING: Mapping = {
 };
 
 export const EIP1193_EVENTS: Array<string> = ['connect', 'disconnect', 'message', 'chainChanged', 'accountsChanged'];
+
+// Preserve login for 1 day
+export const LOGIN_PERSISING_TIME = 86400 * 1000;
