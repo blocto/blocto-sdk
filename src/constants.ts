@@ -7,6 +7,16 @@ export const CHAIN_ID_RPC_MAPPING: Mapping = {
   56: 'https://bsc-dataseed1.binance.org',
   // BSC testnet
   97: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+
+  // Polygon Mainnet
+  137: 'https://rpc-mainnet.maticvigil.com/',
+  // Polygon Testnet
+  80001: 'https://rpc-mumbai.matic.today/',
+
+  // Avalanche Mainnet
+  43114: 'https://api.avax.network/ext/bc/C/rpc',
+  // Avalanche Fuji Testnet
+  43113: 'https://api.avax-test.network/ext/bc/C/rpc',
 };
 
 export const CHAIN_ID_CHAIN_MAPPING: Mapping = {
@@ -17,6 +27,14 @@ export const CHAIN_ID_CHAIN_MAPPING: Mapping = {
   // BSC
   56: 'bsc',
   97: 'bsc',
+
+  // Polygon
+  137: 'polygon',
+  80001: 'polygon',
+
+  // Avalanche
+  43114: 'avalanche',
+  43113: 'avalanche',
 };
 
 export const CHAIN_ID_NET_MAPPING: Mapping = {
@@ -27,6 +45,14 @@ export const CHAIN_ID_NET_MAPPING: Mapping = {
   // BSC
   56: 'mainnet',
   97: 'testnet',
+
+  // Polygon
+  137: 'mainnet',
+  80001: 'testnet',
+
+  // Avalanche
+  43114: 'mainnet',
+  43113: 'testnet',
 };
 
 export const CHAIN_ID_SERVER_MAPPING: Mapping = {
@@ -34,6 +60,10 @@ export const CHAIN_ID_SERVER_MAPPING: Mapping = {
   4: 'https://wallet-testnet.blocto.app',
   56: 'https://wallet.blocto.app',
   97: 'https://wallet-testnet.blocto.app',
+  137: 'https://wallet.blocto.app',
+  80001: 'https://wallet-testnet.blocto.app',
+  43114: 'https://wallet.blocto.app',
+  43113: 'https://wallet-testnet.blocto.app',
 };
 
 export const EIP1193_EVENTS: Array<string> = ['connect', 'disconnect', 'message', 'chainChanged', 'accountsChanged'];
