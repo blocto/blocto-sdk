@@ -1,16 +1,16 @@
 class MemoryStorage {
-    storage = {}
+    storage = {};
 
     getItem(key: String) {
-        return this[key] || null;
+      return this[key] || null;
     }
 
     setItem(key: String, value: any) {
-        this.storage[key] = value;
+      this.storage[key] = value;
     }
 
     removeItem(key: String) {
-        delete this.storage[key];
+      delete this.storage[key];
     }
 }
 

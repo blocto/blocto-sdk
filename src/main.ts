@@ -1,6 +1,6 @@
 
 import EthereumProvider from './providers/ethereum';
-
+// eslint-disable-next-line
 import dotenv from 'dotenv';
 dotenv.config();
 interface BloctoSDKConfig {

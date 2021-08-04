@@ -21,6 +21,7 @@ class BloctoProvider implements EIP1193Provider {
   }
 
   // implement by children
+  // eslint-disable-next-line
   async request(payload: any) {}
 
   on(event: string, listener: Function) {
@@ -31,6 +32,7 @@ class BloctoProvider implements EIP1193Provider {
   }
 
   // @todo: implement it
+  // eslint-disable-next-line
   once() {}
 
   removeListener(event: string, listener: Function) {

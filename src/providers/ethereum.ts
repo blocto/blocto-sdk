@@ -14,6 +14,7 @@ import {
   CHAIN_ID_SERVER_MAPPING,
   LOGIN_PERSISING_TIME,
 } from '../constants';
+
 interface EthereumProviderConfig {
   chainId: string | number | null;
   rpc?: string;
@@ -253,7 +254,7 @@ class EthereumProvider extends BloctoProvider {
             reject();
           }
         }
-      })
+      });
     });
   }
 
@@ -293,15 +294,17 @@ class EthereumProvider extends BloctoProvider {
     addSelfRemovableHandler('message', (event: Event, removeListener: Function) => {
       const e = event as MessageEvent;
       if (e.origin === this.server && e.data.type === 'ETH:FRAME:READY') {
-        signFrame.contentWindow && signFrame.contentWindow.postMessage({
-          type: 'ETH:FRAME:READY:RESPONSE',
-          method,
-          message,
-          chain: this.chain,
-        }, url);
+        if (signFrame.contentWindow) {
+          signFrame.contentWindow.postMessage({
+            type: 'ETH:FRAME:READY:RESPONSE',
+            method,
+            message,
+            chain: this.chain,
+          }, url);
+        }
         removeListener();
       }
-    })
+    });
 
     return new Promise((resolve, reject) =>
       addSelfRemovableHandler('message', (event: Event, removeEventListener: Function) => {
@@ -344,11 +347,11 @@ class EthereumProvider extends BloctoProvider {
       let pollingId: ReturnType<typeof setTimeout>;
       const pollAuthzStatus = () => fetch(
         `${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
         .then(response => response.json())
         .then(({ status, transactionHash }) => {
           if (status === 'APPROVED') {
