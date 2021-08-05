@@ -22,7 +22,7 @@ export interface SolanaRequest {
   params?: Object;
 }
 
-class SolanaProvider extends BloctoProvider {
+export default class SolanaProvider extends BloctoProvider {
   code: string | null = null;
   net: string;
   rpc: string;
@@ -264,5 +264,3 @@ class SolanaProvider extends BloctoProvider {
     });
   }
 }
-
-export default SolanaProvider;

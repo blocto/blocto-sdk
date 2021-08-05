@@ -29,7 +29,7 @@ export interface EIP1193RequestPayload {
   params?: Array<any>;
 }
 
-class EthereumProvider extends BloctoProvider {
+export default class EthereumProvider extends BloctoProvider {
   code: string | null = null;
   chainId: string | number;
   networkId: string | number;
@@ -373,5 +373,3 @@ class EthereumProvider extends BloctoProvider {
     });
   }
 }
-
-export default EthereumProvider;

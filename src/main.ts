@@ -11,7 +11,7 @@ export interface BloctoSDKConfig extends BaseConfig {
   solana: Omit<SolanaProviderConfig, 'appId'>;
 }
 
-class BloctoSDK {
+export default class BloctoSDK {
   ethereum: EthereumProvider;
   solana: SolanaProvider;
 
@@ -20,5 +20,3 @@ class BloctoSDK {
     this.solana = new SolanaProvider({ ...solana, appId });
   }
 }
-
-export default BloctoSDK;
