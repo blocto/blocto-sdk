@@ -3,6 +3,7 @@ import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import BloctoProvider from './blocto';
 import {
+  BaseConfig,
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
 } from '../constants';
@@ -11,13 +12,12 @@ import { Buffer } from 'buffer';
 import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey } from '@solana/web3.js';
 import bs58 from 'bs58';
 
-interface SolanaProviderConfig {
+export interface SolanaProviderConfig extends BaseConfig {
   net: string | null;
   server?: string;
-  appId: string | null;
 }
 
-interface SolanaRequest {
+export interface SolanaRequest {
   method: string;
   params?: Object;
 }

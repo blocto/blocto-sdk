@@ -2,6 +2,10 @@ type Mapping = {
   [key in number | string]: string;
 };
 
+export interface BaseConfig {
+  appId: string | null;
+}
+
 /* eth series constants begin */
 
 export const ETH_CHAIN_ID_RPC_MAPPING: Mapping = {
