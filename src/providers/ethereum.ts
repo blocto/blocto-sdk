@@ -41,7 +41,7 @@ class EthereumProvider extends BloctoProvider {
 
   accounts: Array<string> = [];
 
-  constructor({ chainId = null, rpc, server, appId = null }: EthereumProviderConfig) {
+  constructor({ chainId = '0x1', rpc, server, appId = null }: EthereumProviderConfig) {
     super();
     invariant(chainId, "'chainId' is required");
 
@@ -63,7 +63,7 @@ class EthereumProvider extends BloctoProvider {
 
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
-    this.server = server || process.env.SERVER || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId];
+    this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || process.env.SERVER || '';
     this.appId = process.env.APP_ID || appId;
 
     // load previous connected state

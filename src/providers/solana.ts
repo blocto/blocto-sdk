@@ -1,7 +1,7 @@
 import invariant from 'invariant';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import BloctoProvider from "./blocto";
+import BloctoProvider from './blocto';
 import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
@@ -29,21 +29,20 @@ class SolanaProvider extends BloctoProvider {
   server: string;
   accounts: Array<string> = [];
 
-  constructor({ net = null, server, appId }: SolanaProviderConfig) {
+  constructor({ net = 'mainnet-beta', server, appId }: SolanaProviderConfig) {
     super();
 
     invariant(net, "'net' is required");
-    invariant(SOL_NET.includes(net), "unsupported net");
+    invariant(SOL_NET.includes(net), 'unsupported net');
     this.net = net;
 
     this.rpc = `https://api.${net}.solana.com`;
 
-    this.server = server || process.env.SERVER || SOL_NET_SERVER_MAPPING[this.net];
+    this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
     this.appId = process.env.APP_ID || appId;
   }
 
   async request(payload: SolanaRequest) {
-
     if (!this.connected) {
       await this.connect();
     }
@@ -71,7 +70,7 @@ class SolanaProvider extends BloctoProvider {
         case 'signAllTransactions':
           throw new Error(`Blocto is program wallet, which doesn\'t support ${payload.method}. Use signAndSendTransaction instead.`);
         default:
-          response =  await this.handleReadRequests(payload)
+          response = await this.handleReadRequests(payload);
       }
       if (response) return response.result;
       return result;
@@ -110,7 +109,7 @@ class SolanaProvider extends BloctoProvider {
             reject();
           }
         }
-      })
+      });
     });
   }
 
@@ -119,7 +118,7 @@ class SolanaProvider extends BloctoProvider {
       `${this.server}/api/solana/accounts?code=${this.code}`
     ).then(response => response.json());
     this.accounts = accounts;
-    return accounts
+    return accounts;
   }
 
   async handleReadRequests(payload: SolanaRequest) {
@@ -137,23 +136,23 @@ class SolanaProvider extends BloctoProvider {
     const message = await this.request({
       method: 'convertToProgramWalletTransaction',
       params: {
-        message: transaction.serializeMessage().toString('hex')
-      }
-    })
+        message: transaction.serializeMessage().toString('hex'),
+      },
+    });
     return this.toTransaction(message, []);
   }
-  
+
   // solana web3 utility
   async signAndSendTransaction(transaction: Transaction) {
     return this.request({
       method: 'signAndSendTransaction',
       params: {
         signatures: await this.collectSignatures(transaction),
-        message: transaction.serializeMessage().toString('hex')
-      }
-    })
+        message: transaction.serializeMessage().toString('hex'),
+      },
+    });
   }
-  
+
   // solana web3 utility
   toTransaction(raw: string, signatures: TransactionSignature[]) {
     const message = Message.from(Buffer.from(raw, 'hex'));
@@ -172,8 +171,8 @@ class SolanaProvider extends BloctoProvider {
       };
       transaction.signatures.push(sigPubkeyPair);
     });
-    message.instructions.forEach(instruction => {
-      const keys = instruction.accounts.map(account => {
+    message.instructions.forEach((instruction) => {
+      const keys = instruction.accounts.map((account) => {
         const pubkey = message.accountKeys[account];
         return {
           pubkey,
@@ -193,13 +192,13 @@ class SolanaProvider extends BloctoProvider {
   }
 
   // solana web3 utility
-  async collectSignatures (transaction: Transaction) {
+  async collectSignatures(transaction: Transaction) {
     return transaction.signatures.reduce((acc, cur) => {
       if (cur.signature) {
-        acc[cur.publicKey.toBase58()] = cur.signature.toString('hex')
+        acc[cur.publicKey.toBase58()] = cur.signature.toString('hex');
       }
       return acc;
-    }, {} as { [key: string]: string })
+    }, {} as { [key: string]: string });
   }
 
   async handleConvertTransaction(payload: SolanaRequest) {
@@ -210,7 +209,7 @@ class SolanaProvider extends BloctoProvider {
       },
       body: JSON.stringify({
         sessionId: this.code,
-        ...payload.params
+        ...payload.params,
       }),
     }).then(response => response.json());
   }
@@ -223,7 +222,7 @@ class SolanaProvider extends BloctoProvider {
       },
       body: JSON.stringify({
         sessionId: this.code,
-        ...payload.params
+        ...payload.params,
       }),
     }).then(response => response.json());
 
