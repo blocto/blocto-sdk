@@ -12,7 +12,7 @@ import {
   ETH_CHAIN_ID_CHAIN_MAPPING,
   ETH_CHAIN_ID_NET_MAPPING,
   ETH_CHAIN_ID_SERVER_MAPPING,
-  LOGIN_PERSISING_TIME,
+  LOGIN_PERSISTING_TIME,
 } from '../constants';
 
 interface EthereumProviderConfig {
@@ -243,7 +243,7 @@ class EthereumProvider extends BloctoProvider {
             setItemWithExpiry(this.sessionKey, {
               code: this.code,
               accounts: this.accounts,
-            }, LOGIN_PERSISING_TIME);
+            }, LOGIN_PERSISTING_TIME);
 
             resolve(this.accounts);
           }
@@ -347,11 +347,11 @@ class EthereumProvider extends BloctoProvider {
       let pollingId: ReturnType<typeof setTimeout>;
       const pollAuthzStatus = () => fetch(
         `${this.server}/api/${this.chain}/authz?authorizationId=${authorizationId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
         .then(response => response.json())
         .then(({ status, transactionHash }) => {
           if (status === 'APPROVED') {

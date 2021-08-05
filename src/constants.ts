@@ -85,4 +85,4 @@ export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta']
 export const EIP1193_EVENTS: Array<string> = ['connect', 'disconnect', 'message', 'chainChanged', 'accountsChanged'];
 
 // Preserve login for 1 day
-export const LOGIN_PERSISING_TIME = 86400 * 1000;
+export const LOGIN_PERSISTING_TIME = 86400 * 1000;
