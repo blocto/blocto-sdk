@@ -1,21 +1,17 @@
-import EthereumProvider from './providers/ethereum';
-import SolanaProvider from './providers/solana';
+import { BaseConfig } from './constants';
+import EthereumProvider, { EthereumProviderConfig } from './providers/ethereum';
+import SolanaProvider, { SolanaProviderConfig } from './providers/solana';
 
 // eslint-disable-next-line
 import dotenv from 'dotenv';
 dotenv.config();
-interface BloctoSDKConfig {
-  appId: string | null;
-  ethereum: {
-    chainId: string | number;
-    rpc?: string;
-    server?: string;
-  };
-  solana: {
-    net: string;
-  }
+
+export interface BloctoSDKConfig extends BaseConfig {
+  ethereum: Omit<EthereumProviderConfig, 'appId'>;
+  solana: Omit<SolanaProviderConfig, 'appId'>;
 }
-class BloctoSDK {
+
+export default class BloctoSDK {
   ethereum: EthereumProvider;
   solana: SolanaProvider;
 
@@ -24,5 +20,3 @@ class BloctoSDK {
     this.solana = new SolanaProvider({ ...solana, appId });
   }
 }
-
-export default BloctoSDK;

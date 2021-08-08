@@ -8,6 +8,7 @@ import {
   KEY_SESSION,
 } from '../lib/localStorage';
 import {
+  BaseConfig,
   ETH_CHAIN_ID_RPC_MAPPING,
   ETH_CHAIN_ID_CHAIN_MAPPING,
   ETH_CHAIN_ID_NET_MAPPING,
@@ -15,21 +16,20 @@ import {
   LOGIN_PERSISTING_TIME,
 } from '../constants';
 
-interface EthereumProviderConfig {
+export interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null;
   rpc?: string;
   server?: string;
-  appId: string | null;
 }
 
-interface EIP1193RequestPayload {
+export interface EIP1193RequestPayload {
   id?: number;
   jsonrpc?: string;
   method: string;
   params?: Array<any>;
 }
 
-class EthereumProvider extends BloctoProvider {
+export default class EthereumProvider extends BloctoProvider {
   code: string | null = null;
   chainId: string | number;
   networkId: string | number;
@@ -373,5 +373,3 @@ class EthereumProvider extends BloctoProvider {
     });
   }
 }
-
-export default EthereumProvider;
