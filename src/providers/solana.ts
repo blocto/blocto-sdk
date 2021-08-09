@@ -1,4 +1,8 @@
 import invariant from 'invariant';
+import { Buffer } from 'buffer';
+// @todo: in the long run we want to remove the dependency of solana web3
+import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey } from '@solana/web3.js';
+import bs58 from 'bs58';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import BloctoProvider from './blocto';
@@ -7,10 +11,6 @@ import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
 } from '../constants';
-import { Buffer } from 'buffer';
-// @todo: in the long run we want to remove the dependency of solana web3
-import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey } from '@solana/web3.js';
-import bs58 from 'bs58';
 
 export interface SolanaProviderConfig extends BaseConfig {
   net: string | null;
@@ -68,7 +68,7 @@ export default class SolanaProvider extends BloctoProvider {
         // block user from using traditional methods
         case 'signTransaction':
         case 'signAllTransactions':
-          throw new Error(`Blocto is program wallet, which doesn\'t support ${payload.method}. Use signAndSendTransaction instead.`);
+          throw new Error(`Blocto is program wallet, which doesn't support ${payload.method}. Use signAndSendTransaction instead.`);
         default:
           response = await this.handleReadRequests(payload);
       }
@@ -154,6 +154,7 @@ export default class SolanaProvider extends BloctoProvider {
   }
 
   // solana web3 utility
+  // eslint-disable-next-line
   toTransaction(raw: string, signatures: TransactionSignature[]) {
     const message = Message.from(Buffer.from(raw, 'hex'));
     const transaction = new Transaction();
@@ -164,7 +165,7 @@ export default class SolanaProvider extends BloctoProvider {
     signatures.forEach((signature, index) => {
       const sigPubkeyPair = {
         signature:
-          signature == PublicKey.default.toBase58()
+          signature === PublicKey.default.toBase58()
             ? null
             : bs58.decode(signature),
         publicKey: message.accountKeys[index],
@@ -192,6 +193,7 @@ export default class SolanaProvider extends BloctoProvider {
   }
 
   // solana web3 utility
+  // eslint-disable-next-line
   async collectSignatures(transaction: Transaction) {
     return transaction.signatures.reduce((acc, cur) => {
       if (cur.signature) {

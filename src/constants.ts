@@ -1,6 +1,4 @@
-type Mapping = {
-  [key in number | string]: string;
-};
+type Mapping = Record<number | string, string>
 
 export interface BaseConfig {
   appId: string | null;
@@ -77,12 +75,12 @@ export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
 /* sol constants begin */
 
 export const SOL_NET_SERVER_MAPPING: Mapping = {
-  'devnet': 'https://wallet-testnet.blocto.app',
-  'testnet': 'https://wallet-testnet.blocto.app',
+  devnet: 'https://wallet-testnet.blocto.app',
+  testnet: 'https://wallet-testnet.blocto.app',
   'mainnet-beta': 'https://wallet.blocto.app',
-}
+};
 
-export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta']
+export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta'];
 
 /* sol constants end */
 
