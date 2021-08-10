@@ -236,33 +236,23 @@ export default class SolanaProvider extends BloctoProvider {
 
     attachFrame(authzFrame);
 
-    return new Promise((resolve, reject) => {
-      let pollingId: ReturnType<typeof setTimeout>;
-      const pollAuthzStatus = () => fetch(
-        `${this.server}/api/solana/authz?authorizationId=${authorizationId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        .then(response => response.json())
-        .then(({ status, transactionHash }) => {
-          if (status === 'APPROVED') {
+    return new Promise((resolve, reject) =>
+      addSelfRemovableHandler('message', (event: Event, removeEventListener: Function) => {
+        const e = event as MessageEvent;
+        if (e.origin === this.server && e.data.type === 'SOL:FRAME:RESPONSE') {
+          if (e.data.status === 'APPROVED') {
+            removeEventListener();
             detatchFrame(authzFrame);
-            clearInterval(pollingId);
-
-            resolve(transactionHash);
+            resolve(e.data.txHash);
           }
 
-          if (status === 'DECLINED') {
+          if (e.data.status === 'DECLINED') {
+            removeEventListener();
             detatchFrame(authzFrame);
-            clearInterval(pollingId);
-
-            reject('Transaction Canceled');
+            reject();
           }
-        });
-
-      pollingId = setInterval(pollAuthzStatus, 1000);
-    });
+        }
+      })
+    );
   }
 }
