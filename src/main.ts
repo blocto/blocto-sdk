@@ -12,11 +12,15 @@ export interface BloctoSDKConfig extends BaseConfig {
 }
 
 export default class BloctoSDK {
-  ethereum: EthereumProvider;
-  solana: SolanaProvider;
+  ethereum?: EthereumProvider;
+  solana?: SolanaProvider;
 
   constructor({ appId = null, ethereum, solana }: BloctoSDKConfig) {
-    this.ethereum = new EthereumProvider({ ...ethereum, appId });
-    this.solana = new SolanaProvider({ ...solana, appId });
+    if (ethereum) {
+      this.ethereum = new EthereumProvider({ ...ethereum, appId });
+    }
+    if (solana) {
+      this.solana = new SolanaProvider({ ...solana, appId });
+    }
   }
 }
