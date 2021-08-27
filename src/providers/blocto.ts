@@ -7,11 +7,11 @@ import { EIP1193_EVENTS } from '../constants';
 class BloctoProvider implements EIP1193Provider {
   isBlocto = true;
 
-  isConnecting: Boolean = false;
-  connected: Boolean = false;
-  appId: string | null = null;
+  isConnecting = false;
+  connected = false;
+  appId?: string;
 
-  eventListeners: { [key: string]: Array<Function> } = {};
+  eventListeners: { [key: string]: Array<(arg?: any) => void> } = {};
 
   constructor() {
     // init event listeners
@@ -24,9 +24,8 @@ class BloctoProvider implements EIP1193Provider {
   // eslint-disable-next-line
   async request(payload: any) {}
 
-  on(event: string, listener: Function) {
+  on(event: string, listener: (arg: any) => void): void {
     if (!EIP1193_EVENTS.includes(event)) return;
-    if (!(listener instanceof Function)) return;
 
     this.eventListeners[event].push(listener);
   }
@@ -35,7 +34,7 @@ class BloctoProvider implements EIP1193Provider {
   // eslint-disable-next-line
   once() {}
 
-  removeListener(event: string, listener: Function) {
+  removeListener(event: string, listener: (arg: any) => void): void {
     const listeners = this.eventListeners[event];
     const index = listeners.findIndex(item => item === listener);
     if (index !== -1) {

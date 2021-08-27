@@ -8,6 +8,7 @@ import polyfills from 'rollup-plugin-node-polyfills';
 import alias from '@rollup/plugin-alias';
 import { babel } from '@rollup/plugin-babel';
 import dotenv from 'rollup-plugin-dotenv';
+import dts from 'rollup-plugin-dts';
 
 import pkg from './package.json';
 
@@ -94,5 +95,10 @@ export default [
       polyfills(),
       terser(),
     ],
+  },
+  {
+    input: './src/index.d.ts',
+    output: [{ file: 'dist/blocto-sdk.d.ts', format: 'es' }],
+    plugins: [dts()],
   },
 ];

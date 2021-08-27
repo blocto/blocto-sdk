@@ -1,7 +1,7 @@
 type Mapping = Record<number | string, string>
 
 export interface BaseConfig {
-  appId: string | null;
+  appId?: string;
 }
 
 /* eth series constants begin */

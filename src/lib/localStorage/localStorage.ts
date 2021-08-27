@@ -14,7 +14,7 @@ const isSupported = () => {
 
 const storage = isSupported() ? window.localStorage : MemoryStorage;
 
-export const getItem = (key: String, defaultValue: any = null) => {
+export const getItem = <T>(key: string, defaultValue: T | null = null): T | null => {
   const value = storage.getItem(key);
 
   try {
@@ -24,8 +24,8 @@ export const getItem = (key: String, defaultValue: any = null) => {
   }
 };
 
-export const getItemWithExpiry = (key: String, defaultValue: any = null) => {
-  const rawExpiry = getItem(key, null);
+export const getItemWithExpiry = <T>(key: string, defaultValue: T | null = null): T | null => {
+  const rawExpiry: any = getItem(key, null);
 
   if (!rawExpiry) {
     return defaultValue;
@@ -41,15 +41,15 @@ export const getItemWithExpiry = (key: String, defaultValue: any = null) => {
   return rawExpiry.value;
 };
 
-export const getRawItem = (key: String) => storage.getItem(key);
+export const getRawItem = (key: string): string => storage.getItem(key);
 
-export const setItem = (key: String, value: any) =>
+export const setItem = (key: string, value: any): void =>
   storage.setItem(
     key,
     typeof value === 'string' ? value : JSON.stringify(value)
   );
 
-export const setItemWithExpiry = (key: String, value: any, ttl: number) =>
+export const setItemWithExpiry = (key: string, value: any, ttl: number): void =>
   setItem(
     key,
     {
@@ -58,18 +58,18 @@ export const setItemWithExpiry = (key: String, value: any, ttl: number) =>
     }
   );
 
-export const removeItem = (key: String) => {
+export const removeItem = (key: string): void => {
   setItem(key, ''); // Due to some versions of browser bug can't removeItem correctly.
   storage.removeItem(key);
 };
 
-export const isLatestLocalStorageVersion = () => {
+export const isLatestLocalStorageVersion = (): boolean => {
   const LOCAL_STORAGE_VERSION = keys.LOCAL_STORAGE_VERSION;
   const localVersion = getItem(keys.KEY_LOCAL_STORAGE_VERSION);
   return LOCAL_STORAGE_VERSION === localVersion;
 };
 
-export const removeOutdatedKeys = () => {
+export const removeOutdatedKeys = (): void => {
   if (isLatestLocalStorageVersion()) return;
 
   setItem(keys.KEY_LOCAL_STORAGE_VERSION, keys.LOCAL_STORAGE_VERSION);

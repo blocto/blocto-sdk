@@ -10,6 +10,7 @@
   ],
   "main": "dist/blocto-sdk.js",
   "browser": "dist/blocto-sdk.umd.js",
+  "types": "dist/blocto-sdk.d.ts",
   "devDependencies": {
     "@babel/core": "^7.14.0",
     "@babel/eslint-parser": "^7.14.7",
@@ -26,7 +27,6 @@
     "@typescript-eslint/parser": "^4.29.0",
     "babel-plugin-module-resolver": "^4.1.0",
     "dotenv": "^10.0.0",
-    "eip1193-provider": "^1.0.1",
     "eslint": "^7.30.0",
     "eslint-import-resolver-babel-module": "^5.3.1",
     "eslint-plugin-import": "^2.23.4",
@@ -35,6 +35,7 @@
     "rollup": "^2.47.0",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-dotenv": "^0.3.0",
+    "rollup-plugin-dts": "^3.0.2",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "rollup-plugin-node-resolve": "^5.2.0",
@@ -55,6 +56,7 @@
     "prepublishOnly": "npm-run-all clean build"
   },
   "dependencies": {
+    "eip1193-provider": "^1.0.1",
     "@solana/web3.js": "^1.22.0",
     "bs58": "^4.0.1",
     "buffer": "^6.0.3",

@@ -7,22 +7,18 @@ import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import BloctoProvider from './blocto';
 import {
-  BaseConfig,
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
 } from '../constants';
+import { SolanaProviderConfig, SolanaProviderInterface } from './types/solana.d';
 
-export interface SolanaProviderConfig extends BaseConfig {
-  net: string | null;
-  server?: string;
-}
 
 export interface SolanaRequest {
   method: string;
-  params?: Object;
+  params?: any;
 }
 
-export default class SolanaProvider extends BloctoProvider {
+export default class SolanaProvider extends BloctoProvider implements SolanaProviderInterface {
   code: string | null = null;
   net: string;
   rpc: string;
@@ -80,15 +76,15 @@ export default class SolanaProvider extends BloctoProvider {
     }
   }
 
-  connect() {
-    return new Promise((resolve, reject) => {
+  connect(): Promise<string[]> {
+    return new Promise((resolve: (v: string[]) => void, reject) => {
       if (typeof window === 'undefined') { reject('Currently only supported in browser'); }
       const location = encodeURIComponent(window.location.origin);
       const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=solana`);
 
       attachFrame(loginFrame);
 
-      addSelfRemovableHandler('message', (event: Event, removeListener: Function) => {
+      addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
         if (e.origin === this.server) {
           // @todo: try with another more general event types
@@ -100,7 +96,7 @@ export default class SolanaProvider extends BloctoProvider {
             this.connected = true;
 
             this.accounts = [e.data.addr];
-            resolve(this.accounts);
+            resolve(this.accounts as Array<string>);
           }
 
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
@@ -113,7 +109,7 @@ export default class SolanaProvider extends BloctoProvider {
     });
   }
 
-  async fetchAccounts() {
+  async fetchAccounts(): Promise<string[]> {
     const { accounts } = await fetch(
       `${this.server}/api/solana/accounts?code=${this.code}`
     ).then(response => response.json());
@@ -121,7 +117,7 @@ export default class SolanaProvider extends BloctoProvider {
     return accounts;
   }
 
-  async handleReadRequests(payload: SolanaRequest) {
+  async handleReadRequests(payload: SolanaRequest): Promise<any> {
     return fetch(this.rpc, {
       method: 'POST',
       headers: {
@@ -132,7 +128,7 @@ export default class SolanaProvider extends BloctoProvider {
   }
 
   // solana web3 utility
-  async convertToProgramWalletTransaction(transaction: Transaction) {
+  async convertToProgramWalletTransaction(transaction: Transaction): Promise<Transaction> {
     const message = await this.request({
       method: 'convertToProgramWalletTransaction',
       params: {
@@ -143,7 +139,7 @@ export default class SolanaProvider extends BloctoProvider {
   }
 
   // solana web3 utility
-  async signAndSendTransaction(transaction: Transaction) {
+  async signAndSendTransaction(transaction: Transaction): Promise<string> {
     return this.request({
       method: 'signAndSendTransaction',
       params: {
@@ -216,7 +212,7 @@ export default class SolanaProvider extends BloctoProvider {
     }).then(response => response.json());
   }
 
-  async handleSignAndSendTransaction(payload: SolanaRequest) {
+  async handleSignAndSendTransaction(payload: SolanaRequest): Promise<string> {
     const { authorizationId } = await fetch(`${this.server}/api/solana/authz?code=${this.code}`, {
       method: 'POST',
       headers: {
@@ -237,7 +233,7 @@ export default class SolanaProvider extends BloctoProvider {
     attachFrame(authzFrame);
 
     return new Promise((resolve, reject) =>
-      addSelfRemovableHandler('message', (event: Event, removeEventListener: Function) => {
+      addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
         const e = event as MessageEvent;
         if (e.origin === this.server && e.data.type === 'SOL:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {

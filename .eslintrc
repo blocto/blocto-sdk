@@ -1,6 +1,9 @@
 {
   "parser": "@typescript-eslint/parser",
-  "extends": "@portto/eslint-config-portto/node",
+  "extends": [
+    "@portto/eslint-config-portto/node",
+    "plugin:@typescript-eslint/recommended"
+  ],
   "plugins": ["@babel", "@typescript-eslint"],
   "rules": {
     "@babel/semi": ["error"],

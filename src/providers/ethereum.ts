@@ -8,19 +8,13 @@ import {
   KEY_SESSION,
 } from '../lib/localStorage';
 import {
-  BaseConfig,
   ETH_CHAIN_ID_RPC_MAPPING,
   ETH_CHAIN_ID_CHAIN_MAPPING,
   ETH_CHAIN_ID_NET_MAPPING,
   ETH_CHAIN_ID_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
 } from '../constants';
-
-export interface EthereumProviderConfig extends BaseConfig {
-  chainId: string | number | null;
-  rpc?: string;
-  server?: string;
-}
+import { EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d';
 
 export interface EIP1193RequestPayload {
   id?: number;
@@ -29,7 +23,7 @@ export interface EIP1193RequestPayload {
   params?: Array<any>;
 }
 
-export default class EthereumProvider extends BloctoProvider {
+export default class EthereumProvider extends BloctoProvider implements EthereumProviderInterface {
   code: string | null = null;
   chainId: string | number;
   networkId: string | number;
@@ -92,7 +86,7 @@ export default class EthereumProvider extends BloctoProvider {
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
   // web3 v1.x BatchRequest still depends on it so we need to implement anyway ¯\_(ツ)_/¯
-  async sendAsync(payload: any, callback?: Function) {
+  async sendAsync(payload: any, callback?: (arg: any) => any) {
     const handleRequest = new Promise((resolve) => {
       // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
       if (Array.isArray(payload)) {
@@ -226,7 +220,7 @@ export default class EthereumProvider extends BloctoProvider {
 
       attachFrame(loginFrame);
 
-      addSelfRemovableHandler('message', (event: Event, removeListener: Function) => {
+      addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
         if (e.origin === this.server) {
           // @todo: try with another more general event types
@@ -282,7 +276,7 @@ export default class EthereumProvider extends BloctoProvider {
 
     attachFrame(signFrame);
 
-    let message: string = '';
+    let message = '';
     if (Array.isArray(params)) {
       if (method === 'eth_sign') {
         message = params[1].slice(2);
@@ -291,7 +285,7 @@ export default class EthereumProvider extends BloctoProvider {
       }
     }
 
-    addSelfRemovableHandler('message', (event: Event, removeListener: Function) => {
+    addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
       const e = event as MessageEvent;
       if (e.origin === this.server && e.data.type === 'ETH:FRAME:READY') {
         if (signFrame.contentWindow) {
@@ -307,7 +301,7 @@ export default class EthereumProvider extends BloctoProvider {
     });
 
     return new Promise((resolve, reject) =>
-      addSelfRemovableHandler('message', (event: Event, removeEventListener: Function) => {
+      addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
         const e = event as MessageEvent;
         if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {
@@ -344,7 +338,7 @@ export default class EthereumProvider extends BloctoProvider {
     attachFrame(authzFrame);
 
     return new Promise((resolve, reject) =>
-      addSelfRemovableHandler('message', (event: Event, removeEventListener: Function) => {
+      addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
         const e = event as MessageEvent;
         if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {

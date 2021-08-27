@@ -1,15 +1,15 @@
 class MemoryStorage {
     storage = {};
 
-    getItem(key: String) {
+    getItem(key: string) {
       return this[key] || null;
     }
 
-    setItem(key: String, value: any) {
+    setItem(key: string, value: any) {
       this.storage[key] = value;
     }
 
-    removeItem(key: String) {
+    removeItem(key: string) {
       delete this.storage[key];
     }
 }
