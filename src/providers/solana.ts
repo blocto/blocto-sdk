@@ -95,6 +95,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
             this.code = e.data.code;
             this.connected = true;
 
+            this.eventListeners.connect.forEach(listener => listener(this.net));
             this.accounts = [e.data.addr];
             resolve(this.accounts as Array<string>);
           }
@@ -107,6 +108,12 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         }
       });
     });
+  }
+
+  disconnect(): void {
+    this.code = null;
+    this.accounts = [];
+    this.eventListeners.disconnect.forEach(listener => listener());
   }
 
   async fetchAccounts(): Promise<string[]> {

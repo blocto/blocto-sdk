@@ -35,7 +35,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   accounts: Array<string> = [];
 
-  constructor({ chainId = '0x1', rpc, server, appId = null }: EthereumProviderConfig) {
+  constructor({ chainId = '0x1', rpc, server, appId }: EthereumProviderConfig) {
     super();
     invariant(chainId, "'chainId' is required");
 
