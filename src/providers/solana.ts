@@ -1,7 +1,7 @@
 import invariant from 'invariant';
 import { Buffer } from 'buffer';
 // @todo: in the long run we want to remove the dependency of solana web3
-import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey } from '@solana/web3.js';
+import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey, Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
@@ -146,12 +146,26 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   }
 
   // solana web3 utility
-  async signAndSendTransaction(transaction: Transaction): Promise<string> {
+  async signAndSendTransaction(transaction: Transaction, connection?: Connection): Promise<string> {
+    const extra: any = {};
+    if (connection) {
+      if (connection.commitment) extra.commitment = connection.commitment;
+      // if the connection object passed-in has different rpc endpoint, reconnect to it
+      // eslint-disable-next-line
+      const rpc = (connection as any)?._rpcEndpoint;
+      if (rpc && rpc !== this.rpc) {
+        this.rpc = rpc;
+        this.disconnect();
+        await this.connect();
+      }
+    }
+
     return this.request({
       method: 'signAndSendTransaction',
       params: {
         signatures: await this.collectSignatures(transaction),
         message: transaction.serializeMessage().toString('hex'),
+        ...extra,
       },
     });
   }

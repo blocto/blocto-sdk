@@ -1,4 +1,4 @@
-import { Transaction } from '@solana/web3.js';
+import { Connection, Transaction } from '@solana/web3.js';
 import { BaseConfig } from '../../constants';
 import BloctoProviderInterface from './blocto.d';
 
@@ -18,6 +18,6 @@ export declare interface SolanaProviderInterface extends BloctoProviderInterface
   disconnect(): void;
   request(params: { method: string }): Promise<any>;
 
-  signAndSendTransaction(transaction: Transaction): Promise<string>;
+  signAndSendTransaction(transaction: Transaction, connection?: Connection): Promise<string>;
   convertToProgramWalletTransaction(transaction: Transaction): Promise<Transaction>;
 }
