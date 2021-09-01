@@ -152,7 +152,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       if (connection.commitment) extra.commitment = connection.commitment;
       // if the connection object passed-in has different rpc endpoint, reconnect to it
       // eslint-disable-next-line
-      const rpc = (connection as any)?._rpcEndpoint;
+      const rpc = connection ? (connection as any)._rpcEndpoint : null;
       if (rpc && rpc !== this.rpc) {
         this.rpc = rpc;
         this.disconnect();
