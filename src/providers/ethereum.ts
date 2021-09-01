@@ -53,12 +53,12 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
     invariant(this.chain, `unsupported 'chainId': ${this.chainId}`);
 
-    this.rpc = process.env.RPC || rpc || ETH_CHAIN_ID_RPC_MAPPING[this.chainId];
+    this.rpc = rpc || process.env.RPC || ETH_CHAIN_ID_RPC_MAPPING[this.chainId];
 
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
     this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || process.env.SERVER || '';
-    this.appId = process.env.APP_ID || appId;
+    this.appId = appId || process.env.APP_ID;
 
     // load previous connected state
     this.sessionKey = `${KEY_SESSION}-${this.chainId}`;

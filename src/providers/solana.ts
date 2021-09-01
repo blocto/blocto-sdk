@@ -35,7 +35,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     this.rpc = `https://api.${net}.solana.com`;
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
-    this.appId = process.env.APP_ID || appId;
+    this.appId = appId || process.env.APP_ID;
   }
 
   async request(payload: SolanaRequest) {
