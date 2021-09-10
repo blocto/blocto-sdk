@@ -17,7 +17,6 @@ export interface SolanaRequest {
   method: string;
   params?: any;
 }
-
 export default class SolanaProvider extends BloctoProvider implements SolanaProviderInterface {
   code: string | null = null;
   net: string;
@@ -50,6 +49,9 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         case 'connect':
           result = await this.fetchAccounts();
           break;
+        case 'disconnect':
+          this.disconnect();
+          break;
         case 'getAccounts':
           result = this.accounts.length ? this.accounts : await this.fetchAccounts();
           break;
@@ -76,8 +78,18 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     }
   }
 
-  connect(): Promise<string[]> {
-    return new Promise((resolve: (v: string[]) => void, reject) => {
+  async connect(): Promise<void> {
+    const existedSDK = (window as any).solana;
+    if (existedSDK && existedSDK.isBlocto) {
+      return new Promise((resolve) => {
+        existedSDK.once('connect', (pubkey: PublicKey) => {
+          this.accounts = [pubkey.toBase58()];
+          resolve();
+        });
+        existedSDK.connect();
+      });
+    }
+    return new Promise((resolve: () => void, reject) => {
       if (typeof window === 'undefined') { reject('Currently only supported in browser'); }
       const location = encodeURIComponent(window.location.origin);
       const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=solana`);
@@ -97,7 +109,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
             this.eventListeners.connect.forEach(listener => listener(this.net));
             this.accounts = [e.data.addr];
-            resolve(this.accounts as Array<string>);
+            resolve();
           }
 
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
@@ -110,7 +122,12 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     });
   }
 
-  disconnect(): void {
+  async disconnect(): Promise<void> {
+    const existedSDK = (window as any).solana;
+    if (existedSDK && existedSDK.isBlocto) {
+      await existedSDK.dicconnect();
+      return;
+    }
     this.code = null;
     this.accounts = [];
     this.eventListeners.disconnect.forEach(listener => listener());
@@ -136,6 +153,10 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
   // solana web3 utility
   async convertToProgramWalletTransaction(transaction: Transaction): Promise<Transaction> {
+    const existedSDK = (window as any).solana;
+    if (existedSDK && existedSDK.isBlocto) {
+      return existedSDK.convertToProgramWalletTransaction(transaction);
+    }
     const message = await this.request({
       method: 'convertToProgramWalletTransaction',
       params: {
@@ -147,6 +168,10 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
   // solana web3 utility
   async signAndSendTransaction(transaction: Transaction, connection?: Connection): Promise<string> {
+    const existedSDK = (window as any).solana;
+    if (existedSDK && existedSDK.isBlocto) {
+      return existedSDK.signAndSendTransaction(transaction);
+    }
     const extra: any = {};
     if (connection) {
       if (connection.commitment) extra.commitment = connection.commitment;

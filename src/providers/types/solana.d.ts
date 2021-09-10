@@ -14,8 +14,8 @@ export declare interface SolanaProviderInterface extends BloctoProviderInterface
   server: string;
   accounts: Array<string>;
 
-  connect(): Promise<string[]>;
-  disconnect(): void;
+  connect(): Promise<void>;
+  disconnect(): Promise<void> ;
   request(params: { method: string }): Promise<any>;
 
   signAndSendTransaction(transaction: Transaction, connection?: Connection): Promise<string>;
