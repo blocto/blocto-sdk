@@ -53,7 +53,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
     invariant(this.chain, `unsupported 'chainId': ${this.chainId}`);
 
-    this.rpc = rpc || process.env.RPC || ETH_CHAIN_ID_RPC_MAPPING[this.chainId];
+    this.rpc = rpc || ETH_CHAIN_ID_RPC_MAPPING[this.chainId] || process.env.RPC || '';
 
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
