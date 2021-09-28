@@ -84,6 +84,13 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     }
   }
 
+  private checkNetworkMatched() {
+    const existedSDK = (window as any).ethereum;
+    if (existedSDK && existedSDK.isBlocto && parseInt(existedSDK.chainId, 16) !== this.chainId) {
+      throw new Error('Blocto SDK network mismatched');
+    }
+  }
+
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
   // web3 v1.x BatchRequest still depends on it so we need to implement anyway ¯\_(ツ)_/¯
   async sendAsync(payload: any, callback?: (arg: any) => any) {
@@ -267,6 +274,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   }
 
   async fetchAccounts() {
+    this.checkNetworkMatched();
     const { accounts } = await fetch(
       `${this.server}/api/${this.chain}/accounts?code=${this.code}`
     ).then(response => response.json());
@@ -275,6 +283,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   }
 
   async handleReadRequests(payload: EIP1193RequestPayload) {
+    this.checkNetworkMatched();
     return fetch(this.rpc, {
       method: 'POST',
       headers: {
@@ -335,6 +344,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   }
 
   async handleSendTransaction(payload: EIP1193RequestPayload) {
+    this.checkNetworkMatched();
     const { authorizationId } = await fetch(`${this.server}/api/${this.chain}/authz?code=${this.code}`, {
       method: 'POST',
       headers: {
