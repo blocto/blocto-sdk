@@ -202,10 +202,24 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
-  enable() {
+  async enable() {
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
-      return existedSDK.enable();
+      if (parseInt(existedSDK.chainId, 16) !== this.chainId) {
+        try {
+          await existedSDK.request({
+            method: 'wallet_addEthereumChain',
+            params: [{ chainId: `0x${this.chainId.toString(16)}` }],
+          });
+          this.accounts = [existedSDK.address];
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      return new Promise(((resolve, reject) =>
+        // add a small delay to make sure the network has been switched
+        setTimeout(() => existedSDK.enable().then(resolve).catch(reject), 10))
+      );
     }
 
     return new Promise((resolve, reject) => {
