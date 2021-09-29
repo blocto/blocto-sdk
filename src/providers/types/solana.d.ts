@@ -5,6 +5,7 @@ import BloctoProviderInterface from './blocto.d';
 export declare interface SolanaProviderConfig extends BaseConfig {
   net: string | null;
   server?: string;
+  rpc?: string;
 }
 
 export declare interface SolanaProviderInterface extends BloctoProviderInterface {
@@ -15,7 +16,7 @@ export declare interface SolanaProviderInterface extends BloctoProviderInterface
   accounts: Array<string>;
 
   connect(): Promise<void>;
-  disconnect(): Promise<void> ;
+  disconnect(): Promise<void>;
   request(params: { method: string }): Promise<any>;
 
   signAndSendTransaction(transaction: Transaction, connection?: Connection): Promise<string>;

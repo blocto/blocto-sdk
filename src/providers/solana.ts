@@ -24,14 +24,15 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   server: string;
   accounts: Array<string> = [];
 
-  constructor({ net = 'mainnet-beta', server, appId }: SolanaProviderConfig) {
+  constructor({ net = 'mainnet-beta', server, appId, rpc }: SolanaProviderConfig) {
     super();
 
     invariant(net, "'net' is required");
     invariant(SOL_NET.includes(net), 'unsupported net');
     this.net = net;
 
-    this.rpc = net === 'mainnet-beta' ? 'https://free.rpcpool.com' : `https://api.${net}.solana.com`;
+    this.rpc = rpc ||
+      (net === 'mainnet-beta' ? 'https://free.rpcpool.com' : `https://api.${net}.solana.com`);
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID;
