@@ -31,7 +31,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     invariant(SOL_NET.includes(net), 'unsupported net');
     this.net = net;
 
-    this.rpc = `https://api.${net}.solana.com`;
+    this.rpc = net === 'mainnet-beta' ? 'https://free.rpcpool.com' : `https://api.${net}.solana.com`;
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID;
