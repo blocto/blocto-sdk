@@ -13,6 +13,7 @@ export declare interface SolanaProviderInterface extends BloctoProviderInterface
   rpc: string;
   server: string;
   accounts: Array<string>;
+  sessionKey: string;
 
   connect(): Promise<void>;
   disconnect(): Promise<void> ;

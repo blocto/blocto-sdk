@@ -9,9 +9,14 @@ import BloctoProvider from './blocto';
 import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
+  LOGIN_PERSISTING_TIME,
 } from '../constants';
 import { SolanaProviderConfig, SolanaProviderInterface } from './types/solana.d';
-
+import {
+  getItemWithExpiry,
+  setItemWithExpiry,
+  KEY_SESSION,
+} from '../lib/localStorage';
 
 export interface SolanaRequest {
   method: string;
@@ -23,6 +28,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   rpc: string;
   server: string;
   accounts: Array<string> = [];
+  sessionKey: string;
 
   constructor({ net = 'mainnet-beta', server, appId }: SolanaProviderConfig) {
     super();
@@ -35,6 +41,12 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID;
+    this.sessionKey = `${KEY_SESSION}-solana-${this.net}`;
+    const session = getItemWithExpiry(this.sessionKey, {});
+
+    this.connected = Boolean(session && session.code);
+    this.code = session.code || null;
+    this.accounts = session.accounts || [];
   }
 
   async request(payload: SolanaRequest) {
@@ -109,6 +121,12 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
             this.eventListeners.connect.forEach(listener => listener(this.net));
             this.accounts = [e.data.addr];
+
+            setItemWithExpiry(this.sessionKey, {
+              code: this.code,
+              accounts: this.accounts,
+            }, LOGIN_PERSISTING_TIME);
+
             resolve();
           }
 
