@@ -8,6 +8,8 @@ declare interface BloctoProviderInterface extends EIP1193Provider {
   eventListeners: {
     [key: string]: Array<(arg?: any) => void>
   };
+  code: string | null = null;
+  sessionKey: string;
 }
 
 export default BloctoProviderInterface;

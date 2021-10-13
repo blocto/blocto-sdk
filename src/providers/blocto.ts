@@ -13,6 +13,9 @@ class BloctoProvider implements EIP1193Provider {
 
   eventListeners: { [key: string]: Array<(arg?: any) => void> } = {};
 
+  code: string | null = null;
+  sessionKey = '';
+
   constructor() {
     // init event listeners
     EIP1193_EVENTS.forEach((event) => {

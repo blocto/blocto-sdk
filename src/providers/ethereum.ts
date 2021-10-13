@@ -1,7 +1,8 @@
 import invariant from 'invariant';
-import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
-import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import BloctoProvider from './blocto';
+import Session from '../lib/session.d';
+import { EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d'; import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
+import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   getItemWithExpiry,
   setItemWithExpiry,
@@ -15,7 +16,6 @@ import {
   ETH_CHAIN_ID_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
 } from '../constants';
-import { EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d';
 
 export interface EIP1193RequestPayload {
   id?: number;
@@ -63,11 +63,11 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
     // load previous connected state
     this.sessionKey = `${KEY_SESSION}-${this.chainId}`;
-    const session = getItemWithExpiry(this.sessionKey, {});
+    const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
 
     this.connected = Boolean(session && session.code);
-    this.code = session.code || null;
-    this.accounts = session.accounts || [];
+    this.code = (session && session.code) || null;
+    this.accounts = (session && session.accounts) || [];
   }
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
@@ -94,7 +94,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
   // web3 v1.x BatchRequest still depends on it so we need to implement anyway ¯\_(ツ)_/¯
-  async sendAsync(payload: any, callback?: (arg: any) => any) {
+  async sendAsync(payload: any, callback?: (argOrError: any, arg?: any) => any) {
     const handleRequest = new Promise((resolve) => {
       // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
       if (Array.isArray(payload)) {

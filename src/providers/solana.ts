@@ -3,33 +3,32 @@ import { Buffer } from 'buffer';
 // @todo: in the long run we want to remove the dependency of solana web3
 import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey, Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
+import BloctoProvider from './blocto';
+import { SolanaProviderConfig, SolanaProviderInterface } from './types/solana.d';
+import Session from '../lib/session.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import BloctoProvider from './blocto';
-import {
-  SOL_NET_SERVER_MAPPING,
-  SOL_NET,
-  LOGIN_PERSISTING_TIME,
-} from '../constants';
-import { SolanaProviderConfig, SolanaProviderInterface } from './types/solana.d';
 import {
   getItemWithExpiry,
   setItemWithExpiry,
   KEY_SESSION,
 } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
+import {
+  SOL_NET_SERVER_MAPPING,
+  SOL_NET,
+  LOGIN_PERSISTING_TIME,
+} from '../constants';
 
 export interface SolanaRequest {
   method: string;
   params?: any;
 }
 export default class SolanaProvider extends BloctoProvider implements SolanaProviderInterface {
-  code: string | null = null;
   net: string;
   rpc: string;
   server: string;
   accounts: Array<string> = [];
-  sessionKey: string;
 
   constructor({ net = 'mainnet-beta', server, appId }: SolanaProviderConfig) {
     super();
@@ -43,11 +42,11 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID;
     this.sessionKey = `${KEY_SESSION}-solana-${this.net}`;
-    const session = getItemWithExpiry(this.sessionKey, {});
+    const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
 
     this.connected = Boolean(session && session.code);
-    this.code = session.code || null;
-    this.accounts = session.accounts || [];
+    this.code = (session && session.code) || null;
+    this.accounts = (session && session.accounts) || [];
   }
 
   async request(payload: SolanaRequest) {

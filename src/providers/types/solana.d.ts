@@ -8,12 +8,10 @@ export declare interface SolanaProviderConfig extends BaseConfig {
 }
 
 export declare interface SolanaProviderInterface extends BloctoProviderInterface {
-  code: string | null;
   net: string;
   rpc: string;
   server: string;
   accounts: Array<string>;
-  sessionKey: string;
 
   connect(): Promise<void>;
   disconnect(): Promise<void> ;
