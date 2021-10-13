@@ -7,6 +7,7 @@ import {
   setItemWithExpiry,
   KEY_SESSION,
 } from '../lib/localStorage';
+import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   ETH_CHAIN_ID_RPC_MAPPING,
   ETH_CHAIN_ID_CHAIN_MAPPING,
@@ -277,7 +278,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     this.checkNetworkMatched();
     const { accounts } = await fetch(
       `${this.server}/api/${this.chain}/accounts?code=${this.code}`
-    ).then(response => response.json());
+    ).then(response => responseSessionGuard<{ accounts: [] }>(response, this));
     this.accounts = accounts;
     return accounts;
   }
@@ -351,7 +352,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload.params),
-    }).then(response => response.json());
+    }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
 
     if (typeof window === 'undefined') {
       throw (new Error('Currently only supported in browser'));

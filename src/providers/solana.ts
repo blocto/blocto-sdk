@@ -17,6 +17,7 @@ import {
   setItemWithExpiry,
   KEY_SESSION,
 } from '../lib/localStorage';
+import responseSessionGuard from '../lib/responseSessionGuard';
 
 export interface SolanaRequest {
   method: string;
@@ -273,7 +274,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         sessionId: this.code,
         ...payload.params,
       }),
-    }).then(response => response.json());
+    }).then(response => responseSessionGuard(response, this));
   }
 
   async handleSignAndSendTransaction(payload: SolanaRequest): Promise<string> {
@@ -286,7 +287,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         sessionId: this.code,
         ...payload.params,
       }),
-    }).then(response => response.json());
+    }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
 
     if (typeof window === 'undefined') {
       throw (new Error('Currently only supported in browser'));
