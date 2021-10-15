@@ -89,4 +89,4 @@ export const EIP1193_EVENTS: Array<string> = ['connect', 'disconnect', 'message'
 // Preserve login for 1 day
 export const LOGIN_PERSISTING_TIME = 86400 * 1000;
 
-export const CAN_USE_WINDOW = typeof window !== 'undefined'
+export const CAN_USE_WINDOW = typeof window !== 'undefined';
