@@ -1,9 +1,8 @@
 import MemoryStorage from './memoryStorage';
 import * as keys from './constants';
-import { CAN_USE_WINDOW } from '../../constants';
 
 const isSupported = () => {
-  if (!CAN_USE_WINDOW) {
+  if (typeof window === 'undefined') {
     return false;
   }
   try {

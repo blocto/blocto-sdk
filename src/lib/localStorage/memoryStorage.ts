@@ -1,5 +1,3 @@
-import { CAN_USE_WINDOW } from "../../constants";
-
 class MemoryStorage {
     storage = {};
 
@@ -16,9 +14,9 @@ class MemoryStorage {
     }
 }
 
-const memoryStorage = CAN_USE_WINDOW ? window.memoryStorage : new MemoryStorage();
+const memoryStorage = typeof window === 'undefined' ? new MemoryStorage() : window.memoryStorage;
 
-if (CAN_USE_WINDOW) {
+if (typeof window !== 'undefined') {
   window.memoryStorage = memoryStorage;
 }
 
