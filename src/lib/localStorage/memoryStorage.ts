@@ -1,3 +1,5 @@
+import { CAN_USE_WINDOW } from "../../constants";
+
 class MemoryStorage {
     storage = {};
 
@@ -14,7 +16,11 @@ class MemoryStorage {
     }
 }
 
-window.memoryStorage = window.memoryStorage || new MemoryStorage();
+const memoryStorage = CAN_USE_WINDOW ? window.memoryStorage : new MemoryStorage();
 
-export default window.memoryStorage;
+if (CAN_USE_WINDOW) {
+  window.memoryStorage = memoryStorage;
+}
+
+export default memoryStorage;
 export { MemoryStorage };

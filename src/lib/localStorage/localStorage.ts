@@ -1,7 +1,11 @@
 import MemoryStorage from './memoryStorage';
 import * as keys from './constants';
+import { CAN_USE_WINDOW } from '../../constants';
 
 const isSupported = () => {
+  if (!CAN_USE_WINDOW) {
+    return false;
+  }
   try {
     window.localStorage.setItem('local_storage_supported', '1');
     const result = window.localStorage.getItem('local_storage_supported');
