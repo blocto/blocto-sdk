@@ -14,7 +14,7 @@ class MemoryStorage {
     }
 }
 
-const memoryStorage = typeof window === 'undefined' ? new MemoryStorage() : window.memoryStorage;
+const memoryStorage = typeof window !== 'undefined' ? window.memoryStorage : new MemoryStorage();
 
 if (typeof window !== 'undefined') {
   window.memoryStorage = memoryStorage;
