@@ -14,7 +14,11 @@ class MemoryStorage {
     }
 }
 
-window.memoryStorage = window.memoryStorage || new MemoryStorage();
+const memoryStorage = typeof window !== 'undefined' ? window.memoryStorage : new MemoryStorage();
 
-export default window.memoryStorage;
+if (typeof window !== 'undefined') {
+  window.memoryStorage = memoryStorage;
+}
+
+export default memoryStorage;
 export { MemoryStorage };
