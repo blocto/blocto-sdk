@@ -2,6 +2,9 @@ import MemoryStorage from './memoryStorage';
 import * as keys from './constants';
 
 const isSupported = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
   try {
     window.localStorage.setItem('local_storage_supported', '1');
     const result = window.localStorage.getItem('local_storage_supported');
