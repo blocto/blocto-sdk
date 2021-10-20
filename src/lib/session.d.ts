@@ -1,7 +1,9 @@
 
 interface Session {
   code?: string;
-  accounts?: Array<string>;
+  address?: {
+    [key: string]: string
+  };
 }
 
 export default Session;

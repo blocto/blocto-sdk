@@ -3,6 +3,7 @@
 import { EIP1193Provider } from 'eip1193-provider';
 
 import { EIP1193_EVENTS } from '../constants';
+import { KEY_SESSION } from '../lib/localStorage/constants';
 
 class BloctoProvider implements EIP1193Provider {
   isBlocto = true;
@@ -14,7 +15,7 @@ class BloctoProvider implements EIP1193Provider {
   eventListeners: { [key: string]: Array<(arg?: any) => void> } = {};
 
   code: string | null = null;
-  sessionKey = '';
+  sessionKey = KEY_SESSION;
 
   constructor() {
     // init event listeners

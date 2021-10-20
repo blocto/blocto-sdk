@@ -6,7 +6,6 @@ import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   getItemWithExpiry,
   setItemWithExpiry,
-  KEY_SESSION,
 } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
@@ -25,14 +24,12 @@ export interface EIP1193RequestPayload {
 }
 
 export default class EthereumProvider extends BloctoProvider implements EthereumProviderInterface {
-  code: string | null = null;
   chainId: string | number;
   networkId: string | number;
   chain: string;
   net: string;
   rpc: string;
   server: string;
-  sessionKey: string;
 
   accounts: Array<string> = [];
 
@@ -62,12 +59,13 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     this.appId = appId || process.env.APP_ID;
 
     // load previous connected state
-    this.sessionKey = `${KEY_SESSION}-${this.chainId}`;
     const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
 
-    this.connected = Boolean(session && session.code);
-    this.code = (session && session.code) || null;
-    this.accounts = (session && session.accounts) || [];
+    const sessionCode = session && session.code;
+    const sessionAccount = session && session.address && session.address[this.chain];
+    this.connected = Boolean(sessionCode && sessionAccount);
+    this.code = sessionCode || null;
+    this.accounts = sessionAccount ? [sessionAccount] : [];
   }
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
@@ -254,11 +252,12 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
             this.connected = true;
 
             this.eventListeners.connect.forEach(listener => listener(this.chainId));
-            this.accounts = [e.data.addr];
+            const address = e.data.address;
+            this.accounts = address ? [address[this.chain]] : [];
 
             setItemWithExpiry(this.sessionKey, {
               code: this.code,
-              accounts: this.accounts,
+              address,
             }, LOGIN_PERSISTING_TIME);
 
             resolve(this.accounts);

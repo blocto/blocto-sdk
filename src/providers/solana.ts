@@ -11,7 +11,6 @@ import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   getItemWithExpiry,
   setItemWithExpiry,
-  KEY_SESSION,
 } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
@@ -42,12 +41,13 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID;
-    this.sessionKey = `${KEY_SESSION}-solana-${this.net}`;
     const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
 
-    this.connected = Boolean(session && session.code);
-    this.code = (session && session.code) || null;
-    this.accounts = (session && session.accounts) || [];
+    const sessionCode = session && session.code;
+    const sessionAccount = session && session.address && session.address.solana;
+    this.connected = Boolean(sessionCode && sessionAccount);
+    this.code = sessionCode || null;
+    this.accounts = sessionAccount ? [sessionAccount] : [];
   }
 
   async request(payload: SolanaRequest) {
@@ -104,6 +104,11 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     }
     return new Promise((resolve: () => void, reject) => {
       if (typeof window === 'undefined') { reject('Currently only supported in browser'); }
+
+      if (this.connected) {
+        return resolve();
+      }
+
       const location = encodeURIComponent(window.location.origin);
       const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=solana`);
 
@@ -121,11 +126,12 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
             this.connected = true;
 
             this.eventListeners.connect.forEach(listener => listener(this.net));
-            this.accounts = [e.data.addr];
+            const address = e.data.address;
+            this.accounts = address ? [address.solana] : [];
 
             setItemWithExpiry(this.sessionKey, {
               code: this.code,
-              accounts: this.accounts,
+              address,
             }, LOGIN_PERSISTING_TIME);
 
             resolve();
