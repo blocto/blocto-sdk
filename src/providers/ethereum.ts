@@ -57,7 +57,9 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
     this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID;
+  }
 
+  private tryRetrieveSessionFromStorage(): void {
     // load previous connected state
     const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
 
@@ -66,6 +68,13 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     this.connected = Boolean(sessionCode && sessionAccount);
     this.code = sessionCode || null;
     this.accounts = sessionAccount ? [sessionAccount] : [];
+  }
+
+  private checkNetworkMatched() {
+    const existedSDK = (window as any).ethereum;
+    if (existedSDK && existedSDK.isBlocto && parseInt(existedSDK.chainId, 16) !== this.chainId) {
+      throw new Error('Blocto SDK network mismatched');
+    }
   }
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
@@ -80,13 +89,6 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       // signature type 3: arg1 - JSON-RPC payload(should be synchronous methods)
       default:
         return this.sendAsync(arg1);
-    }
-  }
-
-  private checkNetworkMatched() {
-    const existedSDK = (window as any).ethereum;
-    if (existedSDK && existedSDK.isBlocto && parseInt(existedSDK.chainId, 16) !== this.chainId) {
-      throw new Error('Blocto SDK network mismatched');
     }
   }
 
@@ -227,6 +229,8 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         setTimeout(() => existedSDK.enable().then(resolve).catch(reject), 10))
       );
     }
+
+    this.tryRetrieveSessionFromStorage();
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') { reject('Currently only supported in browser'); }

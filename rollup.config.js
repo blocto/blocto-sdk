@@ -51,7 +51,7 @@ export default [
         plugins: [
           [
             '@babel/plugin-transform-runtime',
-            { version: babelRuntimeVersion, useESModules: true },
+            { version: babelRuntimeVersion },
           ],
         ],
         presets: [['@babel/preset-env']],

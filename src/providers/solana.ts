@@ -41,8 +41,10 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID;
-    const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
+  }
 
+  private tryRetrieveSessionFromStorage() {
+    const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
     const sessionCode = session && session.code;
     const sessionAccount = session && session.address && session.address.solana;
     this.connected = Boolean(sessionCode && sessionAccount);
@@ -102,6 +104,9 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         existedSDK.connect();
       });
     }
+
+    this.tryRetrieveSessionFromStorage();
+
     return new Promise((resolve: () => void, reject) => {
       if (typeof window === 'undefined') { reject('Currently only supported in browser'); }
 
