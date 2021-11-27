@@ -9,6 +9,7 @@
     "src"
   ],
   "main": "dist/blocto-sdk.js",
+  "module": "dist/blocto-sdk.module.js",
   "browser": "dist/blocto-sdk.umd.js",
   "types": "dist/blocto-sdk.d.ts",
   "devDependencies": {

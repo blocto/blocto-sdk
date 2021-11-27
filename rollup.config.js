@@ -59,6 +59,47 @@ export default [
       polyfills(),
     ],
   },
+  // es
+  {
+    input: 'src/main.ts',
+    output: {
+      file: 'dist/blocto-sdk.module.js',
+      format: 'es',
+      name: 'BloctoSDK',
+    },
+    plugins: [
+      dotenv(),
+      alias({
+        entries: {
+          'readable-stream': 'stream',
+        },
+      }),
+      resolve({
+        preferBuiltins: true,
+        browser: true,
+      }),
+      typescript(),
+      commonjs({
+        namedExports: {
+          'node_modules/tweetnacl/nacl-fast.js': ['sign'],
+          'node_modules/js-sha3/src/sha3.js': ['keccak_256'],
+        },
+      }),
+      json(),
+      babel({
+        babelHelpers: 'runtime',
+        exclude: 'node_modules/**',
+        plugins: [
+          [
+            '@babel/plugin-transform-runtime',
+            { version: babelRuntimeVersion },
+          ],
+        ],
+        presets: [['@babel/preset-env']],
+      }),
+      polyfills(),
+    ],
+  },
   // umd
   {
     input: 'src/main.ts',
