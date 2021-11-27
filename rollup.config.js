@@ -18,12 +18,12 @@ const babelRuntimeVersion = pkg.devDependencies['@babel/runtime'].replace(
 );
 
 export default [
-  // es
+  // CommonJS
   {
     input: 'src/main.ts',
     output: {
       file: 'dist/blocto-sdk.js',
-      format: 'es',
+      format: 'cjs',
       name: 'BloctoSDK',
     },
     plugins: [
