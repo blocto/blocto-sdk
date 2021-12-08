@@ -183,6 +183,9 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           result = `0x${result.toString(16)}`;
           break;
         }
+        case 'eth_signTypedData_v3':
+        case 'eth_signTypedData':
+        case 'eth_signTypedData_v4':
         case 'personal_sign':
         case 'eth_sign': {
           result = await this.handleSign(payload);
@@ -309,6 +312,8 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         message = params[1].slice(2);
       } else if (method === 'personal_sign') {
         message = params[0].slice(2);
+      } else if (['eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].includes(method)) {
+        message = params[1];
       }
     }
 
