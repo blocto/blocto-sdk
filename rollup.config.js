@@ -1,4 +1,5 @@
 import { terser } from 'rollup-plugin-terser';
+import { visualizer } from 'rollup-plugin-visualizer';
 
 import typescript from 'rollup-plugin-typescript';
 import commonjs from 'rollup-plugin-commonjs';
@@ -57,6 +58,7 @@ export default [
         presets: [['@babel/preset-env']],
       }),
       polyfills(),
+      visualizer({ filename: 'dist/stats.cjs.html' }),
     ],
   },
   // es
@@ -98,6 +100,7 @@ export default [
         presets: [['@babel/preset-env']],
       }),
       polyfills(),
+      visualizer({ filename: 'dist/stats.es.html' }),
     ],
   },
   // umd
@@ -135,6 +138,7 @@ export default [
       }),
       polyfills(),
       terser(),
+      visualizer({ filename: 'dist/stats.umd.html' }),
     ],
   },
   {

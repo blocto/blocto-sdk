@@ -43,6 +43,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-typescript": "^1.0.1",
+    "rollup-plugin-visualizer": "^5.5.4",
     "tslib": "^2.3.0",
     "typescript": "^4.3.5",
     "yarn-run-all": "^3.1.1"
