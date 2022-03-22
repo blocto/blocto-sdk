@@ -1,7 +1,9 @@
 import invariant from 'invariant';
+import { ProviderAccounts } from 'eip1193-provider';
 import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
-import { EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d'; import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
+import { EIP1193RequestPayload, EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d';
+import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   getItemWithExpiry,
@@ -15,13 +17,6 @@ import {
   ETH_CHAIN_ID_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
 } from '../constants';
-
-export interface EIP1193RequestPayload {
-  id?: number;
-  jsonrpc?: string;
-  method: string;
-  params?: Array<any>;
-}
 
 export default class EthereumProvider extends BloctoProvider implements EthereumProviderInterface {
   chainId: string | number;
@@ -213,7 +208,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
-  async enable() {
+  async enable(): Promise<ProviderAccounts> {
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
       if (parseInt(existedSDK.chainId, 16) !== this.chainId) {

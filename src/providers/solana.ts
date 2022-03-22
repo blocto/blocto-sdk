@@ -1,5 +1,6 @@
 import invariant from 'invariant';
 import { Buffer } from 'buffer';
+import { RequestArguments } from 'eip1193-provider';
 // @todo: in the long run we want to remove the dependency of solana web3
 import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey, Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
@@ -19,10 +20,6 @@ import {
   LOGIN_PERSISTING_TIME,
 } from '../constants';
 
-export interface SolanaRequest {
-  method: string;
-  params?: any;
-}
 export default class SolanaProvider extends BloctoProvider implements SolanaProviderInterface {
   net: string;
   rpc: string;
@@ -52,7 +49,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     this.accounts = sessionAccount ? [sessionAccount] : [];
   }
 
-  async request(payload: SolanaRequest) {
+  async request(payload: RequestArguments) {
     if (!this.connected) {
       await this.connect();
     }
@@ -171,7 +168,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     return accounts;
   }
 
-  async handleReadRequests(payload: SolanaRequest): Promise<any> {
+  async handleReadRequests(payload: RequestArguments): Promise<any> {
     return fetch(this.rpc, {
       method: 'POST',
       headers: {
@@ -275,7 +272,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     }, {} as { [key: string]: string });
   }
 
-  async handleConvertTransaction(payload: SolanaRequest) {
+  async handleConvertTransaction(payload: RequestArguments) {
     return fetch(`${this.server}/api/solana/convertToWalletTx?code=${this.code}`, {
       method: 'POST',
       headers: {
@@ -288,7 +285,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     }).then(response => responseSessionGuard(response, this));
   }
 
-  async handleSignAndSendTransaction(payload: SolanaRequest): Promise<string> {
+  async handleSignAndSendTransaction(payload: RequestArguments): Promise<string> {
     const { authorizationId } = await fetch(`${this.server}/api/solana/authz?code=${this.code}`, {
       method: 'POST',
       headers: {
