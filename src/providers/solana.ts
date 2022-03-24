@@ -82,6 +82,12 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         default:
           response = await this.handleReadRequests(payload);
       }
+
+      if (response && !response.result && response.error) {
+        const errorMessage = response.error.message ? response.error.message : 'Request failed';
+        throw new Error(errorMessage);
+      }
+
       if (response) return response.result;
       return result;
     } catch (error) {
