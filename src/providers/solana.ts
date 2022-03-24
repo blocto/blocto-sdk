@@ -67,6 +67,18 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         case 'getAccounts':
           result = this.accounts.length ? this.accounts : await this.fetchAccounts();
           break;
+        case 'getAccountInfo': {
+          // Format the data as the same format returning from Connection.getAccountInfo from @solana/web3.js
+          // ref: https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getAccountInfo
+          const accountInfo = await this.handleReadRequests(payload);
+          const [bufferData, encoding] = accountInfo.result.value.data;
+          result = {
+            ...accountInfo.result.value,
+            data: Buffer.from(bufferData, encoding),
+            owner: new PublicKey(accountInfo.result.value.owner),
+          };
+          break;
+        }
         // custom JSON-RPC method
         case 'convertToProgramWalletTransaction':
           result = await this.handleConvertTransaction(payload);
