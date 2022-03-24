@@ -274,7 +274,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
             removeListener();
             detatchFrame(loginFrame);
-            reject();
+            reject(new Error('User declined the login request'));
           }
         }
       });
@@ -346,7 +346,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           if (e.data.status === 'DECLINED') {
             removeEventListener();
             detatchFrame(signFrame);
-            reject();
+            reject(new Error('User declined the signing request'));
           }
         }
       })
@@ -384,7 +384,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           if (e.data.status === 'DECLINED') {
             removeEventListener();
             detatchFrame(authzFrame);
-            reject();
+            reject(new Error('User declined to send the transaction'));
           }
         }
       })

@@ -148,7 +148,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
             removeListener();
             detatchFrame(loginFrame);
-            reject();
+            reject(new Error('User declined the login request'));
           }
         }
       });
@@ -324,7 +324,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
           if (e.data.status === 'DECLINED') {
             removeEventListener();
             detatchFrame(authzFrame);
-            reject();
+            reject(new Error('User declined to send the transaction'));
           }
         }
       })
