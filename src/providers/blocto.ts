@@ -1,6 +1,6 @@
 // The root class for all providers
 
-import { EIP1193Provider } from 'eip1193-provider';
+import { EIP1193Provider, RequestArguments } from 'eip1193-provider';
 
 import { EIP1193_EVENTS } from '../constants';
 import { KEY_SESSION } from '../lib/localStorage/constants';
@@ -26,7 +26,7 @@ class BloctoProvider implements EIP1193Provider {
 
   // implement by children
   // eslint-disable-next-line
-  async request(payload: any) {}
+  async request(payload: RequestArguments) {}
 
   on(event: string, listener: (arg: any) => void): void {
     if (!EIP1193_EVENTS.includes(event)) return;

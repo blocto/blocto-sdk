@@ -1,7 +1,9 @@
 import invariant from 'invariant';
+import { ProviderAccounts } from 'eip1193-provider';
 import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
-import { EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d'; import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
+import { EIP1193RequestPayload, EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d';
+import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   getItemWithExpiry,
@@ -15,13 +17,6 @@ import {
   ETH_CHAIN_ID_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
 } from '../constants';
-
-export interface EIP1193RequestPayload {
-  id?: number;
-  jsonrpc?: string;
-  method: string;
-  params?: Array<any>;
-}
 
 export default class EthereumProvider extends BloctoProvider implements EthereumProviderInterface {
   chainId: string | number;
@@ -202,6 +197,12 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         default:
           response = await this.handleReadRequests(payload);
       }
+
+      if (response && !response.result && response.error) {
+        const errorMessage = response.error.message ? response.error.message : 'Request failed';
+        throw new Error(errorMessage);
+      }
+
       if (response) return response.result;
       return result;
     } catch (error) {
@@ -213,7 +214,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
-  async enable() {
+  async enable(): Promise<ProviderAccounts> {
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
       if (parseInt(existedSDK.chainId, 16) !== this.chainId) {
@@ -273,7 +274,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
             removeListener();
             detatchFrame(loginFrame);
-            reject();
+            reject(new Error('User declined the login request'));
           }
         }
       });
@@ -345,7 +346,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           if (e.data.status === 'DECLINED') {
             removeEventListener();
             detatchFrame(signFrame);
-            reject();
+            reject(new Error('User declined the signing request'));
           }
         }
       })
@@ -383,7 +384,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           if (e.data.status === 'DECLINED') {
             removeEventListener();
             detatchFrame(authzFrame);
-            reject();
+            reject(new Error('User declined to send the transaction'));
           }
         }
       })
