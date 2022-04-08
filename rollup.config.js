@@ -10,6 +10,7 @@ import alias from '@rollup/plugin-alias';
 import { babel } from '@rollup/plugin-babel';
 import dotenv from 'rollup-plugin-dotenv';
 import dts from 'rollup-plugin-dts';
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 
 import pkg from './package.json';
 
@@ -26,6 +27,7 @@ export default [
       file: 'dist/blocto-sdk.js',
       format: 'cjs',
       name: 'BloctoSDK',
+      exports: 'auto',
     },
     plugins: [
       dotenv(),
@@ -34,6 +36,7 @@ export default [
           'readable-stream': 'stream',
         },
       }),
+      peerDepsExternal(),
       resolve({
         preferBuiltins: true,
         browser: true,
@@ -76,6 +79,7 @@ export default [
           'readable-stream': 'stream',
         },
       }),
+      peerDepsExternal(),
       resolve({
         preferBuiltins: true,
         browser: true,
