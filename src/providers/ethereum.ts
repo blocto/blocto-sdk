@@ -4,6 +4,7 @@ import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
 import { EIP1193RequestPayload, EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
+import { openNewTab } from '../lib/tab';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   getItemWithExpiry,
@@ -244,17 +245,24 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=${this.chain}`);
 
-      attachFrame(loginFrame);
+      const tabHandler = openNewTab(`${this.server}/authn?l6n=${location}&chain=${this.chain}`);
 
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
+
+        console.log(' :sdk events', e);
         if (e.origin === this.server) {
           // @todo: try with another more general event types
-          if (e.data.type === 'FCL::CHALLENGE::RESPONSE') {
+          if (
+            e.data.type === 'FCL::CHALLENGE::RESPONSE' ||
+            e.data.type === 'FCL::VIEW::RESPONSE'
+          ) {
             removeListener();
-            detatchFrame(loginFrame);
+
+            if (tabHandler) {
+              tabHandler.close();
+            }
 
             this.code = e.data.code;
             this.connected = true;
@@ -273,7 +281,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
             removeListener();
-            detatchFrame(loginFrame);
+            // detatchFrame(loginFrame);
             reject(new Error('User declined the login request'));
           }
         }
