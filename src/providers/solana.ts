@@ -14,6 +14,7 @@ import {
   setItemWithExpiry,
 } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
+import { openNewTab } from '../lib/tab';
 import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
@@ -130,9 +131,9 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=solana`);
 
-      attachFrame(loginFrame);
+      const loginTab = openNewTab(`${this.server}/authn?l6n=${location}&chain=solana`);
+
 
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
@@ -140,7 +141,10 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
           // @todo: try with another more general event types
           if (e.data.type === 'FCL::CHALLENGE::RESPONSE') {
             removeListener();
-            detatchFrame(loginFrame);
+
+            if (loginTab) {
+              loginTab.close();
+            }
 
             this.code = e.data.code;
             this.connected = true;

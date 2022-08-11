@@ -246,7 +246,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
       const location = encodeURIComponent(window.location.origin);
 
-      const tabHandler = openNewTab(`${this.server}/authn?l6n=${location}&chain=${this.chain}`);
+      const loginTab = openNewTab(`${this.server}/authn?l6n=${location}&chain=${this.chain}`);
 
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
@@ -260,8 +260,8 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           ) {
             removeListener();
 
-            if (tabHandler) {
-              tabHandler.close();
+            if (loginTab) {
+              loginTab.close();
             }
 
             this.code = e.data.code;
