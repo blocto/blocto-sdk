@@ -62,7 +62,8 @@
     "prepublishOnly": "npm-run-all clean build"
   },
   "peerDependencies": {
-    "@solana/web3.js": "^1.30.2"
+    "@solana/web3.js": "^1.30.2",
+    "aptos": "^1.3.14"
   },
   "dependencies": {
     "bs58": "^4.0.1",

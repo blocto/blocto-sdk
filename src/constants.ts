@@ -80,6 +80,19 @@ export const SOL_NET_SERVER_MAPPING: Mapping = {
   'mainnet-beta': 'https://wallet.blocto.app',
 };
 
+export const APT_CHAIN_ID_SERVER_MAPPING: Mapping = {
+  // MAINNET
+  1: 'https://wallet.blocto.app',
+  // TESTNET
+  2: 'https://wallet-testnet.blocto.app',
+  // DEVNET
+  3: 'https://wallet-testnet.blocto.app',
+  // TESTING
+  4: 'https://wallet-testnet.blocto.app',
+  // PREMAINNET
+  5: 'https://wallet.blocto.app',
+};
+
 export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta'];
 
 /* sol constants end */
