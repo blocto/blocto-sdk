@@ -170,7 +170,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   async disconnect(): Promise<void> {
     const existedSDK = (window as any).solana;
     if (existedSDK && existedSDK.isBlocto) {
-      await existedSDK.dicconnect();
+      await existedSDK.disconnect();
       return;
     }
     this.code = null;
