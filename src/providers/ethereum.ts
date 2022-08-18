@@ -251,12 +251,11 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
 
-        console.log(' :sdk events', e);
         if (e.origin === this.server) {
           // @todo: try with another more general event types
           if (
             e.data.type === 'FCL::CHALLENGE::RESPONSE' ||
-            e.data.type === 'FCL::VIEW::RESPONSE'
+            e.data.type === 'FCL:VIEW:RESPONSE'
           ) {
             removeListener();
 
