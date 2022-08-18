@@ -280,7 +280,11 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
             removeListener();
-            // detatchFrame(loginFrame);
+
+            if (loginTab) {
+              loginTab.close();
+            }
+
             reject(new Error('User declined the login request'));
           }
         }

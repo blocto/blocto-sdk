@@ -163,7 +163,11 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
           if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
             removeListener();
-            detatchFrame(loginFrame);
+
+            if (loginTab) {
+              loginTab.close();
+            }
+
             reject(new Error('User declined the login request'));
           }
         }
