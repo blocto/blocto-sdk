@@ -138,8 +138,11 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
         if (e.origin === this.server) {
-          // @todo: try with another more general event types
-          if (e.data.type === 'FCL::CHALLENGE::RESPONSE') {
+          if (
+            // @todo: remove FCL::CHALLENGE::RESPONSE event after v0.3
+            e.data.type === 'SOL:FRAME:RESPONSE' ||
+            e.data.type === 'FCL::CHALLENGE::RESPONSE'
+          ) {
             removeListener();
 
             if (loginTab) {
@@ -161,7 +164,11 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
             resolve();
           }
 
-          if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
+          if (
+            // @todo: remove FCL::CHALLENGE::CANCEL event after v0.3
+            e.data.type === 'SOL:FRAME:CLOSE' ||
+            e.data.type === 'FCL::CHALLENGE::CANCEL'
+          ) {
             removeListener();
 
             if (loginTab) {
