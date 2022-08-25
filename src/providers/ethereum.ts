@@ -4,7 +4,7 @@ import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
 import { EIP1193RequestPayload, EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
-import { openNewTab } from '../lib/tab';
+import { popupWindow } from '../lib/popup';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   getItemWithExpiry,
@@ -246,7 +246,12 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
       const location = encodeURIComponent(window.location.origin);
 
-      const loginTab = openNewTab(`${this.server}/authn?l6n=${location}&chain=${this.chain}`);
+      const loginTab = popupWindow(
+        `${this.server}/authn?l6n=${location}&chain=${this.chain}`,
+        'BLOCTO_POP',
+        640,
+        770
+      );
 
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;

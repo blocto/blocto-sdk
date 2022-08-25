@@ -14,7 +14,7 @@ import {
   setItemWithExpiry,
 } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
-import { openNewTab } from '../lib/tab';
+import { popupWindow } from '../lib/popup';
 import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
@@ -132,7 +132,12 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
       const location = encodeURIComponent(window.location.origin);
 
-      const loginTab = openNewTab(`${this.server}/authn?l6n=${location}&chain=solana`);
+      const loginTab = popupWindow(
+        `${this.server}/authn?l6n=${location}&chain=solana`,
+        'BLOCTO_POP',
+        640,
+        770
+      );
 
 
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
