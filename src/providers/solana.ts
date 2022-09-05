@@ -15,6 +15,7 @@ import {
 } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import { popupWindow } from '../lib/popup';
+import { openWalletView } from '../lib/walletOpener';
 import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
@@ -338,10 +339,8 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     if (typeof window === 'undefined') {
       throw (new Error('Currently only supported in browser'));
     }
-
-    const authzFrame = createFrame(`${this.server}/authz/solana/${authorizationId}`);
-
-    attachFrame(authzFrame);
+    const authzUrl = `${this.server}/authz/solana/${authorizationId}`;
+    const { closeChild } = openWalletView(authzUrl);
 
     return new Promise((resolve, reject) =>
       addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
@@ -349,13 +348,13 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         if (e.origin === this.server && e.data.type === 'SOL:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {
             removeEventListener();
-            detatchFrame(authzFrame);
+            closeChild();
             resolve(e.data.txHash);
           }
 
           if (e.data.status === 'DECLINED') {
             removeEventListener();
-            detatchFrame(authzFrame);
+            closeChild();
             reject(new Error('User declined to send the transaction'));
           }
         }
