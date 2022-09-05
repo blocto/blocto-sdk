@@ -3,15 +3,14 @@ import { ProviderAccounts } from 'eip1193-provider';
 import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
 import { EIP1193RequestPayload, EthereumProviderConfig, EthereumProviderInterface } from './types/ethereum.d';
-import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import { popupWindow } from '../lib/popup';
+import { openWalletView } from '../lib/walletOpener';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   getItemWithExpiry,
   setItemWithExpiry,
 } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
-import { openWalletView } from '../lib/walletOpener';
 import {
   ETH_CHAIN_ID_RPC_MAPPING,
   ETH_CHAIN_ID_CHAIN_MAPPING,
@@ -388,9 +387,9 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       throw (new Error('Currently only supported in browser'));
     }
 
-    const authzFrame = createFrame(`${this.server}/authz/${this.chain}/${authorizationId}`);
+    const authzUrl = `${this.server}/authz/${this.chain}/${authorizationId}`;
+    const { closeChild, isSafari } = openWalletView(authzUrl);
 
-    attachFrame(authzFrame);
 
     return new Promise((resolve, reject) =>
       addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
@@ -398,13 +397,13 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {
             removeEventListener();
-            detatchFrame(authzFrame);
+            closeChild();
             resolve(e.data.txHash);
           }
 
           if (e.data.status === 'DECLINED') {
             removeEventListener();
-            detatchFrame(authzFrame);
+            closeChild();
             reject(new Error('User declined to send the transaction'));
           }
         }
