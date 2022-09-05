@@ -11,6 +11,7 @@ import {
   setItemWithExpiry,
 } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
+import { openWalletView } from '../lib/walletOpener';
 import {
   ETH_CHAIN_ID_RPC_MAPPING,
   ETH_CHAIN_ID_CHAIN_MAPPING,
@@ -322,10 +323,8 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   }
 
   async handleSign({ method, params }: EIP1193RequestPayload) {
-    const url = `${this.server}/user-signature/${this.chain}`;
-    const signFrame = createFrame(url);
-
-    attachFrame(signFrame);
+    const signUrl = `${this.server}/user-signature/${this.chain}`;
+    const { closeChild, messageTarget } = openWalletView(signUrl);
 
     let message = '';
     if (Array.isArray(params)) {
@@ -341,13 +340,13 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
       const e = event as MessageEvent;
       if (e.origin === this.server && e.data.type === 'ETH:FRAME:READY') {
-        if (signFrame.contentWindow) {
-          signFrame.contentWindow.postMessage({
+        if (messageTarget) {
+          messageTarget.postMessage({
             type: 'ETH:FRAME:READY:RESPONSE',
             method,
             message,
             chain: this.chain,
-          }, url);
+          }, signUrl);
         }
         removeListener();
       }
@@ -359,13 +358,15 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {
             removeEventListener();
-            detatchFrame(signFrame);
+            closeChild();
+
             resolve(e.data.signature);
           }
 
           if (e.data.status === 'DECLINED') {
             removeEventListener();
-            detatchFrame(signFrame);
+            closeChild();
+
             reject(new Error('User declined the signing request'));
           }
         }
