@@ -340,7 +340,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       throw (new Error('Currently only supported in browser'));
     }
     const authzUrl = `${this.server}/authz/solana/${authorizationId}`;
-    const { closeChild } = openWalletView(authzUrl);
+    const { closeWalletView } = openWalletView(authzUrl);
 
     return new Promise((resolve, reject) =>
       addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
@@ -348,13 +348,13 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         if (e.origin === this.server && e.data.type === 'SOL:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {
             removeEventListener();
-            closeChild();
+            closeWalletView();
             resolve(e.data.txHash);
           }
 
           if (e.data.status === 'DECLINED') {
             removeEventListener();
-            closeChild();
+            closeWalletView();
             reject(new Error('User declined to send the transaction'));
           }
         }

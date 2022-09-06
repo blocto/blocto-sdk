@@ -323,7 +323,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   async handleSign({ method, params }: EIP1193RequestPayload) {
     const signUrl = `${this.server}/user-signature/${this.chain}`;
-    const { closeChild, messageTarget } = openWalletView(signUrl);
+    const { closeWalletView, messageTarget } = openWalletView(signUrl);
 
     let message = '';
     if (Array.isArray(params)) {
@@ -357,14 +357,14 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {
             removeEventListener();
-            closeChild();
+            closeWalletView();
 
             resolve(e.data.signature);
           }
 
           if (e.data.status === 'DECLINED') {
             removeEventListener();
-            closeChild();
+            closeWalletView();
 
             reject(new Error('User declined the signing request'));
           }
@@ -388,7 +388,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     }
 
     const authzUrl = `${this.server}/authz/${this.chain}/${authorizationId}`;
-    const { closeChild, isSafari } = openWalletView(authzUrl);
+    const { closeWalletView, isSafari } = openWalletView(authzUrl);
 
 
     return new Promise((resolve, reject) =>
@@ -397,13 +397,13 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         if (e.origin === this.server && e.data.type === 'ETH:FRAME:RESPONSE') {
           if (e.data.status === 'APPROVED') {
             removeEventListener();
-            closeChild();
+            closeWalletView();
             resolve(e.data.txHash);
           }
 
           if (e.data.status === 'DECLINED') {
             removeEventListener();
-            closeChild();
+            closeWalletView();
             reject(new Error('User declined to send the transaction'));
           }
         }

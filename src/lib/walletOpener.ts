@@ -22,7 +22,7 @@ export function openWalletView(url:string) {
     messageTarget = childFrame && childFrame.contentWindow;
   }
 
-  const closeChild = () => {
+  const closeWalletView = () => {
     if (childFrame || childTab) {
       if (isSafari() && childTab) {
         childTab.close();
@@ -34,7 +34,7 @@ export function openWalletView(url:string) {
 
   return {
     messageTarget,
-    closeChild,
+    closeWalletView,
     isSafari: isSafari(),
   };
 }
