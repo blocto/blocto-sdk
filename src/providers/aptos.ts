@@ -1,5 +1,6 @@
 import invariant from 'invariant';
 import { HexEncodedBytes, SubmitTransactionRequest } from 'aptos';
+import type { SignMessagePayload, SignMessageResponse } from 'aptos';
 import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
 import { AptosProviderConfig, AptosProviderInterface, PublicAccount } from './types/aptos.d';
@@ -30,6 +31,18 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     const sessionAccount = session && session.address && session.address[this.chainId];
     this.code = sessionCode || null;
     this.address = sessionAccount || undefined;
+  }
+
+  private generateFullMessage(payload: SignMessagePayload): string {
+    let fullMessage = '';
+    const prefix = 'APTOS\n';
+    fullMessage += prefix;
+    if (payload.address) fullMessage += `address: ${this.address}\n`;
+    if (payload.chainId) fullMessage += `chainId: ${this.chainId}\n`;
+    if (payload.application) fullMessage += `application: ${window?.location.host || ''}\n`;
+    fullMessage += `nonce: ${payload.nonce}\n`;
+    fullMessage += `message: ${payload.message}\n`;
+    return fullMessage;
   }
 
   constructor({ chainId, server, appId }: AptosProviderConfig) {
@@ -119,6 +132,69 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
             removeEventListener();
             detatchFrame(authzFrame);
             reject(new Error('User declined to send the transaction'));
+          }
+        }
+      })
+    );
+  }
+
+  async signMessage(payload: SignMessagePayload): SignMessageResponse {
+    const existedSDK = (window as any).bloctoAptos;
+    if (existedSDK) {
+      return existedSDK.signMessage(payload);
+    }
+
+    if (!this.isConnected()) {
+      await this.connect();
+    }
+    if (!this.address) {
+      throw new Error('Fail to get account');
+    }
+
+    const url = `${this.server}/user-signature/aptos`;
+    const signFrame = createFrame(url);
+
+    attachFrame(signFrame);
+
+    addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
+      const e = event as MessageEvent;
+      if (e.origin === this.server && e.data.type === 'APTOS:FRAME:READY') {
+        if (signFrame.contentWindow) {
+          signFrame.contentWindow.postMessage({
+            type: 'APTOS:FRAME:READY:RESPONSE',
+            ...payload,
+          }, url);
+        }
+        removeListener();
+      }
+    });
+
+    return new Promise((resolve, reject) =>
+      addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
+        const e = event as MessageEvent;
+        if (e.origin === this.server && e.data.type === 'APTOS:FRAME:RESPONSE') {
+          if (e.data.status === 'APPROVED') {
+            removeEventListener();
+            detatchFrame(signFrame);
+            const fullMessage = this.generateFullMessage(payload);
+            resolve({
+              address: this.address,
+              application: window?.location.host || '',
+              chainId: this.chainId,
+              fullMessage,
+              message: payload.message,
+              nonce: payload.nonce,
+              prefix: 'APTOS', // Should always be APTOS
+              signature: e.data.signature,
+              // @todo: add bitmap
+              bitmap: null,
+            });
+          }
+
+          if (e.data.status === 'DECLINED') {
+            removeEventListener();
+            detatchFrame(signFrame);
+            reject(new Error('User declined the signing request'));
           }
         }
       })
