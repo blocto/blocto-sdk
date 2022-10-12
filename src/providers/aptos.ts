@@ -39,7 +39,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     fullMessage += prefix;
     if (payload.address) fullMessage += `address: ${this.address}\n`;
     if (payload.chainId) fullMessage += `chainId: ${this.chainId}\n`;
-    if (payload.application) fullMessage += `application: ${window?.location.host || ''}\n`;
+    if (payload.application) fullMessage += `application: ${(window && window.location.host) || ''}\n`;
     fullMessage += `nonce: ${payload.nonce}\n`;
     fullMessage += `message: ${payload.message}\n`;
     return fullMessage;
@@ -182,7 +182,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
             const fullMessage = this.generateFullMessage(payload);
             resolve({
               address: this.address,
-              application: window?.location.host || '',
+              application: (window && window.location.host) || '',
               chainId: this.chainId,
               fullMessage,
               message: payload.message,
