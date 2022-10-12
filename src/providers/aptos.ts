@@ -55,6 +55,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     this.appId = appId || process.env.APP_ID;
     this.server = server || defaultServer || process.env.SERVER || '';
   }
+
   get publicAccount(): PublicAccount {
     return {
       address: this.address || null,
@@ -64,7 +65,9 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       minKeysRequired: 2,
     };
   }
+
   async isConnected(): Promise<boolean> { return !!this.address; }
+
   async signTransaction(transaction: any): Promise<SubmitTransactionRequest> {
     const existedSDK = (window as any).bloctoAptos;
     if (existedSDK) {
@@ -80,6 +83,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     }
     throw new Error('signTransaction method not supported.');
   }
+
   async disconnect(): Promise<void> {
     const existedSDK = (window as any).bloctoAptos;
     if (existedSDK) {
@@ -142,6 +146,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
 
   async signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {
     const existedSDK = (window as any).bloctoAptos;
+
     if (existedSDK) {
       return existedSDK.signMessage(payload);
     }
@@ -181,9 +186,9 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
             detatchFrame(signFrame);
             const fullMessage = this.generateFullMessage(payload);
             resolve({
-              address: this.address,
-              application: (window && window.location.host) || '',
-              chainId: this.chainId,
+              address: payload.address && this.address,
+              application: payload.application && ((window && window.location.host) || ''),
+              chainId: payload.chainId && this.chainId,
               fullMessage,
               message: payload.message,
               nonce: payload.nonce,
