@@ -71,7 +71,8 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       return existedSDK.signTransaction(transaction);
     }
 
-    if (!this.isConnected()) {
+    const hasConnected = await this.isConnected();
+    if (!hasConnected) {
       await this.connect();
     }
     if (!this.address) {
@@ -95,7 +96,8 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       return existedSDK.signAndSubmitTransaction(transaction);
     }
 
-    if (!this.isConnected()) {
+    const hasConnected = await this.isConnected();
+    if (!hasConnected) {
       await this.connect();
     }
     if (!this.address) {
@@ -144,7 +146,8 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       return existedSDK.signMessage(payload);
     }
 
-    if (!this.isConnected()) {
+    const hasConnected = await this.isConnected();
+    if (!hasConnected) {
       await this.connect();
     }
     if (!this.address) {
