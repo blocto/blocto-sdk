@@ -20,6 +20,7 @@ export declare interface AptosProviderInterface extends BloctoProviderInterface 
   isConnected: () => Promise<boolean>;
   signAndSubmitTransaction(transaction: any): Promise<{ hash: HexEncodedBytes }>;
   signTransaction(transaction: any): Promise<SubmitTransactionRequest>;
+  signMessage(payload: SignMessagePayload): Promise<SignMessageResponse>;
   disconnect(): Promise<void>;
 }
 

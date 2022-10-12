@@ -140,7 +140,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     );
   }
 
-  async signMessage(payload: SignMessagePayload): SignMessageResponse {
+  async signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {
     const existedSDK = (window as any).bloctoAptos;
     if (existedSDK) {
       return existedSDK.signMessage(payload);
