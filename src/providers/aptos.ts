@@ -184,12 +184,11 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
           if (e.data.status === 'APPROVED') {
             removeEventListener();
             detatchFrame(signFrame);
-            const fullMessage = this.generateFullMessage(payload);
             resolve({
-              address: payload.address && this.address,
-              application: payload.application && ((window && window.location.host) || ''),
-              chainId: payload.chainId && this.chainId,
-              fullMessage,
+              address: e.data.address,
+              application: e.data.application,
+              chainId: e.data.chainId,
+              fullMessage: e.data.fullMessage,
               message: payload.message,
               nonce: payload.nonce,
               prefix: 'APTOS', // Should always be APTOS
