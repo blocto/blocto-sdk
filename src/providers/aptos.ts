@@ -193,8 +193,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
               nonce: payload.nonce,
               prefix: 'APTOS', // Should always be APTOS
               signature: e.data.signature,
-              // @todo: add bitmap
-              bitmap: null,
+              bitmap: e.data.bitmap,
             });
           }
 
