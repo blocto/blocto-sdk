@@ -33,18 +33,6 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     this.address = sessionAccount || undefined;
   }
 
-  private generateFullMessage(payload: SignMessagePayload): string {
-    let fullMessage = '';
-    const prefix = 'APTOS\n';
-    fullMessage += prefix;
-    if (payload.address) fullMessage += `address: ${this.address}\n`;
-    if (payload.chainId) fullMessage += `chainId: ${this.chainId}\n`;
-    if (payload.application) fullMessage += `application: ${(window && window.location.host) || ''}\n`;
-    fullMessage += `nonce: ${payload.nonce}\n`;
-    fullMessage += `message: ${payload.message}\n`;
-    return fullMessage;
-  }
-
   constructor({ chainId, server, appId }: AptosProviderConfig) {
     super();
     invariant(chainId, "'chainId' is required");
