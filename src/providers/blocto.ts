@@ -47,7 +47,7 @@ class BloctoProvider implements EIP1193Provider {
   }
 
   // alias removeListener
-  off = removeEventListener;
+  off = this.removeListener;
 }
 
 export default BloctoProvider;
