@@ -3,7 +3,7 @@ import { HexEncodedBytes, SubmitTransactionRequest } from 'aptos';
 import type { SignMessagePayload, SignMessageResponse } from 'aptos';
 import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
-import { AptosProviderConfig, AptosProviderInterface, PublicAccount } from './types/aptos.d';
+import { AptosProviderConfig, AptosProviderInterface, NetworkInfo, PublicAccount, WalletAdapterNetwork } from './types/aptos.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
@@ -13,6 +13,8 @@ import {
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   APT_CHAIN_ID_SERVER_MAPPING,
+  APT_CHAIN_ID_NAME_MAPPING,
+  APT_CHAIN_ID_RPC_MAPPING,
   LOGIN_PERSISTING_TIME,
 } from '../constants';
 
@@ -22,6 +24,8 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
   authKey = '';
   server: string;
   chainId: number;
+  networkName: WalletAdapterNetwork;
+  api?: string;
 
   private tryRetrieveSessionFromStorage(): void {
     // load previous connected state
@@ -37,6 +41,8 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     super();
     invariant(chainId, "'chainId' is required");
     this.chainId = chainId;
+    this.networkName = APT_CHAIN_ID_NAME_MAPPING[chainId];
+    this.api = APT_CHAIN_ID_RPC_MAPPING[chainId];
 
     const defaultServer = APT_CHAIN_ID_SERVER_MAPPING[chainId];
 
@@ -51,6 +57,14 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       // @todo: provide authkey
       authKey: null,
       minKeysRequired: 2,
+    };
+  }
+
+  async network(): Promise<NetworkInfo> {
+    return {
+      name: this.networkName,
+      api: this.api,
+      chainId: this.chainId.toString(),
     };
   }
 

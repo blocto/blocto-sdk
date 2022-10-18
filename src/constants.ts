@@ -80,6 +80,12 @@ export const SOL_NET_SERVER_MAPPING: Mapping = {
   'mainnet-beta': 'https://wallet.blocto.app',
 };
 
+export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta'];
+
+/* sol constants end */
+
+/* aptos constants begin */
+
 export const APT_CHAIN_ID_SERVER_MAPPING: Mapping = {
   // MAINNET
   1: 'https://wallet.blocto.app',
@@ -93,9 +99,31 @@ export const APT_CHAIN_ID_SERVER_MAPPING: Mapping = {
   5: 'https://wallet.blocto.app',
 };
 
-export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta'];
+export enum WalletAdapterNetwork {
+  Mainnet = 'mainnet',
+  Testnet = 'testnet',
+  Devnet = 'devnet',
+  Testing = 'testing',
+  Premainnet = 'premainnet',
+}
 
-/* sol constants end */
+export const APT_CHAIN_ID_NAME_MAPPING: Record<number, WalletAdapterNetwork> = {
+  1: WalletAdapterNetwork.Mainnet,
+  2: WalletAdapterNetwork.Testnet,
+  3: WalletAdapterNetwork.Devnet,
+  4: WalletAdapterNetwork.Testing,
+  5: WalletAdapterNetwork.Premainnet,
+};
+
+export const APT_CHAIN_ID_RPC_MAPPING: Mapping = {
+  1: 'https://fullnode.mainnet.aptoslabs.com/v1',
+  2: 'https://fullnode.testnet.aptoslabs.com/v1',
+  3: 'https://fullnode.devnet.aptoslabs.com/v1',
+  4: '',
+  5: 'https://premainnet.aptosdev.com/v1',
+};
+
+/* aptos constants end */
 
 export const EIP1193_EVENTS: Array<string> = ['connect', 'disconnect', 'message', 'chainChanged', 'accountsChanged'];
 
