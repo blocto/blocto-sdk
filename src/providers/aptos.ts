@@ -7,6 +7,7 @@ import { AptosProviderConfig, AptosProviderInterface, NetworkInfo, PublicAccount
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
+  removeItem,
   getItemWithExpiry,
   setItemWithExpiry,
 } from '../lib/localStorage';
@@ -31,10 +32,22 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     // load previous connected state
     const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
 
-    const sessionCode = session && session.code;
-    const sessionAccount = session && session.address && session.address[this.chainId];
+    const sessionCode = session?.code;
+    const sessionAccount = session && session.address && session.address.aptos;
+    const sessionAppId = session?.appId;
+
+    this.appId = sessionAppId || undefined;
     this.code = sessionCode || null;
     this.address = sessionAccount || undefined;
+  }
+
+  private async fetchPublicKeys(): Promise<Array<string> | null> {
+    try {
+      const { public_keys: publicKeys } = await fetch(`${this.server}/blocto/aptos/accounts/${this.address}`)
+        .then(response => response.json());
+
+      return publicKeys;
+    } catch (err: any) { return null; }
   }
 
   constructor({ chainId, server, appId }: AptosProviderConfig) {
@@ -50,6 +63,16 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
 
     this.appId = appId || process.env.APP_ID;
     this.server = server || defaultServer || process.env.SERVER || '';
+
+    const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
+
+    if (session?.chainId && session.chainId === chainId) {
+      this.tryRetrieveSessionFromStorage();
+      this.fetchPublicKeys().then((publicKeys) => {
+        this.publicKey = publicKeys || [];
+      });
+      this.connected = true;
+    }
   }
 
   get publicAccount(): PublicAccount {
@@ -96,6 +119,9 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     }
     this.code = null;
     this.address = undefined;
+    this.publicKey = [];
+    this.appId = undefined;
+    removeItem(this.sessionKey);
   }
 
   async signAndSubmitTransaction(transaction: any): Promise<{ hash: HexEncodedBytes }> {
@@ -249,12 +275,13 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
 
             if (this.address) {
               try {
-                const { public_keys: publicKeys } = await fetch(`${this.server}/blocto/aptos/accounts/${this.address}`)
-                  .then(response => response.json());
-                this.publicKey = publicKeys || [];
+                const publicKeys = await this.fetchPublicKeys();
 
-                resolve({ address: this.address || '', publicKey: this.publicKey, authKey: null, minKeysRequired: 2 });
-              } catch (err: any) { reject(e); }
+                if (publicKeys) {
+                  this.publicKey = publicKeys || [];
+                  resolve({ address: this.address || '', publicKey: this.publicKey, authKey: null, minKeysRequired: 2 });
+                }
+              } catch (error) { reject(error); }
             } else {
               // @todo: better error
               return reject();
@@ -263,6 +290,8 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
             setItemWithExpiry(this.sessionKey, {
               code: this.code,
               address,
+              appId: this.appId,
+              chainId: this.chainId,
             }, LOGIN_PERSISTING_TIME);
           }
 

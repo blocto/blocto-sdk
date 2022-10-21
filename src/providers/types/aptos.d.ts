@@ -29,5 +29,6 @@ export declare interface AptosProviderInterface extends BloctoProviderInterface 
   signTransaction(transaction: any): Promise<SubmitTransactionRequest>;
   signMessage(payload: SignMessagePayload): Promise<SignMessageResponse>;
   disconnect(): Promise<void>;
+  address?: string
 }
 
