@@ -1,6 +1,8 @@
 import { BaseConfig, WalletAdapterNetwork } from '../../constants';
 import BloctoProviderInterface from './blocto.d';
 
+export { WalletAdapterNetwork } from '../../constants';
+
 export declare interface AptosProviderConfig extends BaseConfig {
   // @todo: support different network
   chainId: number;
@@ -20,12 +22,16 @@ export type NetworkInfo = {
   name: WalletAdapterNetwork | undefined;
 };
 
+export type TxOptions ={
+  max_gas_amount: string
+}
+
 export declare interface AptosProviderInterface extends BloctoProviderInterface {
   publicAccount: PublicAccount;
   network(): Promise<NetworkInfo>;
   connect: () => Promise<PublicAccount>;
   isConnected: () => Promise<boolean>;
-  signAndSubmitTransaction(transaction: any): Promise<{ hash: HexEncodedBytes }>;
+  signAndSubmitTransaction(transaction: any, txOptions:TxOptions): Promise<{ hash: HexEncodedBytes }>;
   signTransaction(transaction: any): Promise<SubmitTransactionRequest>;
   signMessage(payload: SignMessagePayload): Promise<SignMessageResponse>;
   disconnect(): Promise<void>;

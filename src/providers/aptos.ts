@@ -3,7 +3,14 @@ import { HexEncodedBytes, SubmitTransactionRequest } from 'aptos';
 import type { SignMessagePayload, SignMessageResponse } from 'aptos';
 import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
-import { AptosProviderConfig, AptosProviderInterface, NetworkInfo, PublicAccount, WalletAdapterNetwork } from './types/aptos.d';
+import {
+  AptosProviderConfig,
+  AptosProviderInterface,
+  NetworkInfo,
+  PublicAccount,
+  WalletAdapterNetwork,
+  TxOptions,
+} from './types/aptos.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
@@ -98,10 +105,11 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     this.address = undefined;
   }
 
-  async signAndSubmitTransaction(transaction: any): Promise<{ hash: HexEncodedBytes }> {
+  async signAndSubmitTransaction(transaction: any, { max_gas_amount }:TxOptions): Promise<{ hash: HexEncodedBytes }> {
     const existedSDK = (window as any).bloctoAptos;
+
     if (existedSDK) {
-      return existedSDK.signAndSubmitTransaction(transaction);
+      return existedSDK.signAndSubmitTransaction(transaction, { max_gas_amount });
     }
 
     const hasConnected = await this.isConnected();
@@ -117,7 +125,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(transaction),
+      body: JSON.stringify({ ...transaction, max_gas_amount }),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
 
     if (typeof window === 'undefined') {
