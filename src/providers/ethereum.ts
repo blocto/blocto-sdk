@@ -7,6 +7,7 @@ import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   getItemWithExpiry,
+  removeItem,
   setItemWithExpiry,
 } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
@@ -17,6 +18,7 @@ import {
   ETH_CHAIN_ID_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
 } from '../constants';
+import { KEY_SESSION } from '../lib/localStorage/constants';
 
 export default class EthereumProvider extends BloctoProvider implements EthereumProviderInterface {
   chainId: string | number;
@@ -184,6 +186,11 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         case 'personal_sign':
         case 'eth_sign': {
           result = await this.handleSign(payload);
+          break;
+        }
+        case 'wallet_disconnect': {
+          this.handleDisconnect();
+          result = null;
           break;
         }
         case 'blocto_sendBatchTransaction':
@@ -389,5 +396,11 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         }
       })
     );
+  }
+  async handleDisconnect() : Promise<void> {
+    this.connected = false;
+    this.code = null;
+    this.accounts = [];
+    removeItem(KEY_SESSION);
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@blocto/sdk",
-  "version": "0.3.0-beta.9",
+  "version": "0.3.1",
   "author": "Yang Lin",
   "license": "MIT",
   "repository": "git@github.com:portto/blocto-sdk.git",
