@@ -128,7 +128,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ...transaction, max_gas_amount }),
+      body: JSON.stringify({ ...transaction, ...txOptions }),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
 
     if (typeof window === 'undefined') {
