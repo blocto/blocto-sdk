@@ -105,7 +105,10 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     this.address = undefined;
   }
 
-  async signAndSubmitTransaction(transaction: any, { max_gas_amount }:TxOptions): Promise<{ hash: HexEncodedBytes }> {
+  async signAndSubmitTransaction(
+    transaction: any,
+    { max_gas_amount }:TxOptions = { max_gas_amount: '0' }
+  ): Promise<{ hash: HexEncodedBytes }> {
     const existedSDK = (window as any).bloctoAptos;
 
     if (existedSDK) {

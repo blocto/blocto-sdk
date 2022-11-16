@@ -31,7 +31,7 @@ export declare interface AptosProviderInterface extends BloctoProviderInterface 
   network(): Promise<NetworkInfo>;
   connect: () => Promise<PublicAccount>;
   isConnected: () => Promise<boolean>;
-  signAndSubmitTransaction(transaction: any, txOptions:TxOptions): Promise<{ hash: HexEncodedBytes }>;
+  signAndSubmitTransaction(transaction: any, txOptions?:TxOptions): Promise<{ hash: HexEncodedBytes }>;
   signTransaction(transaction: any): Promise<SubmitTransactionRequest>;
   signMessage(payload: SignMessagePayload): Promise<SignMessageResponse>;
   disconnect(): Promise<void>;
