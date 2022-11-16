@@ -189,7 +189,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           break;
         }
         case 'wallet_disconnect': {
-          removeItem(KEY_SESSION);
+          this.handleDisconnect();
           result = null;
           break;
         }
@@ -396,5 +396,11 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         }
       })
     );
+  }
+  async handleDisconnect() : Promise<void> {
+    this.connected = false;
+    this.code = null;
+    this.accounts = [];
+    removeItem(KEY_SESSION);
   }
 }
