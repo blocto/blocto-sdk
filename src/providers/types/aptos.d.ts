@@ -23,7 +23,9 @@ export type NetworkInfo = {
 };
 
 export type TxOptions ={
-  max_gas_amount: string
+  max_gas_amount?: string,
+  gas_unit_price?: string,
+  [key: string]: any
 }
 
 export declare interface AptosProviderInterface extends BloctoProviderInterface {

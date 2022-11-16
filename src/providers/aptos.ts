@@ -107,12 +107,12 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
 
   async signAndSubmitTransaction(
     transaction: any,
-    { max_gas_amount }:TxOptions = { max_gas_amount: '0' }
+    txOptions: TxOptions = {}
   ): Promise<{ hash: HexEncodedBytes }> {
     const existedSDK = (window as any).bloctoAptos;
 
     if (existedSDK) {
-      return existedSDK.signAndSubmitTransaction(transaction, { max_gas_amount });
+      return existedSDK.signAndSubmitTransaction(transaction, txOptions);
     }
 
     const hasConnected = await this.isConnected();
