@@ -163,7 +163,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           this.accounts = await this.fetchAccounts();
         // eslint-disable-next-line
         case 'eth_accounts':
-          result = this.accounts.length ? this.accounts : await this.fetchAccounts();
+          result = this.accounts;
           break;
         case 'eth_coinbase': {
           // eslint-disable-next-line
