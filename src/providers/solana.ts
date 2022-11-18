@@ -336,7 +336,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
           if (e.data.status === 'DECLINED') {
             removeEventListener();
             detatchFrame(authzFrame);
-            reject(new Error('User declined to send the transaction'));
+            reject(new Error(e.data.errorMessage));
           }
         }
       })

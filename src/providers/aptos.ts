@@ -141,7 +141,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
           if (e.data.status === 'DECLINED') {
             removeEventListener();
             detatchFrame(authzFrame);
-            reject(new Error('User declined to send the transaction'));
+            reject(new Error(e.data.errorMessage));
           }
         }
       })
@@ -204,7 +204,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
           if (e.data.status === 'DECLINED') {
             removeEventListener();
             detatchFrame(signFrame);
-            reject(new Error('User declined the signing request'));
+            reject(new Error(e.data.errorMessage));
           }
         }
       })
