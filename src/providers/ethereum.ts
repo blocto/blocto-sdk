@@ -259,8 +259,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
         if (e.origin === this.server) {
-          // @todo: try with another more general event types
-          if (e.data.type === 'FCL::CHALLENGE::RESPONSE') {
+          if (e.data.type === 'ETH:FRAME:RESPONSE') {
             removeListener();
             detatchFrame(loginFrame);
 
@@ -279,7 +278,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
             resolve(this.accounts);
           }
 
-          if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
+          if (e.data.type === 'ETH:FRAME:CLOSE') {
             removeListener();
             detatchFrame(loginFrame);
             reject(new Error('User declined the login request'));
