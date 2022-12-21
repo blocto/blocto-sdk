@@ -18,6 +18,7 @@ import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
   LOGIN_PERSISTING_TIME,
+  DEFAULT_APP_ID,
 } from '../constants';
 
 export default class SolanaProvider extends BloctoProvider implements SolanaProviderInterface {
@@ -37,7 +38,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       (net === 'mainnet-beta' ? 'https://free.rpcpool.com' : `https://api.${net}.solana.com`);
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
-    this.appId = appId || process.env.APP_ID;
+    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
   }
 
   private tryRetrieveSessionFromStorage() {
@@ -130,7 +131,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=solana`);
+      const loginFrame = createFrame(`${this.server}/${this.appId}/solana/authn?l6n=${location}`);
 
       attachFrame(loginFrame);
 
@@ -319,7 +320,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       throw (new Error('Currently only supported in browser'));
     }
 
-    const authzFrame = createFrame(`${this.server}/authz/solana/${authorizationId}`);
+    const authzFrame = createFrame(`${this.server}/${this.appId}/solana/authz/${authorizationId}`);
 
     attachFrame(authzFrame);
 

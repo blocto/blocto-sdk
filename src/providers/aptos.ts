@@ -23,6 +23,7 @@ import {
   APT_CHAIN_ID_NAME_MAPPING,
   APT_CHAIN_ID_RPC_MAPPING,
   LOGIN_PERSISTING_TIME,
+  DEFAULT_APP_ID,
 } from '../constants';
 
 export default class AptosProvider extends BloctoProvider implements AptosProviderInterface {
@@ -55,7 +56,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
 
     const defaultServer = APT_CHAIN_ID_SERVER_MAPPING[chainId];
 
-    this.appId = appId || process.env.APP_ID;
+    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
     this.server = server || defaultServer || process.env.SERVER || '';
   }
 
@@ -135,7 +136,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       throw (new Error('Currently only supported in browser'));
     }
 
-    const authzFrame = createFrame(`${this.server}/authz/aptos/${authorizationId}`);
+    const authzFrame = createFrame(`${this.server}/${this.appId}/aptos/authz/${authorizationId}`);
 
     attachFrame(authzFrame);
 
@@ -174,7 +175,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       throw new Error('Fail to get account');
     }
 
-    const url = `${this.server}/user-signature/aptos`;
+    const url = `${this.server}/${this.appId}/aptos/user-signature`;
     const signFrame = createFrame(url);
 
     attachFrame(signFrame);
@@ -241,7 +242,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=aptos&appId=${this.appId}`);
+      const loginFrame = createFrame(`${this.server}/${this.appId}/aptos/authn?l6n=${location}`);
 
       attachFrame(loginFrame);
 

@@ -17,6 +17,7 @@ import {
   ETH_CHAIN_ID_NET_MAPPING,
   ETH_CHAIN_ID_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
+  DEFAULT_APP_ID,
 } from '../constants';
 import { KEY_SESSION } from '../lib/localStorage/constants';
 
@@ -53,7 +54,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
     this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || process.env.SERVER || '';
-    this.appId = appId || process.env.APP_ID;
+    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
   }
 
   private tryRetrieveSessionFromStorage(): void {
@@ -251,7 +252,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=${this.chain}`);
+      const loginFrame = createFrame(`${this.server}/${this.appId}/${this.chain}/authn?l6n=${location}`);
 
       attachFrame(loginFrame);
 
@@ -309,7 +310,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   }
 
   async handleSign({ method, params }: EIP1193RequestPayload) {
-    const url = `${this.server}/user-signature/${this.chain}`;
+    const url = `${this.server}/${this.appId}/${this.chain}/user-signature`;
     const signFrame = createFrame(url);
 
     attachFrame(signFrame);
@@ -374,7 +375,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       throw (new Error('Currently only supported in browser'));
     }
 
-    const authzFrame = createFrame(`${this.server}/authz/${this.chain}/${authorizationId}`);
+    const authzFrame = createFrame(`${this.server}/${this.appId}/${this.chain}/authz/${authorizationId}`);
 
     attachFrame(authzFrame);
 
