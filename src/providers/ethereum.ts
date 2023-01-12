@@ -309,11 +309,6 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   }
 
   async handleSign({ method, params }: EIP1193RequestPayload) {
-    const url = `${this.server}/${this.appId}/${this.chain}/user-signature`;
-    const signFrame = createFrame(url);
-
-    attachFrame(signFrame);
-
     let message = '';
     if (Array.isArray(params)) {
       if (method === 'eth_sign') {
@@ -325,20 +320,22 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       }
     }
 
-    addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
-      const e = event as MessageEvent;
-      if (e.origin === this.server && e.data.type === 'ETH:FRAME:READY') {
-        if (signFrame.contentWindow) {
-          signFrame.contentWindow.postMessage({
-            type: 'ETH:FRAME:READY:RESPONSE',
-            method,
-            message,
-            chain: this.chain,
-          }, url);
-        }
-        removeListener();
-      }
-    });
+    this.checkNetworkMatched();
+    const { signatureId } = await fetch(`${this.server}/api/${this.chain}/user-signature`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sessionId: this.code, method, message }),
+    }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
+
+    if (typeof window === 'undefined') {
+      throw (new Error('Currently only supported in browser'));
+    }
+
+    const url = `${this.server}/${this.appId}/${this.chain}/user-signature/${signatureId}`;
+    const signFrame = createFrame(url);
+    attachFrame(signFrame);
 
     return new Promise((resolve, reject) =>
       addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
