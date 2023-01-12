@@ -1,6 +1,5 @@
 import invariant from 'invariant';
-import { HexEncodedBytes, SubmitTransactionRequest } from 'aptos';
-import type { SignMessagePayload, SignMessageResponse } from 'aptos';
+import type { SignMessagePayload, SignMessageResponse, SubmitTransactionRequest, HexEncodedBytes } from 'aptos';
 import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
 import {

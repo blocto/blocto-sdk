@@ -2,7 +2,7 @@ import invariant from 'invariant';
 import { Buffer } from 'buffer';
 import { RequestArguments } from 'eip1193-provider';
 // @todo: in the long run we want to remove the dependency of solana web3
-import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey, Connection } from '@solana/web3.js';
+import type { Transaction, Message, TransactionSignature, PublicKey, Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
 import BloctoProvider from './blocto';
 import { SolanaProviderConfig, SolanaProviderInterface } from './types/solana.d';
@@ -72,6 +72,8 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
           // ref: https://solana-labs.github.io/solana-web3.js/classes/Connection.html#getAccountInfo
           const accountInfo = await this.handleReadRequests(payload);
           const [bufferData, encoding] = accountInfo.result.value.data;
+          // eslint-disable-next-line global-require, @typescript-eslint/no-shadow
+          const { PublicKey } = await require('@solana/web3.js');
           result = {
             ...accountInfo.result.value,
             data: Buffer.from(bufferData, encoding),
@@ -242,8 +244,11 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
   // solana web3 utility
   // eslint-disable-next-line
-  toTransaction(raw: string, signatures: TransactionSignature[]) {
-    const message = Message.from(Buffer.from(raw, 'hex'));
+  async toTransaction(raw: string, signatures: TransactionSignature[]) {
+    // eslint-disable-next-line global-require, @typescript-eslint/no-shadow
+    const { Message, Transaction, PublicKey, TransactionInstruction } = await require('@solana/web3.js');
+
+    const message: Message = Message.from(Buffer.from(raw, 'hex'));
     const transaction = new Transaction();
     transaction.recentBlockhash = message.recentBlockhash;
     if (message.header.numRequiredSignatures > 0) {
