@@ -2,7 +2,11 @@ import invariant from 'invariant';
 import { Buffer } from 'buffer';
 import { RequestArguments } from 'eip1193-provider';
 // @todo: in the long run we want to remove the dependency of solana web3
+<<<<<<< HEAD
 import type { Transaction, Message, TransactionSignature, Connection } from '@solana/web3.js';
+=======
+import type { Transaction, Message, TransactionSignature, Connection, PublicKey } from '@solana/web3.js';
+>>>>>>> b66a4da (refactor: make solana optional)
 import bs58 from 'bs58';
 import BloctoProvider from './blocto';
 import { SolanaProviderConfig, SolanaProviderInterface } from './types/solana.d';
