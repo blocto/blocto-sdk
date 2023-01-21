@@ -232,7 +232,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     if (connection) {
       if (connection.commitment) extra.commitment = connection.commitment;
       // if the connection object passed-in has different rpc endpoint, reconnect to it
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-underscore-dangle
       const rpc = connection ? (connection as any)._rpcEndpoint : null;
       if (rpc && rpc !== this.rpc) {
         this.rpc = rpc;
@@ -252,7 +252,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   }
 
   // solana web3 utility
-  // eslint-disable-next-line
+  // eslint-disable-next-line class-methods-use-this
   async toTransaction(raw: string, signatures: TransactionSignature[]) {
     const message: Message = Solana.Message.from(Buffer.from(raw, 'hex'));
     const transaction = new Solana.Transaction();
@@ -291,7 +291,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   }
 
   // solana web3 utility
-  // eslint-disable-next-line
+  // eslint-disable-next-line class-methods-use-this
   async collectSignatures(transaction: Transaction) {
     return transaction.signatures.reduce((acc, cur) => {
       if (cur.signature) {
