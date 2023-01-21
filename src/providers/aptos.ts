@@ -46,7 +46,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
   constructor({ chainId, server, appId }: AptosProviderConfig) {
     super();
     invariant(chainId, "'chainId' is required");
-    invariant(appId, 'It is necessary to interact with Blocto wallet via your app id.');
+    invariant(appId, 'It is necessary to interact with Blocto wallet via your app id. Please visit https://developers.blocto.app for more details.');
 
     this.chainId = chainId;
     this.networkName = APT_CHAIN_ID_NAME_MAPPING[chainId];
