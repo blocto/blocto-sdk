@@ -2,7 +2,7 @@ import invariant from 'invariant';
 import { Buffer } from 'buffer';
 import { RequestArguments } from 'eip1193-provider';
 // @todo: in the long run we want to remove the dependency of solana web3
-import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey, Connection } from '@solana/web3.js';
+import type { Transaction, Message, TransactionSignature, Connection, PublicKey } from '@solana/web3.js';
 import bs58 from 'bs58';
 import BloctoProvider from './blocto';
 import { SolanaProviderConfig, SolanaProviderInterface } from './types/solana.d';
@@ -19,6 +19,13 @@ import {
   SOL_NET,
   LOGIN_PERSISTING_TIME,
 } from '../constants';
+
+let Solana: any;
+try {
+  Solana = require('@solana/web3.js');
+} catch {
+  // prevent crash if there is no @solana/web3.js.
+}
 
 export default class SolanaProvider extends BloctoProvider implements SolanaProviderInterface {
   net: string;
@@ -38,6 +45,10 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID;
+
+    if (!Solana) {
+      throw new Error('No @solana/web3.js installed. Please install it to interact with Solana.');
+    }
   }
 
   private tryRetrieveSessionFromStorage() {
@@ -75,7 +86,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
           result = {
             ...accountInfo.result.value,
             data: Buffer.from(bufferData, encoding),
-            owner: new PublicKey(accountInfo.result.value.owner),
+            owner: new Solana.PublicKey(accountInfo.result.value.owner),
           };
           break;
         }
@@ -242,9 +253,9 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
   // solana web3 utility
   // eslint-disable-next-line
-  toTransaction(raw: string, signatures: TransactionSignature[]) {
-    const message = Message.from(Buffer.from(raw, 'hex'));
-    const transaction = new Transaction();
+  async toTransaction(raw: string, signatures: TransactionSignature[]) {
+    const message: Message = Solana.Message.from(Buffer.from(raw, 'hex'));
+    const transaction = new Solana.Transaction();
     transaction.recentBlockhash = message.recentBlockhash;
     if (message.header.numRequiredSignatures > 0) {
       transaction.feePayer = message.accountKeys[0];
@@ -252,7 +263,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     signatures.forEach((signature, index) => {
       const sigPubkeyPair = {
         signature:
-          signature === PublicKey.default.toBase58()
+          signature === Solana.PublicKey.default.toBase58()
             ? null
             : bs58.decode(signature),
         publicKey: message.accountKeys[index],
@@ -269,7 +280,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         };
       });
       transaction.instructions.push(
-        new TransactionInstruction({
+        new Solana.TransactionInstruction({
           keys,
           programId: message.accountKeys[instruction.programIdIndex],
           data: bs58.decode(instruction.data),
