@@ -175,23 +175,22 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       throw new Error('Fail to get account');
     }
 
-    const url = `${this.server}/${this.appId}/aptos/user-signature`;
+    if (typeof window === 'undefined') {
+      throw (new Error('Currently only supported in browser'));
+    }
+
+    const { signatureId } = await fetch(`${this.server}/api/aptos/user-signature`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({...payload.params,sessionId:this.code}),
+    }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
+
+    const url = `${this.server}/${this.appId}/aptos/user-signature/${signatureId}`;
     const signFrame = createFrame(url);
 
     attachFrame(signFrame);
-
-    addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
-      const e = event as MessageEvent;
-      if (e.origin === this.server && e.data.type === 'APTOS:FRAME:READY') {
-        if (signFrame.contentWindow) {
-          signFrame.contentWindow.postMessage({
-            type: 'APTOS:FRAME:READY:RESPONSE',
-            ...payload,
-          }, url);
-        }
-        removeListener();
-      }
-    });
 
     return new Promise((resolve, reject) =>
       addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
@@ -200,17 +199,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
           if (e.data.status === 'APPROVED') {
             removeEventListener();
             detatchFrame(signFrame);
-            resolve({
-              address: e.data.address,
-              application: e.data.application,
-              chainId: e.data.chainId,
-              fullMessage: e.data.fullMessage,
-              message: payload.message,
-              nonce: payload.nonce,
-              prefix: 'APTOS', // Should always be APTOS
-              signature: e.data.signature,
-              bitmap: e.data.bitmap,
-            });
+            resolve(e.data);
           }
 
           if (e.data.status === 'DECLINED') {
