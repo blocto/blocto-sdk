@@ -184,7 +184,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ ...payload.params, sessionId: this.code }),
+      body: JSON.stringify({ ...payload, sessionId: this.code }),
     }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
 
     const url = `${this.server}/${this.appId}/aptos/user-signature/${signatureId}`;
