@@ -317,6 +317,10 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         message = params[0].slice(2);
       } else if (['eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].includes(method)) {
         message = params[1];
+        const { domain } = JSON.parse(message);
+        if (domain.chainId !== this.chainId) {
+          throw (new Error(`Provided chainId "${domain.chainId}" must match the active chainId "${this.chainId}"`));
+        }
       }
     }
 
