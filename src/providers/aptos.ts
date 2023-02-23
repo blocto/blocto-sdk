@@ -104,6 +104,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     }
     this.code = null;
     this.address = undefined;
+    this.connected = false;
   }
 
   async signAndSubmitTransaction(
