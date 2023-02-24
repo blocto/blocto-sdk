@@ -120,6 +120,18 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   }
 
   async connect(): Promise<void> {
+    const existedSDK = (window as any).solana;
+
+    if (existedSDK && existedSDK.isBlocto) {
+      return new Promise((resolve) => {
+        existedSDK.on('connect', () => {
+          this.accounts = [existedSDK.publicKey.toBase58()];
+          resolve();
+        });
+        existedSDK.connect();
+      });
+    }
+
     this.tryRetrieveSessionFromStorage();
 
     return new Promise((resolve: () => void, reject) => {
