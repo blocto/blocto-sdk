@@ -291,7 +291,14 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   async fetchAccounts() {
     this.checkNetworkMatched();
     const { accounts } = await fetch(
-      `${this.server}/api/${this.chain}/accounts?code=${this.code}`
+      `${this.server}/api/${this.chain}/accounts?code=${this.code}`, {
+        method: 'GET',
+        headers: {
+          // We already check the existence in the constructor
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          'Blocto-Application-Identifier': this.appId!,
+        },
+      }
     ).then(response => responseSessionGuard<{ accounts: [] }>(response, this));
     this.accounts = accounts;
     return accounts;
@@ -329,6 +336,9 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify({ sessionId: this.code, method, message }),
     }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
@@ -367,6 +377,9 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify(payload.params),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));

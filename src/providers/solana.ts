@@ -181,7 +181,14 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
   async fetchAccounts(): Promise<string[]> {
     const { accounts } = await fetch(
-      `${this.server}/api/solana/accounts?code=${this.code}`
+      `${this.server}/api/solana/accounts?code=${this.code}`, {
+        method: 'GET',
+        headers: {
+          // We already check the existence in the constructor
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          'Blocto-Application-Identifier': this.appId!,
+        },
+      }
     ).then(response => response.json());
     this.accounts = accounts;
     return accounts;
@@ -296,6 +303,9 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify({
         sessionId: this.code,
@@ -309,6 +319,9 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify({
         sessionId: this.code,
