@@ -129,6 +129,9 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify({ ...transaction, ...txOptions }),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
@@ -184,6 +187,9 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify({ ...payload, sessionId: this.code }),
     }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
@@ -280,7 +286,14 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
 
   async fetchAddress() {
     const { accounts } = await fetch(
-      `${this.server}/api/aptos/accounts?code=${this.code}`
+      `${this.server}/api/aptos/accounts?code=${this.code}`, {
+        method: 'GET',
+        headers: {
+          // We already check the existence in the constructor
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          'Blocto-Application-Identifier': this.appId!,
+        },
+      }
     ).then(response => responseSessionGuard<{ accounts: string[] }>(response, this));
     this.address = accounts[0] || undefined;
     return this.address;
