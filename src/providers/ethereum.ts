@@ -17,6 +17,7 @@ import {
   ETH_CHAIN_ID_NET_MAPPING,
   ETH_CHAIN_ID_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
+  DEFAULT_APP_ID,
 } from '../constants';
 import { KEY_SESSION } from '../lib/localStorage/constants';
 
@@ -53,7 +54,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
     this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || process.env.SERVER || '';
-    this.appId = appId || process.env.APP_ID;
+    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
   }
 
   private tryRetrieveSessionFromStorage(): void {
@@ -251,15 +252,14 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=${this.chain}`);
+      const loginFrame = createFrame(`${this.server}/${this.appId}/${this.chain}/authn?l6n=${location}`);
 
       attachFrame(loginFrame);
 
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
         if (e.origin === this.server) {
-          // @todo: try with another more general event types
-          if (e.data.type === 'FCL::CHALLENGE::RESPONSE') {
+          if (e.data.type === 'ETH:FRAME:RESPONSE') {
             removeListener();
             detatchFrame(loginFrame);
 
@@ -278,7 +278,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
             resolve(this.accounts);
           }
 
-          if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
+          if (e.data.type === 'ETH:FRAME:CLOSE') {
             removeListener();
             detatchFrame(loginFrame);
             reject(new Error('User declined the login request'));
@@ -291,7 +291,14 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   async fetchAccounts() {
     this.checkNetworkMatched();
     const { accounts } = await fetch(
-      `${this.server}/api/${this.chain}/accounts?code=${this.code}`
+      `${this.server}/api/${this.chain}/accounts?code=${this.code}`, {
+        method: 'GET',
+        headers: {
+          // We already check the existence in the constructor
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          'Blocto-Application-Identifier': this.appId!,
+        },
+      }
     ).then(response => responseSessionGuard<{ accounts: [] }>(response, this));
     this.accounts = accounts;
     return accounts;
@@ -309,11 +316,6 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   }
 
   async handleSign({ method, params }: EIP1193RequestPayload) {
-    const url = `${this.server}/user-signature/${this.chain}`;
-    const signFrame = createFrame(url);
-
-    attachFrame(signFrame);
-
     let message = '';
     if (Array.isArray(params)) {
       if (method === 'eth_sign') {
@@ -322,23 +324,32 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         message = params[0].slice(2);
       } else if (['eth_signTypedData', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].includes(method)) {
         message = params[1];
+        const { domain } = JSON.parse(message);
+        if (domain.chainId !== this.chainId) {
+          throw (new Error(`Provided chainId "${domain.chainId}" must match the active chainId "${this.chainId}"`));
+        }
       }
     }
 
-    addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
-      const e = event as MessageEvent;
-      if (e.origin === this.server && e.data.type === 'ETH:FRAME:READY') {
-        if (signFrame.contentWindow) {
-          signFrame.contentWindow.postMessage({
-            type: 'ETH:FRAME:READY:RESPONSE',
-            method,
-            message,
-            chain: this.chain,
-          }, url);
-        }
-        removeListener();
-      }
-    });
+    this.checkNetworkMatched();
+    const { signatureId } = await fetch(`${this.server}/api/${this.chain}/user-signature`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+      },
+      body: JSON.stringify({ sessionId: this.code, method, message }),
+    }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
+
+    if (typeof window === 'undefined') {
+      throw (new Error('Currently only supported in browser'));
+    }
+
+    const url = `${this.server}/${this.appId}/${this.chain}/user-signature/${signatureId}`;
+    const signFrame = createFrame(url);
+    attachFrame(signFrame);
 
     return new Promise((resolve, reject) =>
       addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
@@ -366,6 +377,9 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify(payload.params),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
@@ -374,7 +388,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       throw (new Error('Currently only supported in browser'));
     }
 
-    const authzFrame = createFrame(`${this.server}/authz/${this.chain}/${authorizationId}`);
+    const authzFrame = createFrame(`${this.server}/${this.appId}/${this.chain}/authz/${authorizationId}`);
 
     attachFrame(authzFrame);
 

@@ -22,6 +22,7 @@ import {
   APT_CHAIN_ID_NAME_MAPPING,
   APT_CHAIN_ID_RPC_MAPPING,
   LOGIN_PERSISTING_TIME,
+  DEFAULT_APP_ID,
 } from '../constants';
 
 export default class AptosProvider extends BloctoProvider implements AptosProviderInterface {
@@ -54,7 +55,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
 
     const defaultServer = APT_CHAIN_ID_SERVER_MAPPING[chainId];
 
-    this.appId = appId || process.env.APP_ID;
+    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
     this.server = server || defaultServer || process.env.SERVER || '';
   }
 
@@ -102,6 +103,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     }
     this.code = null;
     this.address = undefined;
+    this.connected = false;
   }
 
   async signAndSubmitTransaction(
@@ -126,6 +128,9 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify({ ...transaction, ...txOptions }),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
@@ -134,7 +139,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       throw (new Error('Currently only supported in browser'));
     }
 
-    const authzFrame = createFrame(`${this.server}/authz/aptos/${authorizationId}`);
+    const authzFrame = createFrame(`${this.server}/${this.appId}/aptos/authz/${authorizationId}`);
 
     attachFrame(authzFrame);
 
@@ -173,23 +178,25 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       throw new Error('Fail to get account');
     }
 
-    const url = `${this.server}/user-signature/aptos`;
+    if (typeof window === 'undefined') {
+      throw (new Error('Currently only supported in browser'));
+    }
+
+    const { signatureId } = await fetch(`${this.server}/api/aptos/user-signature`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+      },
+      body: JSON.stringify({ ...payload, sessionId: this.code }),
+    }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
+
+    const url = `${this.server}/${this.appId}/aptos/user-signature/${signatureId}`;
     const signFrame = createFrame(url);
 
     attachFrame(signFrame);
-
-    addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
-      const e = event as MessageEvent;
-      if (e.origin === this.server && e.data.type === 'APTOS:FRAME:READY') {
-        if (signFrame.contentWindow) {
-          signFrame.contentWindow.postMessage({
-            type: 'APTOS:FRAME:READY:RESPONSE',
-            ...payload,
-          }, url);
-        }
-        removeListener();
-      }
-    });
 
     return new Promise((resolve, reject) =>
       addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
@@ -198,17 +205,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
           if (e.data.status === 'APPROVED') {
             removeEventListener();
             detatchFrame(signFrame);
-            resolve({
-              address: e.data.address,
-              application: e.data.application,
-              chainId: e.data.chainId,
-              fullMessage: e.data.fullMessage,
-              message: payload.message,
-              nonce: payload.nonce,
-              prefix: 'APTOS', // Should always be APTOS
-              signature: e.data.signature,
-              bitmap: e.data.bitmap,
-            });
+            resolve(e.data);
           }
 
           if (e.data.status === 'DECLINED') {
@@ -240,7 +237,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=aptos&appId=${this.appId}`);
+      const loginFrame = createFrame(`${this.server}/${this.appId}/aptos/authn?l6n=${location}`);
 
       attachFrame(loginFrame);
 
@@ -288,7 +285,14 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
 
   async fetchAddress() {
     const { accounts } = await fetch(
-      `${this.server}/api/aptos/accounts?code=${this.code}`
+      `${this.server}/api/aptos/accounts?code=${this.code}`, {
+        method: 'GET',
+        headers: {
+          // We already check the existence in the constructor
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          'Blocto-Application-Identifier': this.appId!,
+        },
+      }
     ).then(response => responseSessionGuard<{ accounts: string[] }>(response, this));
     this.address = accounts[0] || undefined;
     return this.address;

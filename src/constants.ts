@@ -129,3 +129,4 @@ export const EIP1193_EVENTS: Array<string> = ['connect', 'disconnect', 'message'
 
 // Preserve login for 1 day
 export const LOGIN_PERSISTING_TIME = 86400 * 1000;
+export const DEFAULT_APP_ID = '00000000-0000-0000-0000-000000000000';

@@ -18,6 +18,7 @@ import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
   LOGIN_PERSISTING_TIME,
+  DEFAULT_APP_ID,
 } from '../constants';
 
 let Solana: any;
@@ -44,7 +45,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       (net === 'mainnet-beta' ? 'https://free.rpcpool.com' : `https://api.${net}.solana.com`);
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
-    this.appId = appId || process.env.APP_ID;
+    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
 
     if (!Solana) {
       throw new Error('No @solana/web3.js installed. Please install it to interact with Solana.');
@@ -142,15 +143,14 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/authn?l6n=${location}&chain=solana`);
+      const loginFrame = createFrame(`${this.server}/${this.appId}/solana/authn?l6n=${location}`);
 
       attachFrame(loginFrame);
 
       addSelfRemovableHandler('message', (event: Event, removeListener: () => void) => {
         const e = event as MessageEvent;
         if (e.origin === this.server) {
-          // @todo: try with another more general event types
-          if (e.data.type === 'FCL::CHALLENGE::RESPONSE') {
+          if (e.data.type === 'SOL:FRAME:RESPONSE') {
             removeListener();
             detatchFrame(loginFrame);
 
@@ -169,7 +169,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
             resolve();
           }
 
-          if (e.data.type === 'FCL::CHALLENGE::CANCEL') {
+          if (e.data.type === 'SOL:FRAME:CLOSE') {
             removeListener();
             detatchFrame(loginFrame);
             reject(new Error('User declined the login request'));
@@ -188,11 +188,19 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     this.code = null;
     this.accounts = [];
     this.eventListeners.disconnect.forEach(listener => listener());
+    this.connected = false;
   }
 
   async fetchAccounts(): Promise<string[]> {
     const { accounts } = await fetch(
-      `${this.server}/api/solana/accounts?code=${this.code}`
+      `${this.server}/api/solana/accounts?code=${this.code}`, {
+        method: 'GET',
+        headers: {
+          // We already check the existence in the constructor
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          'Blocto-Application-Identifier': this.appId!,
+        },
+      }
     ).then(response => response.json());
     this.accounts = accounts;
     return accounts;
@@ -307,6 +315,9 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify({
         sessionId: this.code,
@@ -320,6 +331,9 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
       },
       body: JSON.stringify({
         sessionId: this.code,
@@ -331,7 +345,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
       throw (new Error('Currently only supported in browser'));
     }
 
-    const authzFrame = createFrame(`${this.server}/authz/solana/${authorizationId}`);
+    const authzFrame = createFrame(`${this.server}/${this.appId}/solana/authz/${authorizationId}`);
 
     attachFrame(authzFrame);
 
