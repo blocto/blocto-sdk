@@ -1,4 +1,4 @@
-import { Connection, Transaction } from '@solana/web3.js';
+import type { Connection, Transaction } from '@solana/web3.js';
 import { RequestArguments } from 'eip1193-provider';
 import { BaseConfig } from '../../constants';
 import BloctoProviderInterface from './blocto.d';
