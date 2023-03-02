@@ -60,14 +60,14 @@ export const ETH_CHAIN_ID_NET_MAPPING: Mapping = {
 };
 
 export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
-  1: 'https://wallet.blocto.app',
-  4: 'https://wallet-dev.blocto.app',
-  56: 'https://wallet.blocto.app',
-  97: 'https://wallet-dev.blocto.app',
-  137: 'https://wallet.blocto.app',
-  80001: 'https://wallet-dev.blocto.app',
-  43114: 'https://wallet.blocto.app',
-  43113: 'https://wallet-dev.blocto.app',
+  1: 'https://wallet-v2.blocto.app ',
+  4: 'https://wallet-v2-dev.blocto.app',
+  56: 'https://wallet-v2.blocto.app ',
+  97: 'https://wallet-v2-dev.blocto.app',
+  137: 'https://wallet-v2.blocto.app ',
+  80001: 'https://wallet-v2-dev.blocto.app',
+  43114: 'https://wallet-v2.blocto.app ',
+  43113: 'https://wallet-v2-dev.blocto.app',
 };
 
 /* eth series constants end */
@@ -75,9 +75,9 @@ export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
 /* sol constants begin */
 
 export const SOL_NET_SERVER_MAPPING: Mapping = {
-  devnet: 'https://wallet-dev.blocto.app',
-  testnet: 'https://wallet-dev.blocto.app',
-  'mainnet-beta': 'https://wallet.blocto.app',
+  devnet: 'https://wallet-v2-dev.blocto.app',
+  testnet: 'https://wallet-v2-dev.blocto.app',
+  'mainnet-beta': 'https://wallet-v2.blocto.app ',
 };
 
 export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta'];
@@ -88,15 +88,15 @@ export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta'];
 
 export const APT_CHAIN_ID_SERVER_MAPPING: Mapping = {
   // MAINNET
-  1: 'https://wallet.blocto.app',
+  1: 'https://wallet-v2.blocto.app ',
   // TESTNET
-  2: 'https://wallet-dev.blocto.app',
+  2: 'https://wallet-v2-dev.blocto.app',
   // DEVNET
-  3: 'https://wallet-dev.blocto.app',
+  3: 'https://wallet-v2-dev.blocto.app',
   // TESTING
-  4: 'https://wallet-dev.blocto.app',
+  4: 'https://wallet-v2-dev.blocto.app',
   // PREMAINNET
-  5: 'https://wallet.blocto.app',
+  5: 'https://wallet-v2-staging.blocto.app ',
 };
 
 export enum WalletAdapterNetwork {
