@@ -290,16 +290,15 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   async fetchAccounts() {
     this.checkNetworkMatched();
-    const { accounts } = await fetch(
-      `${this.server}/api/${this.chain}/accounts?code=${this.code}`, {
-        method: 'GET',
-        headers: {
-          // We already check the existence in the constructor
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Application-Identifier': this.appId!,
-        },
-      }
-    ).then(response => responseSessionGuard<{ accounts: [] }>(response, this));
+    const { accounts } = await fetch(`${this.server}/api/${this.chain}/accounts`, {
+      headers: {
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
+      },
+    }).then(response => responseSessionGuard<{ accounts: [] }>(response, this));
     this.accounts = accounts;
     return accounts;
   }
@@ -339,8 +338,10 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
       },
-      body: JSON.stringify({ sessionId: this.code, method, message }),
+      body: JSON.stringify({ method, message }),
     }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
 
     if (typeof window === 'undefined') {
@@ -373,13 +374,15 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   async handleSendTransaction(payload: EIP1193RequestPayload) {
     this.checkNetworkMatched();
-    const { authorizationId } = await fetch(`${this.server}/api/${this.chain}/authz?code=${this.code}`, {
+    const { authorizationId } = await fetch(`${this.server}/api/${this.chain}/authz`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
       },
       body: JSON.stringify(payload.params),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));

@@ -124,13 +124,15 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       throw new Error('Fail to get account');
     }
 
-    const { authorizationId } = await fetch(`${this.server}/api/aptos/authz?code=${this.code}`, {
+    const { authorizationId } = await fetch(`${this.server}/api/aptos/authz`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
       },
       body: JSON.stringify({ ...transaction, ...txOptions }),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
@@ -189,8 +191,10 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
       },
-      body: JSON.stringify({ ...payload, sessionId: this.code }),
+      body: JSON.stringify(payload.params),
     }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
 
     const url = `${this.server}/${this.appId}/aptos/user-signature/${signatureId}`;
@@ -284,15 +288,15 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
   }
 
   async fetchAddress() {
-    const { accounts } = await fetch(
-      `${this.server}/api/aptos/accounts?code=${this.code}`, {
-        method: 'GET',
-        headers: {
-          // We already check the existence in the constructor
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Application-Identifier': this.appId!,
-        },
-      }
+    const { accounts } = await fetch(`${this.server}/api/aptos/accounts`, {
+      headers: {
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
+      },
+    }
     ).then(response => responseSessionGuard<{ accounts: string[] }>(response, this));
     this.address = accounts[0] || undefined;
     return this.address;

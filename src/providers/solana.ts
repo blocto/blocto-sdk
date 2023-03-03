@@ -2,7 +2,7 @@ import invariant from 'invariant';
 import { Buffer } from 'buffer';
 import { RequestArguments } from 'eip1193-provider';
 // @todo: in the long run we want to remove the dependency of solana web3
-import type { Transaction, Message, TransactionSignature, Connection, PublicKey } from '@solana/web3.js';
+import type { Transaction, Message, TransactionSignature, Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
 import BloctoProvider from './blocto';
 import { SolanaProviderConfig, SolanaProviderInterface } from './types/solana.d';
@@ -192,15 +192,15 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   }
 
   async fetchAccounts(): Promise<string[]> {
-    const { accounts } = await fetch(
-      `${this.server}/api/solana/accounts?code=${this.code}`, {
-        method: 'GET',
-        headers: {
-          // We already check the existence in the constructor
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Application-Identifier': this.appId!,
-        },
-      }
+    const { accounts } = await fetch(`${this.server}/api/solana/accounts`, {
+      headers: {
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
+      },
+    }
     ).then(response => response.json());
     this.accounts = accounts;
     return accounts;
@@ -311,34 +311,32 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   }
 
   async handleConvertTransaction(payload: RequestArguments) {
-    return fetch(`${this.server}/api/solana/convertToWalletTx?code=${this.code}`, {
+    return fetch(`${this.server}/api/solana/convertToWalletTx`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
       },
-      body: JSON.stringify({
-        sessionId: this.code,
-        ...payload.params,
-      }),
+      body: JSON.stringify(payload.params),
     }).then(response => responseSessionGuard(response, this));
   }
 
   async handleSignAndSendTransaction(payload: RequestArguments): Promise<string> {
-    const { authorizationId } = await fetch(`${this.server}/api/solana/authz?code=${this.code}`, {
+    const { authorizationId } = await fetch(`${this.server}/api/solana/authz`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
       },
-      body: JSON.stringify({
-        sessionId: this.code,
-        ...payload.params,
-      }),
+      body: JSON.stringify(payload.params),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
 
     if (typeof window === 'undefined') {
