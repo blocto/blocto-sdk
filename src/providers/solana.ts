@@ -188,6 +188,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     this.code = null;
     this.accounts = [];
     this.eventListeners.disconnect.forEach(listener => listener());
+    this.connected = false;
   }
 
   async fetchAccounts(): Promise<string[]> {
