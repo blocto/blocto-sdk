@@ -21,6 +21,11 @@ export const ETH_CHAIN_ID_RPC_MAPPING: Mapping = {
   43114: 'https://api.avax.network/ext/bc/C/rpc',
   // Avalanche Fuji Testnet
   43113: 'https://api.avax-test.network/ext/bc/C/rpc',
+
+  // Arbitrum Mainnet
+  42161: 'https://endpoints.omniatech.io/v1/arbitrum/one/public',
+  // Arbitrum Testnet
+  421613: 'https://endpoints.omniatech.io/v1/arbitrum/goerli/public',
 };
 
 export const ETH_CHAIN_ID_CHAIN_MAPPING: Mapping = {
@@ -39,6 +44,10 @@ export const ETH_CHAIN_ID_CHAIN_MAPPING: Mapping = {
   // Avalanche
   43114: 'avalanche',
   43113: 'avalanche',
+
+  // Arbitrum
+  42161: 'arbitrum',
+  421613: 'arbitrum',
 };
 
 export const ETH_CHAIN_ID_NET_MAPPING: Mapping = {
@@ -57,17 +66,23 @@ export const ETH_CHAIN_ID_NET_MAPPING: Mapping = {
   // Avalanche
   43114: 'mainnet',
   43113: 'testnet',
+
+  // Arbitrum
+  42161: 'mainnet',
+  421613: 'testnet',
 };
 
 export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
-  1: 'https://wallet.blocto.app',
-  4: 'https://wallet-v2.blocto.app',
-  56: 'https://wallet.blocto.app',
-  97: 'https://wallet-v2.blocto.app',
-  137: 'https://wallet.blocto.app',
-  80001: 'https://wallet-v2.blocto.app',
-  43114: 'https://wallet.blocto.app',
-  43113: 'https://wallet-v2.blocto.app',
+  1: 'https://wallet-v2.blocto.app',
+  4: 'https://wallet-v2-dev.blocto.app',
+  56: 'https://wallet-v2.blocto.app',
+  97: 'https://wallet-v2-dev.blocto.app',
+  137: 'https://wallet-v2.blocto.app',
+  80001: 'https://wallet-v2-dev.blocto.app',
+  43114: 'https://wallet-v2.blocto.app',
+  43113: 'https://wallet-v2-dev.blocto.app',
+  42161: 'https://wallet-v2.blocto.app',
+  421613: 'https://wallet-v2-dev.blocto.app',
 };
 
 /* eth series constants end */
