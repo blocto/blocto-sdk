@@ -26,6 +26,11 @@ export const ETH_CHAIN_ID_RPC_MAPPING: Mapping = {
   42161: 'https://endpoints.omniatech.io/v1/arbitrum/one/public',
   // Arbitrum Testnet
   421613: 'https://endpoints.omniatech.io/v1/arbitrum/goerli/public',
+
+  // Optimism Mainnet
+  10: 'https://mainnet.optimism.io',
+  // Optimism Goerli Testnet
+  420: 'https://goerli.optimism.io',
 };
 
 export const ETH_CHAIN_ID_CHAIN_MAPPING: Mapping = {
@@ -48,6 +53,10 @@ export const ETH_CHAIN_ID_CHAIN_MAPPING: Mapping = {
   // Arbitrum
   42161: 'arbitrum',
   421613: 'arbitrum',
+
+  // Optimism
+  10: 'optimism',
+  420: 'optimism',
 };
 
 export const ETH_CHAIN_ID_NET_MAPPING: Mapping = {
@@ -70,6 +79,10 @@ export const ETH_CHAIN_ID_NET_MAPPING: Mapping = {
   // Arbitrum
   42161: 'mainnet',
   421613: 'testnet',
+
+  // Optimism
+  10: 'mainnet',
+  420: 'testnet',
 };
 
 export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
