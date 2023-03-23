@@ -259,6 +259,39 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           });
           result = null;
           break;
+        case 'wallet_switchEthereumChain':
+          if (!payload?.params?.[0]?.chainId) {
+            throw new Error('Invalid params');
+          }
+
+          if (!this.switchableNetwork[payload.params[0].chainId]) {
+            const error: any = new Error('This chain has not been added to SDK. Please try wallet_addEthereumChain first.');
+            error.code = 4902;
+            throw error;
+          }
+
+          if (typeof payload.params[0].chainId === 'number') {
+            this.chainId = payload.params[0].chainId;
+          } else if (payload.params[0].chainId.includes('0x')) {
+            this.chainId = parseInt(payload.params[0].chainId, 16);
+          } else {
+            this.chainId = parseInt(payload.params[0].chainId, 10);
+          }
+
+          this.networkId = this.chainId;
+          this.chain = this.switchableNetwork[this.chainId].name;
+          this.net = this.switchableNetwork[this.chainId].network_type;
+
+          invariant(this.chain, `unsupported 'chainId': ${this.chainId}`);
+
+          this.rpc = this.switchableNetwork[this.chainId].rpc_url;
+
+          invariant(this.rpc, "'rpc' is required");
+
+          this.server = this.switchableNetwork[this.chainId].wallet_web_url;
+
+          result = null;
+          break;
         default:
           response = await this.handleReadRequests(payload);
       }
