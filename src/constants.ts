@@ -70,6 +70,12 @@ export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
   43113: 'https://wallet-v2-dev.blocto.app',
 };
 
+export const ETH_ENV_WALLET_SERVER_MAPPING: Mapping = {
+  prod: 'https://wallet-v2.blocto.app',
+  staging: 'https://wallet-v2-staging.blocto.app',
+  dev: 'https://wallet-v2-dev.blocto.app',
+};
+
 /* eth series constants end */
 
 /* sol constants begin */
