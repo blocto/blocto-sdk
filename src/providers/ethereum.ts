@@ -38,6 +38,15 @@ interface SwitchableNetwork {
   }
 }
 
+function parseChainId(chainId: string | number): number {
+  if (typeof chainId === 'number') {
+    return chainId;
+  } else if (chainId.includes('0x')) {
+    return parseInt(chainId, 16);
+  }
+  return parseInt(chainId, 10);
+}
+
 export default class EthereumProvider extends BloctoProvider implements EthereumProviderInterface {
   chainId: string | number; // current network id e.g.1
   networkId: string | number; // same as chainId
@@ -53,14 +62,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     super();
     invariant(chainId, "'chainId' is required");
 
-    if (typeof chainId === 'number') {
-      this.chainId = chainId;
-    } else if (chainId.includes('0x')) {
-      this.chainId = parseInt(chainId, 16);
-    } else {
-      this.chainId = parseInt(chainId, 10);
-    }
-
+    this.chainId = parseChainId(chainId);
     this.networkId = this.chainId;
     this.chain = ETH_CHAIN_ID_CHAIN_MAPPING[this.chainId];
     this.net = ETH_CHAIN_ID_NET_MAPPING[this.chainId];
@@ -82,13 +84,13 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         networkList.forEach(({ chainId: chain_id, rpcUrls }) => {
           invariant(rpcUrls, 'rpcUrls is required for networksList');
           if (!rpcUrls) return;
-          this.checkAndAddNetwork({ chainId: chain_id, rpcUrls });
+          this.checkAndAddNetwork({ chainId: parseChainId(chain_id), rpcUrls });
         });
       }
     });
   }
 
-  private checkAndAddNetwork({ chainId, rpcUrls }:{ chainId: string; rpcUrls: string[] }): void {
+  private checkAndAddNetwork({ chainId, rpcUrls }:{ chainId: number; rpcUrls: string[] }): void {
     const domain = new URL(rpcUrls[0]).hostname;
     const { chain_id, name, display_name, network_type, blocto_service_enviroment, rpc_endpoint_domains } =
       this.supportNetwork[chainId];
@@ -255,7 +257,10 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           }
           await getEvmSupport().then((supportNetwork) => {
             this.supportNetwork = supportNetwork;
-            this.checkAndAddNetwork({ chainId: payload?.params?.[0]?.chainId, rpcUrls: payload?.params?.[0].rpcUrls });
+            this.checkAndAddNetwork({
+              chainId: parseChainId(payload?.params?.[0]?.chainId),
+              rpcUrls: payload?.params?.[0].rpcUrls,
+            });
           });
           result = null;
           break;
@@ -264,20 +269,15 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
             throw new Error('Invalid params');
           }
 
-          if (!this.switchableNetwork[payload.params[0].chainId]) {
-            const error: any = new Error('This chain has not been added to SDK. Please try wallet_addEthereumChain first.');
+          if (!this.switchableNetwork[parseChainId(payload.params[0].chainId)]) {
+            const error: any = new Error(
+              'This chain has not been added to SDK. Please try wallet_addEthereumChain first.'
+            );
             error.code = 4902;
             throw error;
           }
 
-          if (typeof payload.params[0].chainId === 'number') {
-            this.chainId = payload.params[0].chainId;
-          } else if (payload.params[0].chainId.includes('0x')) {
-            this.chainId = parseInt(payload.params[0].chainId, 16);
-          } else {
-            this.chainId = parseInt(payload.params[0].chainId, 10);
-          }
-
+          this.chainId = parseChainId(payload.params[0].chainId);
           this.networkId = this.chainId;
           this.chain = this.switchableNetwork[this.chainId].name;
           this.net = this.switchableNetwork[this.chainId].network_type;
