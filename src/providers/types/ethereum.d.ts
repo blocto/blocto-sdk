@@ -6,10 +6,6 @@ export declare interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null
   rpc?: string
   server?: string
-  networkList?: {
-    chainId: string
-    rpcUrls?: string[]
-  }[]
 }
 
 export interface EIP1193RequestPayload {
@@ -28,6 +24,12 @@ export declare interface EthereumProviderInterface extends BloctoProviderInterfa
   server: string
   accounts: Array<string>
   request(args: EIP1193RequestPayload): Promise<any>
+  loadSwitchableNetwork(
+    networkList: {
+      chainId: string
+      rpcUrls?: string[]
+    }[]
+  ): Promise<null>
 }
 
 export interface AddEthereumChainParameter {
