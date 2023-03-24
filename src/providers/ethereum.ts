@@ -59,7 +59,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
   supportNetwork: EvmSupportMapping = {};
   switchableNetwork: SwitchableNetwork = {};
 
-  constructor({ chainId, rpc, server, appId, networkList }: EthereumProviderConfig) {
+  constructor({ chainId, rpc, server, appId }: EthereumProviderConfig) {
     super();
     invariant(chainId, "'chainId' is required");
 
@@ -76,19 +76,6 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
     this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
-
-    getEvmSupport().then((result) => {
-      // setup supported network
-      this.supportNetwork = result;
-      // setup switchable list if user set networkList
-      if (networkList?.length) {
-        networkList.forEach(({ chainId: chain_id, rpcUrls }) => {
-          invariant(rpcUrls, 'rpcUrls is required for networksList');
-          if (!rpcUrls) return;
-          this.checkAndAddNetwork({ chainId: parseChainId(chain_id), rpcUrls });
-        });
-      }
-    });
   }
 
   private checkAndAddNetwork({ chainId, rpcUrls }:{ chainId: number; rpcUrls: string[] }): void {
@@ -104,6 +91,8 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         wallet_web_url,
         rpc_url: rpcUrls[0],
       };
+    } else {
+      console.warn(`The rpc url ${rpcUrls[0]} is not supported.`);
     }
   }
 
@@ -123,6 +112,27 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     if (existedSDK && existedSDK.isBlocto && parseInt(existedSDK.chainId, 16) !== this.chainId) {
       throw new Error('Blocto SDK network mismatched');
     }
+  }
+
+  async loadSwitchableNetwork(
+    networkList: {
+      chainId: string
+      rpcUrls?: string[]
+    }[]
+  ): Promise<null> {
+    return getEvmSupport().then((result) => {
+      // setup supported network
+      this.supportNetwork = result;
+      // setup switchable list if user set networkList
+      if (networkList?.length) {
+        networkList.forEach(({ chainId: chain_id, rpcUrls }) => {
+          invariant(rpcUrls, 'rpcUrls is required for networksList');
+          if (!rpcUrls?.length) throw new Error('Empty rpcUrls array');
+          this.checkAndAddNetwork({ chainId: parseChainId(chain_id), rpcUrls });
+        });
+      }
+      return null;
+    });
   }
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
