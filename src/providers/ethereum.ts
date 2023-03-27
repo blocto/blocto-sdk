@@ -222,7 +222,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
-  async enable(): Promise<ProviderAccounts> {
+  async enable(email?: string): Promise<ProviderAccounts> {
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
       if (parseInt(existedSDK.chainId, 16) !== this.chainId) {
@@ -252,7 +252,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/${this.appId}/${this.chain}/authn?l6n=${location}`);
+      const loginFrame = createFrame(`${this.server}/${this.appId}/${this.chain}/authn?l6n=${location}${email && `&email=${email}`}`);
 
       attachFrame(loginFrame);
 
