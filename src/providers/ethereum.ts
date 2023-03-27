@@ -153,7 +153,12 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     }
 
     if (!this.connected) {
-      await this.enable();
+      let email: string | undefined;
+      if (payload.method === 'eth_requestAccounts') {
+        email = payload?.params?.[0];
+      }
+
+      await this.enable(email);
     }
 
     try {
