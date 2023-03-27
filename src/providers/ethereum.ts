@@ -80,10 +80,10 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
   private checkAndAddNetwork({ chainId, rpcUrls }:{ chainId: number; rpcUrls: string[] }): void {
     const domain = new URL(rpcUrls[0]).hostname;
-    const { chain_id, name, display_name, network_type, blocto_service_enviroment, rpc_endpoint_domains } =
+    const { chain_id, name, display_name, network_type, blocto_service_environment, rpc_endpoint_domains } =
       this.supportNetwork[chainId];
     if (rpc_endpoint_domains.includes(domain)) {
-      const wallet_web_url = ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_enviroment];
+      const wallet_web_url = ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment]
       this.switchableNetwork[chain_id] = {
         name,
         display_name,
