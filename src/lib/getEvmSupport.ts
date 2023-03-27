@@ -4,22 +4,13 @@ export interface EvmSupportMapping {
     name: string // backend defined chain name: ethereum, bsc, …
     display_name: string // human readable name: Ethereum, Polygon, …
     network_type: string // chain network type: mainnet / testnet / devnet
-    blocto_service_enviroment: string // backend service env: prod / dev (may return staging in future)
+    blocto_service_environment: string // backend service env: prod / dev (may return staging in future)
     rpc_endpoint_domains: string[] // rpc endpoints whitelist
   }
 }
 
 export async function getEvmSupport(): Promise<EvmSupportMapping> {
-  const networks = [
-    {
-      chain_id: 1,
-      name: 'ethereum',
-      display_name: 'Ethereum',
-      network_type: 'mainnet',
-      blocto_service_enviroment: 'staging',
-      rpc_endpoint_domains: [],
-    },
-  ];
-  const evmSupportMap = networks.reduce((a, v) => ({ ...a, [v.chain_id]: v }), {});
+  const { networks } = await fetch('https://api-dev.blocto.app/networks/evm').then(response => response.json());
+  const evmSupportMap = networks.reduce((a: any, v: any) => ({ ...a, [v.chain_id]: v }), {});
   return evmSupportMap;
 }
