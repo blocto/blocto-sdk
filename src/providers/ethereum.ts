@@ -75,6 +75,14 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
     this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
+
+    this.switchableNetwork[this.chainId] = {
+      name: this.chain,
+      display_name: this.chain,
+      network_type: this.net,
+      wallet_web_url: this.server,
+      rpc_url: this.rpc,
+    }
   }
 
   private checkAndAddNetwork({ chainId, rpcUrls }:{ chainId: number; rpcUrls: string[] }): void {
@@ -299,6 +307,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           invariant(this.rpc, "'rpc' is required");
 
           this.server = this.switchableNetwork[this.chainId].wallet_web_url;
+          this.accounts = await this.fetchAccounts()
 
           result = null;
           break;
