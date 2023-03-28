@@ -82,7 +82,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
       network_type: this.net,
       wallet_web_url: this.server,
       rpc_url: this.rpc,
-    }
+    };
   }
 
   private checkAndAddNetwork({ chainId, rpcUrls }:{ chainId: number; rpcUrls: string[] }): void {
@@ -90,7 +90,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     const { chain_id, name, display_name, network_type, blocto_service_environment, rpc_endpoint_domains } =
       this.supportNetwork[chainId];
     if (rpc_endpoint_domains.includes(domain)) {
-      const wallet_web_url = ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment]
+      const wallet_web_url = ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment];
       this.switchableNetwork[chain_id] = {
         name,
         display_name,
@@ -307,7 +307,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
           invariant(this.rpc, "'rpc' is required");
 
           this.server = this.switchableNetwork[this.chainId].wallet_web_url;
-          this.accounts = await this.fetchAccounts()
+          this.accounts = await this.fetchAccounts();
 
           result = null;
           break;
