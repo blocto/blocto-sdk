@@ -257,7 +257,10 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         return resolve(this.accounts);
       }
 
-      const params = new URLSearchParams({ l6n: window.location.origin, ...(isEmail(email) && { email }) });
+      const params = new URLSearchParams();
+      params.set('l6n', window.location.origin);
+      if (email && isEmail(email)) params.set('email', email);
+
       const loginFrame = createFrame(`${this.server}/${this.appId}/${this.chain}/authn?${params.toString()}`);
 
       attachFrame(loginFrame);
