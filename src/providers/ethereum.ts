@@ -20,6 +20,7 @@ import {
   DEFAULT_APP_ID,
 } from '../constants';
 import { KEY_SESSION } from '../lib/localStorage/constants';
+import { isEmail } from '../lib/is';
 
 export default class EthereumProvider extends BloctoProvider implements EthereumProviderInterface {
   chainId: string | number;
@@ -153,12 +154,12 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     }
 
     if (!this.connected) {
-      let email: string | undefined;
-      if (payload.method === 'eth_requestAccounts') {
-        email = payload?.params?.[0];
+      const email = payload?.params?.[0];
+      if (payload.method === 'eth_requestAccounts' && isEmail(email)) {
+        await this.enable(email);
+      } else {
+        await this.enable();
       }
-
-      await this.enable(email);
     }
 
     try {
@@ -256,8 +257,8 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
         return resolve(this.accounts);
       }
 
-      const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/${this.appId}/${this.chain}/authn?l6n=${location}${email && `&email=${email}`}`);
+      const params = new URLSearchParams({ l6n: window.location.origin, ...(isEmail(email) && { email }) });
+      const loginFrame = createFrame(`${this.server}/${this.appId}/${this.chain}/authn?${params.toString()}`);
 
       attachFrame(loginFrame);
 
