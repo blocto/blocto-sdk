@@ -6,7 +6,6 @@ import {
   EIP1193RequestPayload,
   EthereumProviderConfig,
   EthereumProviderInterface,
-  AddEthereumChainParameter,
 } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
