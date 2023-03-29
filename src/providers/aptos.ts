@@ -1,6 +1,10 @@
 import invariant from 'invariant';
-import { HexEncodedBytes, SubmitTransactionRequest } from 'aptos';
-import type { SignMessagePayload, SignMessageResponse } from 'aptos';
+import type {
+  SignMessagePayload,
+  SignMessageResponse,
+  SubmitTransactionRequest,
+  HexEncodedBytes,
+} from 'aptos';
 import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
 import {
@@ -13,10 +17,7 @@ import {
 } from './types/aptos.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import {
-  getItemWithExpiry,
-  setItemWithExpiry,
-} from '../lib/localStorage';
+import { getItemWithExpiry, setItemWithExpiry } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   APT_CHAIN_ID_SERVER_MAPPING,
@@ -26,7 +27,9 @@ import {
   DEFAULT_APP_ID,
 } from '../constants';
 
-export default class AptosProvider extends BloctoProvider implements AptosProviderInterface {
+export default class AptosProvider
+  extends BloctoProvider
+  implements AptosProviderInterface {
   publicKey: string[] = [];
   address?: string;
   authKey = '';
@@ -37,10 +40,14 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
 
   private tryRetrieveSessionFromStorage(): void {
     // load previous connected state
-    const session: Session | null = getItemWithExpiry<Session>(this.sessionKey, {});
+    const session: Session | null = getItemWithExpiry<Session>(
+      this.sessionKey,
+      {}
+    );
 
     const sessionCode = session && session.code;
-    const sessionAccount = session && session.address && session.address[this.chainId];
+    const sessionAccount =
+      session && session.address && session.address[this.chainId];
     this.code = sessionCode || null;
     this.address = sessionAccount || undefined;
   }
@@ -48,7 +55,10 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
   constructor({ chainId, server, appId }: AptosProviderConfig) {
     super();
     invariant(chainId, "'chainId' is required");
-    invariant(appId, 'It is necessary to interact with Blocto wallet via your app id.');
+    invariant(
+      appId,
+      'It is necessary to interact with Blocto wallet via your app id. Please visit https://developers.blocto.app for more details.'
+    );
 
     this.chainId = chainId;
     this.networkName = APT_CHAIN_ID_NAME_MAPPING[chainId];
@@ -78,7 +88,9 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     };
   }
 
-  async isConnected(): Promise<boolean> { return !!this.address; }
+  async isConnected(): Promise<boolean> {
+    return !!this.address;
+  }
 
   async signTransaction(transaction: any): Promise<SubmitTransactionRequest> {
     const existedSDK = (window as any).bloctoAptos;
@@ -104,6 +116,7 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     }
     this.code = null;
     this.address = undefined;
+    this.connected = false;
   }
 
   async signAndSubmitTransaction(
@@ -124,39 +137,54 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
       throw new Error('Fail to get account');
     }
 
-    const { authorizationId } = await fetch(`${this.server}/api/aptos/authz?code=${this.code}`, {
+    const { authorizationId } = await fetch(`${this.server}/api/aptos/authz`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
       },
       body: JSON.stringify({ ...transaction, ...txOptions }),
-    }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
+    }).then(response =>
+      responseSessionGuard<{ authorizationId: string }>(response, this)
+    );
 
     if (typeof window === 'undefined') {
-      throw (new Error('Currently only supported in browser'));
+      throw new Error('Currently only supported in browser');
     }
 
-    const authzFrame = createFrame(`${this.server}/${this.appId}/aptos/authz/${authorizationId}`);
+    const authzFrame = createFrame(
+      `${this.server}/${this.appId}/aptos/authz/${authorizationId}`
+    );
 
     attachFrame(authzFrame);
 
     return new Promise((resolve, reject) =>
-      addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
-        const e = event as MessageEvent;
-        if (e.origin === this.server && e.data.type === 'APTOS:FRAME:RESPONSE') {
-          if (e.data.status === 'APPROVED') {
-            removeEventListener();
-            detatchFrame(authzFrame);
-            resolve({ hash: e.data.txHash });
-          }
+      addSelfRemovableHandler(
+        'message',
+        (event: Event, removeEventListener: () => void) => {
+          const e = event as MessageEvent;
+          if (
+            e.origin === this.server &&
+            e.data.type === 'APTOS:FRAME:RESPONSE'
+          ) {
+            if (e.data.status === 'APPROVED') {
+              removeEventListener();
+              detatchFrame(authzFrame);
+              resolve({ hash: e.data.txHash });
+            }
 
-          if (e.data.status === 'DECLINED') {
-            removeEventListener();
-            detatchFrame(authzFrame);
-            reject(new Error(e.data.errorMessage));
+            if (e.data.status === 'DECLINED') {
+              removeEventListener();
+              detatchFrame(authzFrame);
+              reject(new Error(e.data.errorMessage));
+            }
           }
         }
-      })
+      )
     );
   }
 
@@ -176,16 +204,26 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     }
 
     if (typeof window === 'undefined') {
-      throw (new Error('Currently only supported in browser'));
+      throw new Error('Currently only supported in browser');
     }
 
-    const { signatureId } = await fetch(`${this.server}/api/aptos/user-signature`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({...payload.params,sessionId:this.code}),
-    }).then(response => responseSessionGuard<{ signatureId: string }>(response, this));
+    const { signatureId } = await fetch(
+      `${this.server}/api/aptos/user-signature`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // We already check the existence in the constructor
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          'Blocto-Application-Identifier': this.appId!,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          'Blocto-Session-Identifier': this.code!,
+        },
+        body: JSON.stringify(payload),
+      }
+    ).then(response =>
+      responseSessionGuard<{ signatureId: string }>(response, this)
+    );
 
     const url = `${this.server}/${this.appId}/aptos/user-signature/${signatureId}`;
     const signFrame = createFrame(url);
@@ -193,94 +231,132 @@ export default class AptosProvider extends BloctoProvider implements AptosProvid
     attachFrame(signFrame);
 
     return new Promise((resolve, reject) =>
-      addSelfRemovableHandler('message', (event: Event, removeEventListener: () => void) => {
-        const e = event as MessageEvent;
-        if (e.origin === this.server && e.data.type === 'APTOS:FRAME:RESPONSE') {
-          if (e.data.status === 'APPROVED') {
-            removeEventListener();
-            detatchFrame(signFrame);
-            resolve(e.data);
-          }
+      addSelfRemovableHandler(
+        'message',
+        (event: Event, removeEventListener: () => void) => {
+          const e = event as MessageEvent;
+          if (
+            e.origin === this.server &&
+            e.data.type === 'APTOS:FRAME:RESPONSE'
+          ) {
+            if (e.data.status === 'APPROVED') {
+              removeEventListener();
+              detatchFrame(signFrame);
+              resolve(e.data);
+            }
 
-          if (e.data.status === 'DECLINED') {
-            removeEventListener();
-            detatchFrame(signFrame);
-            reject(new Error(e.data.errorMessage));
+            if (e.data.status === 'DECLINED') {
+              removeEventListener();
+              detatchFrame(signFrame);
+              reject(new Error(e.data.errorMessage));
+            }
           }
         }
-      })
+      )
     );
   }
 
   async connect(): Promise<PublicAccount> {
     const existedSDK = (window as any).bloctoAptos;
     if (existedSDK) {
-      return new Promise(((resolve, reject) =>
+      return new Promise((resolve, reject) =>
         // add a small delay to make sure the network has been switched
-        setTimeout(() => existedSDK.connect().then(resolve).catch(reject), 10))
+        setTimeout(() => existedSDK.connect().then(resolve).catch(reject), 10)
       );
     }
 
     this.tryRetrieveSessionFromStorage();
 
     return new Promise((resolve, reject) => {
-      if (typeof window === 'undefined') { reject('Currently only supported in browser'); }
+      if (typeof window === 'undefined') {
+        reject('Currently only supported in browser');
+      }
 
       if (this.connected && this.address) {
-        resolve({ address: this.address, publicKey: this.publicKey, authKey: null, minKeysRequired: 2 });
+        resolve({
+          address: this.address,
+          publicKey: this.publicKey,
+          authKey: null,
+          minKeysRequired: 2,
+        });
       }
 
       const location = encodeURIComponent(window.location.origin);
-      const loginFrame = createFrame(`${this.server}/${this.appId}/aptos/authn?l6n=${location}`);
+      const loginFrame = createFrame(
+        `${this.server}/${this.appId}/aptos/authn?l6n=${location}`
+      );
 
       attachFrame(loginFrame);
 
-      addSelfRemovableHandler('message', async (event: Event, removeListener: () => void) => {
-        const e = event as MessageEvent;
-        if (e.origin === this.server) {
-          if (e.data.type === 'APTOS:FRAME:RESPONSE') {
-            removeListener();
-            detatchFrame(loginFrame);
+      addSelfRemovableHandler(
+        'message',
+        async (event: Event, removeListener: () => void) => {
+          const e = event as MessageEvent;
+          if (e.origin === this.server) {
+            if (e.data.type === 'APTOS:FRAME:RESPONSE') {
+              removeListener();
+              detatchFrame(loginFrame);
 
-            this.code = e.data.code;
-            this.connected = true;
+              this.code = e.data.code;
+              this.connected = true;
 
-            const address = e.data.address;
-            this.address = address ? address.aptos : undefined;
+              const address = e.data.address;
+              this.address = address ? address.aptos : undefined;
 
-            if (this.address) {
-              try {
-                const { public_keys: publicKeys } = await fetch(`${this.server}/blocto/aptos/accounts/${this.address}`)
-                  .then(response => response.json());
-                this.publicKey = publicKeys || [];
+              if (this.address) {
+                try {
+                  const { public_keys: publicKeys } = await fetch(
+                    `${this.server}/blocto/aptos/accounts/${this.address}`
+                  ).then(response => response.json());
+                  this.publicKey = publicKeys || [];
 
-                resolve({ address: this.address || '', publicKey: this.publicKey, authKey: null, minKeysRequired: 2 });
-              } catch (err: any) { reject(e); }
-            } else {
-              // @todo: better error
-              return reject();
+                  resolve({
+                    address: this.address || '',
+                    publicKey: this.publicKey,
+                    authKey: null,
+                    minKeysRequired: 2,
+                  });
+                } catch (err: any) {
+                  reject(e);
+                }
+              } else {
+                // @todo: better error
+                return reject();
+              }
+
+              setItemWithExpiry(
+                this.sessionKey,
+                {
+                  code: this.code,
+                  address,
+                },
+                LOGIN_PERSISTING_TIME
+              );
             }
 
-            setItemWithExpiry(this.sessionKey, {
-              code: this.code,
-              address,
-            }, LOGIN_PERSISTING_TIME);
-          }
-
-          if (e.data.type === 'APTOS:FRAME:CLOSE') {
-            removeListener();
-            detatchFrame(loginFrame);
-            reject(new Error('User declined the login request'));
+            if (e.data.type === 'APTOS:FRAME:CLOSE') {
+              removeListener();
+              detatchFrame(loginFrame);
+              reject(new Error('User declined the login request'));
+            }
           }
         }
-      });
+      );
     });
   }
 
   async fetchAddress() {
-    const { accounts } = await fetch(
-      `${this.server}/api/aptos/accounts?code=${this.code}`
-    ).then(response => responseSessionGuard<{ accounts: string[] }>(response, this));
+    const { accounts } = await fetch(`${this.server}/api/aptos/accounts`, {
+      headers: {
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
+      },
+    }).then(response =>
+      responseSessionGuard<{ accounts: string[] }>(response, this)
+    );
     this.address = accounts[0] || undefined;
     return this.address;
   }

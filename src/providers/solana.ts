@@ -2,7 +2,7 @@ import invariant from 'invariant';
 import { Buffer } from 'buffer';
 import { RequestArguments } from 'eip1193-provider';
 // @todo: in the long run we want to remove the dependency of solana web3
-import { Transaction, Message, TransactionSignature, TransactionInstruction, PublicKey, Connection } from '@solana/web3.js';
+import type { Transaction, Message, TransactionSignature, Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
 import BloctoProvider from './blocto';
 import { SolanaProviderConfig, SolanaProviderInterface } from './types/solana.d';
@@ -20,6 +20,13 @@ import {
   LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
 } from '../constants';
+
+let Solana: any;
+try {
+  Solana = require('@solana/web3.js');
+} catch {
+  // prevent crash if there is no @solana/web3.js.
+}
 
 export default class SolanaProvider extends BloctoProvider implements SolanaProviderInterface {
   net: string;
@@ -39,6 +46,10 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
     this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
+
+    if (!Solana) {
+      throw new Error('No @solana/web3.js installed. Please install it to interact with Solana.');
+    }
   }
 
   private tryRetrieveSessionFromStorage() {
@@ -76,7 +87,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
           result = {
             ...accountInfo.result.value,
             data: Buffer.from(bufferData, encoding),
-            owner: new PublicKey(accountInfo.result.value.owner),
+            owner: new Solana.PublicKey(accountInfo.result.value.owner),
           };
           break;
         }
@@ -111,10 +122,11 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
 
   async connect(): Promise<void> {
     const existedSDK = (window as any).solana;
+
     if (existedSDK && existedSDK.isBlocto) {
       return new Promise((resolve) => {
-        existedSDK.once('connect', (pubkey: PublicKey) => {
-          this.accounts = [pubkey.toBase58()];
+        existedSDK.on('connect', () => {
+          this.accounts = [existedSDK.publicKey.toBase58()];
           resolve();
         });
         existedSDK.connect();
@@ -176,11 +188,19 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     this.code = null;
     this.accounts = [];
     this.eventListeners.disconnect.forEach(listener => listener());
+    this.connected = false;
   }
 
   async fetchAccounts(): Promise<string[]> {
-    const { accounts } = await fetch(
-      `${this.server}/api/solana/accounts?code=${this.code}`
+    const { accounts } = await fetch(`${this.server}/api/solana/accounts`, {
+      headers: {
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
+      },
+    }
     ).then(response => response.json());
     this.accounts = accounts;
     return accounts;
@@ -221,7 +241,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     if (connection) {
       if (connection.commitment) extra.commitment = connection.commitment;
       // if the connection object passed-in has different rpc endpoint, reconnect to it
-      // eslint-disable-next-line
+      // eslint-disable-next-line no-underscore-dangle
       const rpc = connection ? (connection as any)._rpcEndpoint : null;
       if (rpc && rpc !== this.rpc) {
         this.rpc = rpc;
@@ -241,10 +261,10 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   }
 
   // solana web3 utility
-  // eslint-disable-next-line
-  toTransaction(raw: string, signatures: TransactionSignature[]) {
-    const message = Message.from(Buffer.from(raw, 'hex'));
-    const transaction = new Transaction();
+  // eslint-disable-next-line class-methods-use-this
+  async toTransaction(raw: string, signatures: TransactionSignature[]) {
+    const message: Message = Solana.Message.from(Buffer.from(raw, 'hex'));
+    const transaction = new Solana.Transaction();
     transaction.recentBlockhash = message.recentBlockhash;
     if (message.header.numRequiredSignatures > 0) {
       transaction.feePayer = message.accountKeys[0];
@@ -252,7 +272,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     signatures.forEach((signature, index) => {
       const sigPubkeyPair = {
         signature:
-          signature === PublicKey.default.toBase58()
+          signature === Solana.PublicKey.default.toBase58()
             ? null
             : bs58.decode(signature),
         publicKey: message.accountKeys[index],
@@ -269,7 +289,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
         };
       });
       transaction.instructions.push(
-        new TransactionInstruction({
+        new Solana.TransactionInstruction({
           keys,
           programId: message.accountKeys[instruction.programIdIndex],
           data: bs58.decode(instruction.data),
@@ -280,7 +300,7 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   }
 
   // solana web3 utility
-  // eslint-disable-next-line
+  // eslint-disable-next-line class-methods-use-this
   async collectSignatures(transaction: Transaction) {
     return transaction.signatures.reduce((acc, cur) => {
       if (cur.signature) {
@@ -291,28 +311,32 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
   }
 
   async handleConvertTransaction(payload: RequestArguments) {
-    return fetch(`${this.server}/api/solana/convertToWalletTx?code=${this.code}`, {
+    return fetch(`${this.server}/api/solana/convertToWalletTx`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
       },
-      body: JSON.stringify({
-        sessionId: this.code,
-        ...payload.params,
-      }),
+      body: JSON.stringify(payload.params),
     }).then(response => responseSessionGuard(response, this));
   }
 
   async handleSignAndSendTransaction(payload: RequestArguments): Promise<string> {
-    const { authorizationId } = await fetch(`${this.server}/api/solana/authz?code=${this.code}`, {
+    const { authorizationId } = await fetch(`${this.server}/api/solana/authz`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // We already check the existence in the constructor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.code!,
       },
-      body: JSON.stringify({
-        sessionId: this.code,
-        ...payload.params,
-      }),
+      body: JSON.stringify(payload.params),
     }).then(response => responseSessionGuard<{ authorizationId: string }>(response, this));
 
     if (typeof window === 'undefined') {
