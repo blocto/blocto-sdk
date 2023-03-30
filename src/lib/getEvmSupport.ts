@@ -10,7 +10,7 @@ export interface EvmSupportMapping {
 }
 
 export async function getEvmSupport(): Promise<EvmSupportMapping> {
-  const { networks } = await fetch('https://api-dev.blocto.app/networks/evm').then(response => response.json());
+  const { networks } = await fetch('https://api.blocto.app/networks/evm').then(response => response.json());
   const evmSupportMap = networks.reduce((a: any, v: any) => ({ ...a, [v.chain_id]: v }), {});
   return evmSupportMap;
 }
