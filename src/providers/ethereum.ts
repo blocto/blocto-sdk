@@ -41,7 +41,7 @@ interface SwitchableNetwork {
 function parseChainId(chainId: string | number): number {
   if (typeof chainId === 'number') {
     return chainId;
-  } else if (chainId.includes('0x')) {
+  } else if (chainId.startsWith('0x')) {
     return parseInt(chainId, 16);
   }
   return parseInt(chainId, 10);
@@ -367,7 +367,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
 
       const params = new URLSearchParams();
       params.set('l6n', window.location.origin);
-      const emailParam = email && isEmail(email) ? `/${email}` : "";
+      const emailParam = email && isEmail(email) ? `/${email}` : '';
 
       const loginFrame = createFrame(
         `${this.server}/${this.appId}/${this.chain}/authn${emailParam}?${params.toString()}`
