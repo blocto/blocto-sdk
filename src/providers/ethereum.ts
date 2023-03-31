@@ -296,6 +296,7 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
             const error: any = new Error(
               'This chain has not been added to SDK. Please try wallet_addEthereumChain first.'
             );
+            // Follows MetaMask return 4902, see https://docs.metamask.io/guide/rpc-api.html#wallet-switchethereumchain
             error.code = 4902;
             throw error;
           }
