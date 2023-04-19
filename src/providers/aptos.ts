@@ -47,7 +47,8 @@ export default class AptosProvider
 
     const sessionCode = session && session.code;
     const sessionAccount =
-      session && session.address && session.address[this.chainId];
+      session && session.address && session.address.aptos;
+    this.connected = Boolean(sessionCode && sessionAccount);
     this.code = sessionCode || null;
     this.address = sessionAccount || undefined;
   }
@@ -89,7 +90,7 @@ export default class AptosProvider
   }
 
   async isConnected(): Promise<boolean> {
-    return !!this.address;
+    return this.connected;
   }
 
   async signTransaction(transaction: any): Promise<SubmitTransactionRequest> {
@@ -273,7 +274,7 @@ export default class AptosProvider
       }
 
       if (this.connected && this.address) {
-        resolve({
+        return resolve({
           address: this.address,
           publicKey: this.publicKey,
           authKey: null,
