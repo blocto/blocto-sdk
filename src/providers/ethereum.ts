@@ -360,7 +360,9 @@ export default class EthereumProvider extends BloctoProvider implements Ethereum
     this.tryRetrieveSessionFromStorage();
 
     return new Promise((resolve, reject) => {
-      if (typeof window === 'undefined') { reject('Currently only supported in browser'); }
+      if (typeof window === 'undefined') { 
+        return reject('Currently only supported in browser'); 
+      }
 
       if (this.connected) {
         return resolve(this.accounts);

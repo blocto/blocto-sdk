@@ -270,7 +270,7 @@ export default class AptosProvider
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') {
-        reject('Currently only supported in browser');
+        return reject('Currently only supported in browser');
       }
 
       if (this.connected && this.address) {
@@ -304,6 +304,15 @@ export default class AptosProvider
               const address = e.data.address;
               this.address = address ? address.aptos : undefined;
 
+              setItemWithExpiry(
+                this.sessionKey,
+                {
+                  code: this.code,
+                  address,
+                },
+                LOGIN_PERSISTING_TIME
+              );
+
               if (this.address) {
                 try {
                   const { public_keys: publicKeys } = await fetch(
@@ -318,21 +327,12 @@ export default class AptosProvider
                     minKeysRequired: 2,
                   });
                 } catch (err: any) {
-                  reject(e);
+                  return reject(e);
                 }
               } else {
                 // @todo: better error
                 return reject();
               }
-
-              setItemWithExpiry(
-                this.sessionKey,
-                {
-                  code: this.code,
-                  address,
-                },
-                LOGIN_PERSISTING_TIME
-              );
             }
 
             if (e.data.type === 'APTOS:FRAME:CLOSE') {
