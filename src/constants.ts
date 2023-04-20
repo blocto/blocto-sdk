@@ -22,9 +22,13 @@ export const ETH_CHAIN_ID_RPC_MAPPING: Mapping = {
   // Avalanche Fuji Testnet
   43113: 'https://api.avax-test.network/ext/bc/C/rpc',
 
+  // Arbitrum Mainnet
+  42161: 'https://arb1.arbitrum.io/rpc',
   // Arbitrum Testnet
   421613: 'https://endpoints.omniatech.io/v1/arbitrum/goerli/public',
 
+  // Optimism Mainnet
+  10: 'https://mainnet.optimism.io',
   // Optimism Goerli Testnet
   420: 'https://goerli.optimism.io',
 }
@@ -90,7 +94,9 @@ export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
   80001: 'https://wallet-v2-dev.blocto.app',
   43114: 'https://wallet-v2.blocto.app',
   43113: 'https://wallet-v2-dev.blocto.app',
+  42161: 'https://wallet-v2.blocto.app',
   421613: 'https://wallet-v2-dev.blocto.app',
+  10: 'https://wallet-v2.blocto.app',
   420: 'https://wallet-v2-dev.blocto.app',
 }
 
