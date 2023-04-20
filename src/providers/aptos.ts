@@ -47,7 +47,8 @@ export default class AptosProvider
 
     const sessionCode = session && session.code;
     const sessionAccount =
-      session && session.address && session.address[this.chainId];
+      session && session.address && session.address.aptos;
+    this.connected = Boolean(sessionCode && sessionAccount);
     this.code = sessionCode || null;
     this.address = sessionAccount || undefined;
   }
@@ -89,7 +90,7 @@ export default class AptosProvider
   }
 
   async isConnected(): Promise<boolean> {
-    return !!this.address;
+    return this.connected;
   }
 
   async signTransaction(transaction: any): Promise<SubmitTransactionRequest> {
@@ -269,11 +270,11 @@ export default class AptosProvider
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') {
-        reject('Currently only supported in browser');
+        return reject('Currently only supported in browser');
       }
 
       if (this.connected && this.address) {
-        resolve({
+        return resolve({
           address: this.address,
           publicKey: this.publicKey,
           authKey: null,
@@ -303,6 +304,15 @@ export default class AptosProvider
               const address = e.data.address;
               this.address = address ? address.aptos : undefined;
 
+              setItemWithExpiry(
+                this.sessionKey,
+                {
+                  code: this.code,
+                  address,
+                },
+                LOGIN_PERSISTING_TIME
+              );
+
               if (this.address) {
                 try {
                   const { public_keys: publicKeys } = await fetch(
@@ -317,21 +327,12 @@ export default class AptosProvider
                     minKeysRequired: 2,
                   });
                 } catch (err: any) {
-                  reject(e);
+                  return reject(e);
                 }
               } else {
                 // @todo: better error
                 return reject();
               }
-
-              setItemWithExpiry(
-                this.sessionKey,
-                {
-                  code: this.code,
-                  address,
-                },
-                LOGIN_PERSISTING_TIME
-              );
             }
 
             if (e.data.type === 'APTOS:FRAME:CLOSE') {

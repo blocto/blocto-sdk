@@ -136,7 +136,9 @@ export default class SolanaProvider extends BloctoProvider implements SolanaProv
     this.tryRetrieveSessionFromStorage();
 
     return new Promise((resolve: () => void, reject) => {
-      if (typeof window === 'undefined') { reject('Currently only supported in browser'); }
+      if (typeof window === 'undefined') { 
+        return reject('Currently only supported in browser'); 
+      }
 
       if (this.connected) {
         return resolve();
