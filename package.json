@@ -17,6 +17,6 @@
   },
   "workspaces": [
     "packages/*",
-    "adapter/*"
+    "adapters/*"
   ]
 }
