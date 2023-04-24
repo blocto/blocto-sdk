@@ -2,15 +2,13 @@
   "name": "@blocto/sdk",
   "version": "0.4.3",
   "repository": "git@github.com:portto/blocto-sdk.git",
-  "license": "MIT",
-  "author": "Yang Lin",
+  "author": "Chiaki.C",
   "main": "dist/blocto-sdk.js",
   "module": "dist/blocto-sdk.module.js",
   "browser": "dist/blocto-sdk.umd.js",
   "types": "dist/blocto-sdk.d.ts",
   "files": [
-    "dist",
-    "src"
+    "/dist"
   ],
   "scripts": {
     "build": "NODE_ENV=production rollup -c",
