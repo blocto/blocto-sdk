@@ -1,0 +1,32 @@
+{
+  "name": "@blocto/blocto-wagmi-connector",
+  "description": "blocto wallet connector extend from wagmi Connector to use with web3modal",
+  "author": "Calvin Chang",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "license": "Apache-2.0",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.umd.cjs"
+  },
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.0",
+    "typescript": "^5.0.2",
+    "vite": "^4.3.0",
+    "vite-plugin-dts": "^2.3.0"
+  },
+  "files": [
+    "/dist"
+  ],
+  "dependencies": {
+    "@blocto/sdk": "^0.4.3",
+    "ethers": "^5.7.1",
+    "wagmi": "^0.12.12"
+  }
+}
