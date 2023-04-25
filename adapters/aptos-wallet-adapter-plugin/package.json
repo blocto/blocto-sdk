@@ -1,6 +1,6 @@
 {
   "name": "@blocto/aptos-wallet-adapter-plugin",
-  "version": "0.1.4",
+  "version": "0.1.5-beta.0",
   "description": "Blocto Wallet plugin to use with Aptos Wallet Adapter",
   "author": "Blcoto Wallet",
   "main": "./dist/index.js",
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@aptos-labs/wallet-adapter-core": "^0.2.2",
-    "@blocto/sdk": "^0.4.1",
+    "@blocto/sdk": "^0.4.4-beta.0",
     "aptos": "^1.4.0"
   },
   "devDependencies": {

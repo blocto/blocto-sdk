@@ -1,7 +1,7 @@
 ---
-'@blocto/aptos-wallet-adapter-plugin': minor
-'@blocto/blocto-connector': minor
-'@blocto/sdk': minor
+'@blocto/aptos-wallet-adapter-plugin': patch
+'@blocto/blocto-connector': patch
+'@blocto/sdk': patch
 ---
 
 Migrate with monorepo and changeset
