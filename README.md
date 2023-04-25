@@ -1,6 +1,6 @@
 # Blocto JavaScript SDK
 
-This is a monorepo of Blocto JavaScript SDK.
+This is a monorepo of Blocto JavaScript SDK. Check out the docs here: [docs.blocto.app](https://docs.blocto.app/).
 
 ## What's inside?
 
