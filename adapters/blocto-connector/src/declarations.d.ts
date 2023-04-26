@@ -1,1 +1,1 @@
-declare module '@blocto/sdk'
+declare module '@blocto/sdk';
