@@ -13,7 +13,7 @@ export default defineConfig({
     rollupOptions: {
       input: 'src/index.ts',
       external: ['react', 'react-dom'],
-    }
+    },
   },
   plugins: [dts()],
 });
