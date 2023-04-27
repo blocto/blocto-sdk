@@ -2,13 +2,15 @@
   "mode": "exit",
   "tag": "beta",
   "initialVersions": {
-    "@blocto/aptos-wallet-adapter-plugin": "0.1.4",
-    "@blocto/blocto-connector": "0.4.0-beta",
-    "@blocto/sdk": "0.4.3",
+    "@blocto/aptos-wallet-adapter-plugin": "0.1.5-beta.0",
+    "@blocto/blocto-connector": "0.4.0-beta.0",
+    "@blocto/blocto-wagmi-connector": "0.1.0",
+    "@blocto/sdk": "0.4.4-beta.0",
     "eslint-config-custom": "0.0.0",
     "tsconfig": "0.0.0"
   },
   "changesets": [
-    "healthy-bobcats-complain"
+    "healthy-bobcats-complain",
+    "real-colts-nail"
   ]
 }
