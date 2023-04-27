@@ -1,6 +1,6 @@
 {
   "name": "@blocto/sdk",
-  "version": "0.4.4-beta.1",
+  "version": "0.4.4-beta.2",
   "repository": "git@github.com:portto/blocto-sdk.git",
   "author": "Chiaki.C",
   "main": "dist/blocto-sdk.js",
