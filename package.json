@@ -8,9 +8,9 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "beta-ver": "turbo run build && changeset pre enter beta && changeset version &&  changeset pre exit",
-    "ver": "turbo run build && changeset version",
-    "beta-release": "turbo run build && changeset pre enter beta && changeset publish &&  changeset pre exit",
+    "beta-ver": "changeset pre enter beta && changeset version && changeset pre exit",
+    "ver": "changeset version",
+    "beta-release": "turbo run build && changeset pre enter beta && changeset publish && changeset pre exit",
     "release": "turbo run build && changeset publish",
     "postinstall": "husky install",
     "prepare": "husky install"
