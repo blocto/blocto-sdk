@@ -512,7 +512,7 @@ export default class EthereumProvider
       ) {
         message = params[1];
         const { domain } = JSON.parse(message);
-        if (domain.chainId !== this.chainId) {
+        if (parseChainId(domain.chainId) !== parseChainId(this.chainId)) {
           throw new Error(
             `Provided chainId "${domain.chainId}" must match the active chainId "${this.chainId}"`
           );
