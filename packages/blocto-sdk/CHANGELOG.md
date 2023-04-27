@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.4.4-beta.2
+
+### Patch Changes
+
+- f45f39e: signTypeData condition
+
 ## 0.4.4-beta.1
 
 ### Patch Changes
