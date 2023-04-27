@@ -354,7 +354,9 @@ export default class EthereumProvider
 
           this.server = this.switchableNetwork[this.chainId].wallet_web_url;
           this.accounts = await this.fetchAccounts();
-
+          this.eventListeners.chainChanged.forEach((listener) => 
+            listener(this.chainId)
+          );
           result = null;
           break;
         default:
