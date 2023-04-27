@@ -28,5 +28,6 @@ jobs:
         with:
           version: yarn beta-ver
           commit: 'ci: version packages'
+          title: 'ci: new beta release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

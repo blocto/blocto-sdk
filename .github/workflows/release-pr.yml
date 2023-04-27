@@ -27,5 +27,6 @@ jobs:
         uses: changesets/action@v1
         with:
           commit: 'ci: version packages'
+          title: 'ci: new prod release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
