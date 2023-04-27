@@ -23,9 +23,11 @@ jobs:
       - name: Install Dependencies
         run: yarn
 
-      - name: Create Release Pull Request
+      - name: Create Beta Release Pull Request
         uses: changesets/action@v1
         with:
           version: yarn beta-ver
+          commit: 'ci: version packages'
+          title: 'ci: new beta release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
