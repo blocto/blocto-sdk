@@ -5,13 +5,14 @@
     "@blocto/aptos-wallet-adapter-plugin": "0.1.5-beta.0",
     "@blocto/blocto-connector": "0.4.0-beta.0",
     "@blocto/blocto-wagmi-connector": "0.2.0-beta.0",
-    "@blocto/sdk": "0.4.4-beta.1",
+    "@blocto/sdk": "0.4.4-beta.2",
     "eslint-config-custom": "0.0.0",
     "tsconfig": "0.0.0"
   },
   "changesets": [
     "cool-cars-pretend",
     "healthy-bobcats-complain",
+    "ninety-waves-whisper",
     "real-colts-nail",
     "swift-beds-rest"
   ]
