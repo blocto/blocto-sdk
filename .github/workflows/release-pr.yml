@@ -1,0 +1,40 @@
+name: Prod Release PR
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Prod Release PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Create Release Pull Request to main branch
+        uses: changesets/action@v1
+        with:
+          commit: 'ci: version packages'
+          title: 'ci: new prod release'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }
+
+      - name: Create Release Pull Request to develop branch
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: 'changeset-release/main'
+          destination_branch: 'develop'
+          pr_title: 'ci: merge new prod release back to develop'
+          pr_body: 'Merge new prod release back to develop'
