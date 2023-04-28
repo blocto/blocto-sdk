@@ -1,5 +1,9 @@
 # Blocto JavaScript SDK
 
+![npm (lastest)](https://img.shields.io/npm/v/@blocto/sdk/latest)
+![npm (beta)](https://img.shields.io/npm/v/@blocto/sdk/beta)
+![Discord](https://img.shields.io/discord/720454370650619984.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)
+
 This is a monorepo of Blocto JavaScript SDK. Check out the docs here: [docs.blocto.app](https://docs.blocto.app/).
 
 ## What's inside?
@@ -35,6 +39,8 @@ blocto-sdk
 ├─ adapters
 │  ├─ @blocto/aptos-wallet-adapter-plugin
 │  │  └─ package.json
+│  ├─ @blocto/wagmi-connector
+│  │  └─ package.json
 │  └─ @blocto/blocto-connector
 │     └─ package.json
 └─ package.json
@@ -47,6 +53,11 @@ To build all apps and packages, run the following command:
 ```
 yarn build
 ```
+
+## Contributing
+
+Feel like contributing? That's awesome! We have a
+[contributing guide](./CONTRIBUTING.md) to help guide you.
 
 ## Add changeset
 
