@@ -31,7 +31,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }
 
-      - name: pull-request
+      - name: Create Release Pull Request to develop branch
         uses: repo-sync/pull-request@v2
         with:
           source_branch: 'changeset-release/main'
