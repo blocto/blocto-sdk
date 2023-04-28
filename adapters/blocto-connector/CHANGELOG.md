@@ -1,5 +1,11 @@
 # @blocto/blocto-connector
 
+## 0.4.0-beta.1
+
+### Patch Changes
+
+- 53fbf7f: Changed to newest @blocto/sdk dependencies
+
 ## 0.4.0-beta.0
 
 ### Patch Changes
