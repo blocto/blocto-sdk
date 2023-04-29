@@ -6,6 +6,13 @@
 
 This is a monorepo of Blocto JavaScript SDK. Check out the docs here: [docs.blocto.app](https://docs.blocto.app/).
 
+There are some adapters to make it easier to integrate:
+|lib name|npm|
+|-|-|
+|[@blocto/aptos-wallet-adapter-plugin](./adapters/aptos-wallet-adapter-plugin/)|![npm (lastest)](https://img.shields.io/npm/v/@blocto/aptos-wallet-adapter-plugin/latest)|
+|[@blocto/blocto-connector](./adapters/blocto-connector/)|![npm (lastest)](https://img.shields.io/npm/v/@blocto/blocto-connector/latest)|
+|[@blocto/blocto-wagmi-connector](./adapters/wagmi-connector/)|![npm (lastest)](https://img.shields.io/npm/v/@blocto/blocto-wagmi-connector/latest)|
+
 ## What's inside?
 
 This repo includes the following packages/apps:
