@@ -1,0 +1,43 @@
+name: Create PR from release branch
+
+on:
+  push:
+    branches:
+      - 'release**'
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Create PR from release branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Bump Changeset Version
+        run: yarn ver
+
+      - name: Create Release Pull Request to develop branch
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: ${{ github.head_ref }}
+          destination_branch: 'develop'
+          pr_title: 'ci: new prod release'
+          pr_body: 'Merge new prod release back to develop'
+
+      - name: Create Release Pull Request to main branch
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: ${{ github.head_ref }}
+          destination_branch: 'main'
+          pr_title: 'ci: new prod release'
+          pr_body: 'Pull Request new prod release to main'
