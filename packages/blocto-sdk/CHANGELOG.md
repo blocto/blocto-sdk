@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.4.5-beta.0
+
+### Patch Changes
+
+- 8188f4f: Remove invariant lib prevent process undefined
+
 ## 0.4.4
 
 ### Patch Changes
