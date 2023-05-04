@@ -7,7 +7,7 @@ For usage, please refer to [Blocto SDK Integrate with Web3Modal](https://docs.bl
 ## Usage
 
 ```
-yarn add @blocto/blocto-wagmi-connector
+yarn add @blocto/wagmi-connector
 ```
 
 ## Development

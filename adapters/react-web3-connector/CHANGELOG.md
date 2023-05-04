@@ -1,4 +1,4 @@
-# @blocto/blocto-connector
+# @blocto/react-web3-connector
 
 ## 0.4.1-beta.0
 
