@@ -102,8 +102,9 @@ export class BloctoConnector extends InjectedConnector {
     const provider = await this.getProvider();
     if (!provider) throw new ConnectorNotFoundError();
     try {
+      const providerRpcurl = provider.switchableNetwork[chainId]?.rpc_url
       const chainUrl = chain.rpcUrls?.default?.http[0];
-      if (provider?.switchableNetwork?.rpc_url !== chainUrl) {
+      if (providerRpcurl !== chainUrl) {
         await provider.request({
           method: 'wallet_addEthereumChain',
           params: [
