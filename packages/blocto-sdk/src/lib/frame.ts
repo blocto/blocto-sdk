@@ -1,5 +1,5 @@
 const IFRAME_STYLE =
-  'width:100vw;height:100%;position:fixed;top:0;left:0;z-index:20000;border:none;';
+  'width:100vw;height:100%;position:fixed;top:0;left:0;z-index:2147483646;border:none;';
 
 export function createFrame(url: string): HTMLIFrameElement {
   const frame = document.createElement('iframe');
