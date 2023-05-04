@@ -29,14 +29,13 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "test": "jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --ci --silent"
   },
   "dependencies": {
-    "@aptos-labs/wallet-adapter-core": "^0.2.2",
     "@blocto/sdk": "^0.4.5-beta.0",
     "@rainbow-me/rainbowkit": "^0.12.12",
     "ethers": "^5.7.1",
-    "wagmi": "^0.12.12"
+    "wagmi": "0.12.12"
   },
   "devDependencies": {
     "@types/jest": "^29.2.3",

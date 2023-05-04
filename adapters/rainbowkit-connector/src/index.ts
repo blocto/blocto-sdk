@@ -6,11 +6,6 @@ export interface BloctoWalletOptions {
   chains: Chain[];
 }
 
-// FIXME when rainbowkit update this config, this can remove
-interface BloctoWallet extends Wallet {
-  closeModalOnConnecting?: boolean;
-}
-
 declare global {
   interface Window {
     blocto: any;
@@ -132,7 +127,7 @@ export class BloctoConnector extends InjectedConnector {
 
 export const bloctoWallet = ({
   chains,
-}: BloctoWalletOptions): BloctoWallet => ({
+}: BloctoWalletOptions): Wallet => ({
   id: 'blocto',
   name: 'Blocto',
   iconBackground: '#ffffff',
@@ -143,7 +138,6 @@ export const bloctoWallet = ({
     android: 'https://play.google.com/store/apps/details?id=com.portto.blocto',
   },
   installed: true,
-  closeModalOnConnecting: true,
   createConnector: () => {
     const connector = new BloctoConnector({ chains });
     return {

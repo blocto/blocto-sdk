@@ -1,4 +1,4 @@
-# Blocto RainbowKit wallet connector
+# rainbowkit-connector
 
 [Blocto SDK](https://docs.blocto.app/blocto-sdk/javascript-sdk) connector for [RainbowKit](https://www.rainbowkit.com/) React library.
 
@@ -6,53 +6,52 @@
 
 ### Install package
 
-`yarn add @blocto/blocto-rainbowkit-connector`
+`yarn add @blocto/rainbowkit-connector`
 
 ### Use it in your code
 
 ```TSX
 import {
-  ConnectButton,
+  getDefaultWallets,
   connectorsForWallets,
-  wallet,
-} from '@rainbow-me/rainbowkit';
-import { WagmiConfig } from 'wagmi';
-import { chain, configureChains, createClient } from 'wagmi';
-import { alchemyProvider } from 'wagmi/providers/alchemy';
-import { bloctoWallet } from '@blocto/blocto-rainbowkit-connector';
+  RainbowKitProvider,
+  ConnectButton
+} from "@rainbow-me/rainbowkit";
+import { configureChains, createClient, WagmiConfig, useAccount } from "wagmi";
+import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
+import { bloctoWallet } from '@blocto/rainbowkit-connector';
 
-const defaultProvider = alchemyProvider({
-  apiKey: process.env.ALCHEMY_APIKEY,
-});
-
-export const { chains, provider, webSocketProvider } = configureChains(
-  [chain.polygonMumbai],
-  [defaultProvider],
+const { chains, provider } = configureChains(
+  [mainnet, polygon, optimism, arbitrum],
+  [alchemyProvider({ apiKey: process.env.ALCHEMY_ID }), publicProvider()]
 );
 
+const { wallets } = getDefaultWallets({
+  appName: "My RainbowKit App",
+  projectId: "YOUR_PROJECT_ID",
+  chains
+});
+
 const connectors = connectorsForWallets([
+  ...wallets,
   {
-    groupName: 'Recommended',
+    groupName: "Other",
     wallets: [
-      bloctoWallet({ chains }),
-      wallet.metaMask({ chains }),
-      wallet.rainbow({ chains }),
-      wallet.walletConnect({ chains }),
-    ],
-  },
+      bloctoWallet({ chains }), // add BloctoWallet
+    ]
+  }
 ]);
 
 const wagmiClient = createClient({
   autoConnect: true,
-  connectors: () => [...connectors()],
-  provider,
-  webSocketProvider,
+  connectors,
+  provider
 });
 
 export const App = () => {
   return (
     <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider>
+      <RainbowKitProvider chains={chains}>
         <ConnectButton />
       </RainbowKitProvider>
     </WagmiConfig>
