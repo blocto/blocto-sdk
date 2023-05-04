@@ -3,7 +3,7 @@
   "tag": "beta",
   "initialVersions": {
     "@blocto/aptos-wallet-adapter-plugin": "0.1.5",
-    "@blocto/blocto-connector": "0.4.0",
+    "@blocto/react-web3-connector": "0.4.0",
     "@blocto/blocto-wagmi-connector": "0.2.0",
     "@blocto/sdk": "0.4.4",
     "eslint-config-custom": "0.0.0",
