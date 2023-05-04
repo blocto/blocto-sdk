@@ -1,4 +1,4 @@
-import invariant from 'tiny-invariant';
+import invariant from '../lib/invariant';
 import { Buffer } from 'buffer';
 import { RequestArguments } from 'eip1193-provider';
 // @todo: in the long run we want to remove the dependency of solana web3

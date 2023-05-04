@@ -1,4 +1,4 @@
-import invariant from 'tiny-invariant';
+import invariant from '../lib/invariant';
 import type {
   SignMessagePayload,
   SignMessageResponse,
