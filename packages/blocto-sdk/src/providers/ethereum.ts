@@ -75,17 +75,12 @@ export default class EthereumProvider
 
     invariant(this.chain, `unsupported 'chainId': ${this.chainId}`);
 
-    this.rpc =
-      rpc || ETH_CHAIN_ID_RPC_MAPPING[this.chainId] || process.env.RPC || '';
+    this.rpc = rpc || ETH_CHAIN_ID_RPC_MAPPING[this.chainId] || '';
 
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
-    this.server =
-      server ||
-      ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] ||
-      process.env.SERVER ||
-      '';
-    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
+    this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || '';
+    this.appId = appId || DEFAULT_APP_ID;
 
     this.switchableNetwork[this.chainId] = {
       name: this.chain,

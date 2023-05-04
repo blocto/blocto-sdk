@@ -60,9 +60,8 @@ export default class SolanaProvider
         ? 'https://free.rpcpool.com'
         : `https://api.${net}.solana.com`);
 
-    this.server =
-      server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
-    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
+    this.server = server || SOL_NET_SERVER_MAPPING[this.net] || '';
+    this.appId = appId || DEFAULT_APP_ID;
 
     if (!Solana) {
       throw new Error(
