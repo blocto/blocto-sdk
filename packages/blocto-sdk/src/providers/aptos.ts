@@ -1,4 +1,4 @@
-import invariant from 'tiny-invariant';
+import invariant from '../lib/invariant';
 import type {
   SignMessagePayload,
   SignMessageResponse,
@@ -67,8 +67,8 @@ export default class AptosProvider
 
     const defaultServer = APT_CHAIN_ID_SERVER_MAPPING[chainId];
 
-    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
-    this.server = server || defaultServer || process.env.SERVER || '';
+    this.appId = appId || DEFAULT_APP_ID;
+    this.server = server || defaultServer || '';
   }
 
   get publicAccount(): PublicAccount {

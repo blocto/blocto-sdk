@@ -1,4 +1,4 @@
-import invariant from 'tiny-invariant';
+import invariant from '../lib/invariant';
 import { ProviderAccounts } from 'eip1193-provider';
 import BloctoProvider from './blocto';
 import Session from '../lib/session.d';
@@ -38,7 +38,10 @@ interface SwitchableNetwork {
   };
 }
 
-function parseChainId(chainId: string | number): number {
+function parseChainId(chainId: string | number | null): number {
+  if (!chainId) {
+    return 1;
+  }
   if (typeof chainId === 'number') {
     return chainId;
   } else if (chainId.startsWith('0x')) {
@@ -72,17 +75,12 @@ export default class EthereumProvider
 
     invariant(this.chain, `unsupported 'chainId': ${this.chainId}`);
 
-    this.rpc =
-      rpc || ETH_CHAIN_ID_RPC_MAPPING[this.chainId] || process.env.RPC || '';
+    this.rpc = rpc || ETH_CHAIN_ID_RPC_MAPPING[this.chainId] || '';
 
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
-    this.server =
-      server ||
-      ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] ||
-      process.env.SERVER ||
-      '';
-    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
+    this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || '';
+    this.appId = appId || DEFAULT_APP_ID;
 
     this.switchableNetwork[this.chainId] = {
       name: this.chain,
@@ -354,7 +352,7 @@ export default class EthereumProvider
 
           this.server = this.switchableNetwork[this.chainId].wallet_web_url;
           this.accounts = await this.fetchAccounts();
-          this.eventListeners.chainChanged.forEach((listener) => 
+          this.eventListeners.chainChanged.forEach((listener) =>
             listener(this.chainId)
           );
           result = null;

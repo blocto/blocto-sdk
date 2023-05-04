@@ -5,7 +5,6 @@ import json from 'rollup-plugin-json';
 import polyfills from 'rollup-plugin-node-polyfills';
 import alias from '@rollup/plugin-alias';
 import { babel } from '@rollup/plugin-babel';
-import dotenv from 'rollup-plugin-dotenv';
 
 const config = {
   input: 'src/main.ts',
@@ -15,7 +14,6 @@ const config = {
     name: 'BloctoSDK',
   },
   plugins: [
-    dotenv(),
     alias({
       entries: {
         'readable-stream': 'stream',

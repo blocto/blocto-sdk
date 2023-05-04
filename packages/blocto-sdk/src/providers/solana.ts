@@ -1,4 +1,4 @@
-import invariant from 'tiny-invariant';
+import invariant from '../lib/invariant';
 import { Buffer } from 'buffer';
 import { RequestArguments } from 'eip1193-provider';
 // @todo: in the long run we want to remove the dependency of solana web3
@@ -60,9 +60,8 @@ export default class SolanaProvider
         ? 'https://free.rpcpool.com'
         : `https://api.${net}.solana.com`);
 
-    this.server =
-      server || SOL_NET_SERVER_MAPPING[this.net] || process.env.SERVER || '';
-    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
+    this.server = server || SOL_NET_SERVER_MAPPING[this.net] || '';
+    this.appId = appId || DEFAULT_APP_ID;
 
     if (!Solana) {
       throw new Error(

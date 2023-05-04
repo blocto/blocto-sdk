@@ -3,11 +3,6 @@ import SolanaProvider from './providers/solana';
 import AptosProvider from './providers/aptos';
 import { BloctoSDKConfig } from './index.d';
 
-// eslint-disable-next-line
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 export default class BloctoSDK {
   ethereum?: EthereumProvider;
   solana?: SolanaProvider;

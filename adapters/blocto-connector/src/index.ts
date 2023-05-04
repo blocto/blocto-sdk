@@ -1,6 +1,5 @@
 import { ConnectorUpdate } from '@web3-react/types';
 import { AbstractConnector } from '@web3-react/abstract-connector';
-import invariant from 'tiny-invariant';
 import BloctoSDK from '@blocto/sdk';
 
 interface BloctoConnectorArguments {
@@ -8,29 +7,12 @@ interface BloctoConnectorArguments {
   rpc: string;
 }
 
-const chainIdToNetwork: { [network: number]: string } = {
-  1: 'mainnet',
-  3: 'ropsten',
-  4: 'rinkeby',
-  42: 'kovan',
-  56: 'bsc', // BSC Mainnet
-  97: 'chapel', // BSC Testnet
-  137: 'polygon', // Polygon Mainnet
-  80001: 'mumbai', // Polygon Testnet
-  43114: 'avalanche', // Avalanche Mainnet
-  43113: 'fuji', // Avalanche Testnet
-};
-
 export class BloctoConnector extends AbstractConnector {
   private readonly chainId: number;
   private readonly rpc: string;
   public blocto: any;
 
   constructor({ chainId, rpc }: BloctoConnectorArguments) {
-    invariant(
-      Object.keys(chainIdToNetwork).includes(chainId.toString()),
-      `Unsupported chainId ${chainId}`
-    );
     super({ supportedChainIds: [chainId] });
     this.chainId = chainId;
     this.rpc = rpc;
