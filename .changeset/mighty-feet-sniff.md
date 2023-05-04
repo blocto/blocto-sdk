@@ -1,7 +1,7 @@
 ---
 '@blocto/aptos-wallet-adapter-plugin': patch
 '@blocto/react-web3-connector': patch
-'@blocto/blocto-wagmi-connector': patch
+'@blocto/wagmi-connector': patch
 '@blocto/sdk': patch
 ---
 

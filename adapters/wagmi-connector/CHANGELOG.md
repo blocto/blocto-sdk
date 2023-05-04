@@ -1,4 +1,4 @@
-# @blocto/blocto-wagmi-connector
+# @blocto/wagmi-connector
 
 ## 0.2.1-beta.0
 
