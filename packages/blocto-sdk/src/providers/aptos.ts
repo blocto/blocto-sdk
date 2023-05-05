@@ -27,13 +27,15 @@ import {
 } from '../constants';
 
 const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
+  const formattedPayload: Partial<SignMessagePayload> = { ...payload };
   const { message, nonce, address, application, chainId } = payload;
-  const formattedPayload: Partial<SignMessagePayload> = {};
+
   if (typeof message !== 'string') {
-    formattedPayload.message = message.toString() || '';
+    formattedPayload.message =
+      message && message.toString ? message.toString() : '';
   }
   if (typeof nonce !== 'string') {
-    formattedPayload.nonce = nonce.toString() || '';
+    formattedPayload.nonce = nonce && nonce.toString ? nonce.toString() : '';
   }
   if (address && typeof address !== 'boolean') {
     formattedPayload.address = !!address;
