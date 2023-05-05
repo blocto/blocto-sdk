@@ -31,11 +31,10 @@ const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
   const { message, nonce, address, application, chainId } = payload;
 
   if (typeof message !== 'string') {
-    formattedPayload.message =
-      message && message.toString ? message.toString() : '';
+    formattedPayload.message = message?.toString() ?? '';
   }
   if (typeof nonce !== 'string') {
-    formattedPayload.nonce = nonce && nonce.toString ? nonce.toString() : '';
+    formattedPayload.nonce = nonce?.toString() ?? '';
   }
   if (address && typeof address !== 'boolean') {
     formattedPayload.address = !!address;
