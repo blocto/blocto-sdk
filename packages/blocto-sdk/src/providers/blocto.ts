@@ -3,25 +3,47 @@
 import { EIP1193Provider, RequestArguments } from 'eip1193-provider';
 
 import { EIP1193_EVENTS } from '../constants';
-import { KEY_SESSION } from '../lib/localStorage/constants';
+import { KEY_SESSION, getItemWithExpiry } from '../lib/localStorage';
+import Session from '../lib/session.d';
+import { ProviderSession } from './types/blocto.d';
 
 class BloctoProvider implements EIP1193Provider {
   isBlocto = true;
 
   isConnecting = false;
-  connected = false;
   appId?: string;
 
   eventListeners: { [key: string]: Array<(arg?: any) => void> } = {};
 
-  code: string | null = null;
   sessionKey = KEY_SESSION;
 
-  constructor() {
+  session: ProviderSession;
+
+  constructor(session: ProviderSession) {
+    this.session = session;
     // init event listeners
     EIP1193_EVENTS.forEach((event) => {
       this.eventListeners[event] = [];
     });
+  }
+
+  protected formatAndSetSessionAccount(address: Record<string, string> = {}) {
+    this.session.accounts = Object.keys(address).reduce<
+      Record<string, string[]>
+    >((initial, current) => {
+      initial[current] = [address![current]];
+      return initial;
+    }, {});
+  }
+
+  protected tryRetrieveSessionFromStorage(chain: string) {
+    // load previous connected state
+    const session = getItemWithExpiry<Session>(this.sessionKey, {});
+    const sessionCode = session && session.code;
+    const sessionAccount = session && session.address && session.address[chain];
+    this.session.connected = Boolean(sessionCode && sessionAccount);
+    this.session.code = sessionCode || null;
+    this.formatAndSetSessionAccount(session ? session.address : {});
   }
 
   // implement by children

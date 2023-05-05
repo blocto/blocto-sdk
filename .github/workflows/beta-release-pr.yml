@@ -27,7 +27,7 @@ jobs:
         uses: changesets/action@v1
         with:
           version: yarn beta-ver
-          commit: 'ci: version packages'
+          commit: 'ci: version packages [ci skip]'
           title: 'ci: new beta release'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

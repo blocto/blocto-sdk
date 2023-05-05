@@ -1,10 +1,18 @@
 # Blocto JavaScript SDK
 
-![npm (lastest)](https://img.shields.io/npm/v/@blocto/sdk/latest)
-![npm (beta)](https://img.shields.io/npm/v/@blocto/sdk/beta)
-![Discord](https://img.shields.io/discord/720454370650619984.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)
+[![npm (lastest)](https://img.shields.io/npm/v/@blocto/sdk/latest)](https://www.npmjs.com/package/@blocto/sdk)
+[![npm (beta)](https://img.shields.io/npm/v/@blocto/sdk/beta)](https://www.npmjs.com/package/@blocto/sdk)
+[![Discord](https://img.shields.io/discord/720454370650619984.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.com/invite/QRZTr6yHmY)
 
 This is a monorepo of Blocto JavaScript SDK. Check out the docs here: [docs.blocto.app](https://docs.blocto.app/).
+
+There are some adapters to make it easier to integrate:
+|lib name|npm|
+|-|-|
+|[@blocto/aptos-wallet-adapter-plugin](./adapters/aptos-wallet-adapter-plugin/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/aptos-wallet-adapter-plugin/latest)](https://www.npmjs.com/package/@blocto/aptos-wallet-adapter-plugin)|
+|[@blocto/react-web3-connector](./adapters/react-web3-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/react-web3-connector/latest)](https://www.npmjs.com/package/@blocto/react-web3-connector)|
+|[@blocto/wagmi-connector](./adapters/wagmi-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/wagmi-connector/latest)](https://www.npmjs.com/package/@blocto/wagmi-connector)|
+|[@blocto/rainbowkit-connector](./adapters/rainbowkit-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/wagmi-connector/latest)](https://www.npmjs.com/package/@blocto/rainbowkit-connector)|
 
 ## What's inside?
 
@@ -41,7 +49,7 @@ blocto-sdk
 │  │  └─ package.json
 │  ├─ @blocto/wagmi-connector
 │  │  └─ package.json
-│  └─ @blocto/blocto-connector
+│  └─ @blocto/react-web3-connector
 │     └─ package.json
 └─ package.json
 ```
