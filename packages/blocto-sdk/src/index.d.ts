@@ -26,9 +26,9 @@ export {
   AptosProviderInterface,
 };
 export declare interface BloctoSDKConfig extends BaseConfig {
-  ethereum?: Omit<EthereumProviderConfig, 'appId'>;
-  solana?: Omit<SolanaProviderConfig, 'appId'>;
-  aptos?: Omit<AptosProviderConfig, 'appId'>;
+  ethereum?: Omit<EthereumProviderConfig, 'appId' | 'session'>;
+  solana?: Omit<SolanaProviderConfig, 'appId' | 'session'>;
+  aptos?: Omit<AptosProviderConfig, 'session'>;
 }
 declare class BloctoSDK {
   ethereum?: EthereumProviderInterface;

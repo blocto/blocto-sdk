@@ -1,15 +1,20 @@
 import { EIP1193Provider } from 'eip1193-provider';
 
+export interface ProviderSession {
+  connected: boolean;
+  code: string | null;
+  accounts: Record<string, string[]>;
+}
+
 declare interface BloctoProviderInterface extends EIP1193Provider {
   isBlocto: boolean;
   isConnecting: boolean;
-  connected: boolean;
   appId?: string;
   eventListeners: {
     [key: string]: Array<(arg?: any) => void>;
   };
-  code: string | null;
   sessionKey: string;
+  session: ProviderSession;
 }
 
 export default BloctoProviderInterface;
