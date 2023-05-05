@@ -12,6 +12,7 @@ There are some adapters to make it easier to integrate:
 |[@blocto/aptos-wallet-adapter-plugin](./adapters/aptos-wallet-adapter-plugin/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/aptos-wallet-adapter-plugin/latest)](https://www.npmjs.com/package/@blocto/aptos-wallet-adapter-plugin)|
 |[@blocto/react-web3-connector](./adapters/react-web3-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/react-web3-connector/latest)](https://www.npmjs.com/package/@blocto/react-web3-connector)|
 |[@blocto/wagmi-connector](./adapters/wagmi-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/wagmi-connector/latest)](https://www.npmjs.com/package/@blocto/wagmi-connector)|
+|[@blocto/rainbowkit-connector](./adapters/rainbowkit-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/wagmi-connector/latest)](https://www.npmjs.com/package/@blocto/rainbowkit-connector)|
 
 ## What's inside?
 
