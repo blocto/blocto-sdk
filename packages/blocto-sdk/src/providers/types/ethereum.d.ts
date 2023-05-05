@@ -1,11 +1,12 @@
 import { IEthereumProvider } from 'eip1193-provider';
 import { BaseConfig } from '../../constants';
-import BloctoProviderInterface from './blocto.d';
+import BloctoProviderInterface, { ProviderSession } from './blocto.d';
 
 export declare interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null;
   rpc?: string;
   server?: string;
+  session: ProviderSession;
 }
 
 export interface EIP1193RequestPayload {
@@ -24,7 +25,6 @@ export declare interface EthereumProviderInterface
   net: string;
   rpc: string;
   server: string;
-  accounts: Array<string>;
   request(args: EIP1193RequestPayload): Promise<any>;
   loadSwitchableNetwork(
     networkList: {

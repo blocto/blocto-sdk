@@ -1,7 +1,6 @@
 import invariant from '../lib/invariant';
 import { ProviderAccounts } from 'eip1193-provider';
 import BloctoProvider from './blocto';
-import Session from '../lib/session.d';
 import {
   EIP1193RequestPayload,
   EthereumProviderConfig,
@@ -9,11 +8,7 @@ import {
 } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import {
-  getItemWithExpiry,
-  removeItem,
-  setItemWithExpiry,
-} from '../lib/localStorage';
+import { removeItem, setItemWithExpiry } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   ETH_CHAIN_ID_RPC_MAPPING,
@@ -60,12 +55,17 @@ export default class EthereumProvider
   net: string;
   rpc: string;
   server: string;
-  accounts: Array<string> = [];
   supportNetwork: EvmSupportMapping = {};
   switchableNetwork: SwitchableNetwork = {};
 
-  constructor({ chainId, rpc, server, appId }: EthereumProviderConfig) {
-    super();
+  constructor({
+    chainId,
+    rpc,
+    server,
+    appId,
+    session,
+  }: EthereumProviderConfig) {
+    super(session);
     invariant(chainId, "'chainId' is required");
 
     this.chainId = parseChainId(chainId);
@@ -120,21 +120,6 @@ export default class EthereumProvider
     } else {
       console.warn(`The rpc url ${rpcUrls[0]} is not supported.`);
     }
-  }
-
-  private tryRetrieveSessionFromStorage(): void {
-    // load previous connected state
-    const session: Session | null = getItemWithExpiry<Session>(
-      this.sessionKey,
-      {}
-    );
-
-    const sessionCode = session && session.code;
-    const sessionAccount =
-      session && session.address && session.address[this.chain];
-    this.connected = Boolean(sessionCode && sessionAccount);
-    this.code = sessionCode || null;
-    this.accounts = sessionAccount ? [sessionAccount] : [];
   }
 
   private checkNetworkMatched() {
@@ -252,7 +237,7 @@ export default class EthereumProvider
       return existedSDK.request(payload);
     }
 
-    if (!this.connected) {
+    if (!this.session.connected) {
       const email = payload?.params?.[0];
       if (payload.method === 'eth_requestAccounts' && isEmail(email)) {
         await this.enable(email);
@@ -266,14 +251,14 @@ export default class EthereumProvider
       let result = null;
       switch (payload.method) {
         case 'eth_requestAccounts':
-          this.accounts = await this.fetchAccounts();
+          await this.fetchAccounts();
         // eslint-disable-next-line
         case 'eth_accounts':
-          result = this.accounts;
+          result = this.session.accounts[this.chain];
           break;
         case 'eth_coinbase': {
           // eslint-disable-next-line
-          result = this.accounts[0];
+          result = this.session.accounts[this.chain][0];
           break;
         }
         case 'eth_chainId': {
@@ -351,7 +336,7 @@ export default class EthereumProvider
           invariant(this.rpc, "'rpc' is required");
 
           this.server = this.switchableNetwork[this.chainId].wallet_web_url;
-          this.accounts = await this.fetchAccounts();
+          await this.fetchAccounts();
           this.eventListeners.chainChanged.forEach((listener) =>
             listener(this.chainId)
           );
@@ -388,7 +373,7 @@ export default class EthereumProvider
             method: 'wallet_addEthereumChain',
             params: [{ chainId: `0x${this.chainId.toString(16)}` }],
           });
-          this.accounts = [existedSDK.address];
+          this.session.accounts[this.chain] = [existedSDK.address];
         } catch (e) {
           console.error(e);
         }
@@ -399,15 +384,15 @@ export default class EthereumProvider
       );
     }
 
-    this.tryRetrieveSessionFromStorage();
+    this.tryRetrieveSessionFromStorage(this.chain);
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') {
         return reject('Currently only supported in browser');
       }
 
-      if (this.connected) {
-        return resolve(this.accounts);
+      if (this.session.connected) {
+        return resolve(this.session.accounts[this.chain]);
       }
 
       const params = new URLSearchParams();
@@ -431,25 +416,25 @@ export default class EthereumProvider
               removeListener();
               detatchFrame(loginFrame);
 
-              this.code = e.data.code;
-              this.connected = true;
+              this.session.code = e.data.code;
+              this.session.connected = true;
 
               this.eventListeners.connect.forEach((listener) =>
                 listener(this.chainId)
               );
               const address = e.data.address;
-              this.accounts = address ? [address[this.chain]] : [];
+              this.formatAndSetSessionAccount(address);
 
               setItemWithExpiry(
                 this.sessionKey,
                 {
-                  code: this.code,
+                  code: this.session.code,
                   address,
                 },
                 LOGIN_PERSISTING_TIME
               );
 
-              resolve(this.accounts);
+              resolve(this.session.accounts[this.chain]);
             }
 
             if (e.data.type === 'ETH:FRAME:CLOSE') {
@@ -473,13 +458,13 @@ export default class EthereumProvider
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           'Blocto-Application-Identifier': this.appId!,
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Session-Identifier': this.code!,
+          'Blocto-Session-Identifier': this.session.code!,
         },
       }
     ).then((response) =>
       responseSessionGuard<{ accounts: [] }>(response, this)
     );
-    this.accounts = accounts;
+    this.session.accounts[this.chain] = accounts;
     return accounts;
   }
 
@@ -529,7 +514,7 @@ export default class EthereumProvider
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           'Blocto-Application-Identifier': this.appId!,
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Session-Identifier': this.code!,
+          'Blocto-Session-Identifier': this.session.code!,
         },
         body: JSON.stringify({ method, message }),
       }
@@ -583,7 +568,7 @@ export default class EthereumProvider
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           'Blocto-Application-Identifier': this.appId!,
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Session-Identifier': this.code!,
+          'Blocto-Session-Identifier': this.session.code!,
         },
         body: JSON.stringify(payload.params),
       }
@@ -627,9 +612,9 @@ export default class EthereumProvider
     );
   }
   async handleDisconnect(): Promise<void> {
-    this.connected = false;
-    this.code = null;
-    this.accounts = [];
+    this.session.connected = false;
+    this.session.code = null;
+    this.session.accounts = {};
     removeItem(KEY_SESSION);
   }
 }

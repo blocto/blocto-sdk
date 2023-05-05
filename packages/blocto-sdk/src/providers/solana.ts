@@ -14,10 +14,9 @@ import {
   SolanaProviderConfig,
   SolanaProviderInterface,
 } from './types/solana.d';
-import Session from '../lib/session.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import { getItemWithExpiry, setItemWithExpiry } from '../lib/localStorage';
+import { setItemWithExpiry } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   SOL_NET_SERVER_MAPPING,
@@ -40,15 +39,15 @@ export default class SolanaProvider
   net: string;
   rpc: string;
   server: string;
-  accounts: Array<string> = [];
 
   constructor({
     net = 'mainnet-beta',
     server,
     appId,
     rpc,
+    session,
   }: SolanaProviderConfig) {
-    super();
+    super(session);
 
     invariant(net, "'net' is required");
     invariant(SOL_NET.includes(net), 'unsupported net');
@@ -70,20 +69,8 @@ export default class SolanaProvider
     }
   }
 
-  private tryRetrieveSessionFromStorage() {
-    const session: Session | null = getItemWithExpiry<Session>(
-      this.sessionKey,
-      {}
-    );
-    const sessionCode = session && session.code;
-    const sessionAccount = session && session.address && session.address.solana;
-    this.connected = Boolean(sessionCode && sessionAccount);
-    this.code = sessionCode || null;
-    this.accounts = sessionAccount ? [sessionAccount] : [];
-  }
-
   async request(payload: RequestArguments) {
-    if (!this.connected) {
+    if (!this.session.connected) {
       await this.connect();
     }
 
@@ -98,8 +85,8 @@ export default class SolanaProvider
           this.disconnect();
           break;
         case 'getAccounts':
-          result = this.accounts.length
-            ? this.accounts
+          result = this.session.accounts.solana.length
+            ? this.session.accounts.solana
             : await this.fetchAccounts();
           break;
         case 'getAccountInfo': {
@@ -153,21 +140,21 @@ export default class SolanaProvider
     if (existedSDK && existedSDK.isBlocto) {
       return new Promise((resolve) => {
         existedSDK.on('connect', () => {
-          this.accounts = [existedSDK.publicKey.toBase58()];
+          this.session.accounts.solana = [existedSDK.publicKey.toBase58()];
           resolve();
         });
         existedSDK.connect();
       });
     }
 
-    this.tryRetrieveSessionFromStorage();
+    this.tryRetrieveSessionFromStorage('solana');
 
     return new Promise((resolve: () => void, reject) => {
       if (typeof window === 'undefined') {
         return reject('Currently only supported in browser');
       }
 
-      if (this.connected) {
+      if (this.session.connected) {
         return resolve();
       }
 
@@ -187,19 +174,19 @@ export default class SolanaProvider
               removeListener();
               detatchFrame(loginFrame);
 
-              this.code = e.data.code;
-              this.connected = true;
+              this.session.code = e.data.code;
+              this.session.connected = true;
 
               this.eventListeners.connect.forEach((listener) =>
                 listener(this.net)
               );
               const address = e.data.address;
-              this.accounts = address ? [address.solana] : [];
+              this.formatAndSetSessionAccount(address);
 
               setItemWithExpiry(
                 this.sessionKey,
                 {
-                  code: this.code,
+                  code: this.session.code,
                   address,
                 },
                 LOGIN_PERSISTING_TIME
@@ -225,10 +212,10 @@ export default class SolanaProvider
       await existedSDK.disconnect();
       return;
     }
-    this.code = null;
-    this.accounts = [];
+    this.session.code = null;
+    this.session.accounts = {};
     this.eventListeners.disconnect.forEach((listener) => listener());
-    this.connected = false;
+    this.session.connected = false;
   }
 
   async fetchAccounts(): Promise<string[]> {
@@ -238,10 +225,10 @@ export default class SolanaProvider
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.code!,
+        'Blocto-Session-Identifier': this.session.code!,
       },
     }).then((response) => response.json());
-    this.accounts = accounts;
+    this.session.accounts.solana = accounts;
     return accounts;
   }
 
@@ -363,7 +350,7 @@ export default class SolanaProvider
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.code!,
+        'Blocto-Session-Identifier': this.session.code!,
       },
       body: JSON.stringify(payload.params),
     }).then((response) => responseSessionGuard(response, this));
@@ -380,7 +367,7 @@ export default class SolanaProvider
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.code!,
+        'Blocto-Session-Identifier': this.session.code!,
       },
       body: JSON.stringify(payload.params),
     }).then((response) =>
