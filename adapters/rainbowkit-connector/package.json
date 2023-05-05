@@ -1,6 +1,6 @@
 {
   "name": "@blocto/rainbowkit-connector",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "blocto wallet connector to use rainbowkit",
   "author": "Blcoto Wallet",
   "main": "./dist/index.js",
