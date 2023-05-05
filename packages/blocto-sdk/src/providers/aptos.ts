@@ -27,6 +27,27 @@ import {
   DEFAULT_APP_ID,
 } from '../constants';
 
+const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
+  const { message, nonce, address, application, chainId } = payload;
+  const formattedPayload: Partial<SignMessagePayload> = {};
+  if (typeof message !== 'string') {
+    formattedPayload.message = message.toString() || '';
+  }
+  if (typeof nonce !== 'string') {
+    formattedPayload.nonce = nonce.toString() || '';
+  }
+  if (address && typeof address !== 'boolean') {
+    formattedPayload.address = !!address;
+  }
+  if (application && typeof application !== 'boolean') {
+    formattedPayload.application = !!application;
+  }
+  if (chainId && typeof chainId !== 'boolean') {
+    formattedPayload.chainId = !!chainId;
+  }
+  return formattedPayload;
+};
+
 export default class AptosProvider
   extends BloctoProvider
   implements AptosProviderInterface
@@ -192,8 +213,10 @@ export default class AptosProvider
   async signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {
     const existedSDK = (window as any).bloctoAptos;
 
+    const formattedPayload = checkMessagePayloadFormat(payload);
+
     if (existedSDK) {
-      return existedSDK.signMessage(payload);
+      return existedSDK.signMessage(formattedPayload);
     }
 
     const hasConnected = await this.isConnected();
@@ -220,7 +243,7 @@ export default class AptosProvider
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           'Blocto-Session-Identifier': this.code!,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formattedPayload),
       }
     ).then((response) =>
       responseSessionGuard<{ signatureId: string }>(response, this)
