@@ -1,5 +1,18 @@
 # @blocto/react-web3-connector
 
+## 0.4.1-beta.1
+
+### Patch Changes
+
+- 8313b19: Format signing message payload for Aptos
+- 4da58d8: Fix incorrect session id error when the user logs in/out on the different chains
+- 655d1ca: Fix the formatting funciton for Aptos signing message
+- Updated dependencies [8313b19]
+- Updated dependencies [6e2cd2c]
+- Updated dependencies [4da58d8]
+- Updated dependencies [655d1ca]
+  - @blocto/sdk@0.4.5-beta.1
+
 ## 0.4.1-beta.0
 
 ### Patch Changes

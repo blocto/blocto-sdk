@@ -1,5 +1,14 @@
 # @blocto/sdk
 
+## 0.4.5-beta.1
+
+### Patch Changes
+
+- 8313b19: Format signing message payload for Aptos
+- 6e2cd2c: iframe z-index adjust to the highest
+- 4da58d8: Fix incorrect session id error when the user logs in/out on the different chains
+- 655d1ca: Fix the formatting funciton for Aptos signing message
+
 ## 0.4.5-beta.0
 
 ### Patch Changes
