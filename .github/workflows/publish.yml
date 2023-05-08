@@ -1,4 +1,4 @@
-name: Prod Release PR
+name: Publish to npm
 
 on:
   push:
@@ -9,7 +9,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: Prod Release PR
+    name: Publish to npm
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -23,11 +23,9 @@ jobs:
       - name: Install Dependencies
         run: yarn
 
-      - name: Create Release Pull Request to main branch
+      - name: Attempting to publish packages to npm
         uses: changesets/action@v1
         with:
-          commit: 'ci: version packages'
-          title: 'ci: new prod release'
           publish: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

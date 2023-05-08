@@ -1,16 +1,19 @@
-name: Create PR from release branch
+name: Create version PR from release branch
 
 on:
   push:
     branches:
       - 'release**'
+      - 'hotfix**'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: Create PR from release branch
+    name: Create version PR from release branch
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -25,19 +28,27 @@ jobs:
 
       - name: Bump Changeset Version
         run: yarn ver
-
-      - name: Create Release Pull Request to develop branch
-        uses: repo-sync/pull-request@v2
+      
+      - name: Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          source_branch: ${{ github.head_ref }}
-          destination_branch: 'develop'
-          pr_title: 'ci: new prod release'
-          pr_body: 'Merge new prod release back to develop'
+          commit_message: 'ci: bump package version'
+          commit_options: '--no-verify'
 
       - name: Create Release Pull Request to main branch
         uses: repo-sync/pull-request@v2
         with:
           source_branch: ${{ github.head_ref }}
           destination_branch: 'main'
-          pr_title: 'ci: new prod release'
-          pr_body: 'Pull Request new prod release to main'
+          pr_title: 'Release: Merge to publish new version to npm'
+          pr_body: |
+            Please review and merge this Pull Request.
+            Caution: Merge to main branch will trigger publish to npm.
+
+      - name: Create Release Pull Request to develop branch
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: ${{ github.head_ref }}
+          destination_branch: 'develop'
+          pr_title: 'Release: Merge back new version to develop'
+          pr_body: 'Merge new prod release back to develop'
