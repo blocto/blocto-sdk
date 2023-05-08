@@ -1,4 +1,4 @@
-import invariant from 'tiny-invariant';
+import invariant from '../lib/invariant';
 import type {
   SignMessagePayload,
   SignMessageResponse,
@@ -6,7 +6,6 @@ import type {
   HexEncodedBytes,
 } from 'aptos';
 import BloctoProvider from './blocto';
-import Session from '../lib/session.d';
 import {
   AptosProviderConfig,
   AptosProviderInterface,
@@ -17,7 +16,7 @@ import {
 } from './types/aptos.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import { getItemWithExpiry, setItemWithExpiry } from '../lib/localStorage';
+import { setItemWithExpiry } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   APT_CHAIN_ID_SERVER_MAPPING,
@@ -27,34 +26,42 @@ import {
   DEFAULT_APP_ID,
 } from '../constants';
 
+const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
+  const formattedPayload: Partial<SignMessagePayload> = { ...payload };
+  const { message, nonce, address, application, chainId } = payload;
+
+  if (typeof message !== 'string') {
+    formattedPayload.message = message?.toString() ?? '';
+  }
+  if (typeof nonce !== 'string') {
+    formattedPayload.nonce = nonce?.toString() ?? '';
+  }
+  if (address && typeof address !== 'boolean') {
+    formattedPayload.address = !!address;
+  }
+  if (application && typeof application !== 'boolean') {
+    formattedPayload.application = !!application;
+  }
+  if (chainId && typeof chainId !== 'boolean') {
+    formattedPayload.chainId = !!chainId;
+  }
+  return formattedPayload;
+};
+
 export default class AptosProvider
   extends BloctoProvider
   implements AptosProviderInterface
 {
   publicKey: string[] = [];
-  address?: string;
   authKey = '';
   server: string;
   chainId: number;
   networkName: WalletAdapterNetwork;
   api?: string;
 
-  private tryRetrieveSessionFromStorage(): void {
-    // load previous connected state
-    const session: Session | null = getItemWithExpiry<Session>(
-      this.sessionKey,
-      {}
-    );
+  constructor({ chainId, server, appId, session }: AptosProviderConfig) {
+    super(session);
 
-    const sessionCode = session && session.code;
-    const sessionAccount = session && session.address && session.address.aptos;
-    this.connected = Boolean(sessionCode && sessionAccount);
-    this.code = sessionCode || null;
-    this.address = sessionAccount || undefined;
-  }
-
-  constructor({ chainId, server, appId }: AptosProviderConfig) {
-    super();
     invariant(chainId, "'chainId' is required");
     invariant(
       appId,
@@ -67,13 +74,13 @@ export default class AptosProvider
 
     const defaultServer = APT_CHAIN_ID_SERVER_MAPPING[chainId];
 
-    this.appId = appId || process.env.APP_ID || DEFAULT_APP_ID;
-    this.server = server || defaultServer || process.env.SERVER || '';
+    this.appId = appId || DEFAULT_APP_ID;
+    this.server = server || defaultServer || '';
   }
 
   get publicAccount(): PublicAccount {
     return {
-      address: this.address || null,
+      address: this.session.accounts.aptos[0] || null,
       publicKey: this.publicKey.length ? this.publicKey : null,
       // @todo: provide authkey
       authKey: null,
@@ -90,7 +97,7 @@ export default class AptosProvider
   }
 
   async isConnected(): Promise<boolean> {
-    return this.connected;
+    return this.session.connected;
   }
 
   async signTransaction(transaction: any): Promise<SubmitTransactionRequest> {
@@ -103,7 +110,7 @@ export default class AptosProvider
     if (!hasConnected) {
       await this.connect();
     }
-    if (!this.address) {
+    if (!this.session.accounts.aptos.length) {
       throw new Error('Fail to get account');
     }
     throw new Error('signTransaction method not supported.');
@@ -115,9 +122,9 @@ export default class AptosProvider
       await existedSDK.disconnect();
       return;
     }
-    this.code = null;
-    this.address = undefined;
-    this.connected = false;
+    this.session.code = null;
+    this.session.accounts = {};
+    this.session.connected = false;
   }
 
   async signAndSubmitTransaction(
@@ -134,7 +141,7 @@ export default class AptosProvider
     if (!hasConnected) {
       await this.connect();
     }
-    if (!this.address) {
+    if (!this.session.accounts.aptos.length) {
       throw new Error('Fail to get account');
     }
 
@@ -146,7 +153,7 @@ export default class AptosProvider
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.code!,
+        'Blocto-Session-Identifier': this.session.code!,
       },
       body: JSON.stringify({ ...transaction, ...txOptions }),
     }).then((response) =>
@@ -192,15 +199,17 @@ export default class AptosProvider
   async signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {
     const existedSDK = (window as any).bloctoAptos;
 
+    const formattedPayload = checkMessagePayloadFormat(payload);
+
     if (existedSDK) {
-      return existedSDK.signMessage(payload);
+      return existedSDK.signMessage(formattedPayload);
     }
 
     const hasConnected = await this.isConnected();
     if (!hasConnected) {
       await this.connect();
     }
-    if (!this.address) {
+    if (!this.session.accounts.aptos.length) {
       throw new Error('Fail to get account');
     }
 
@@ -218,9 +227,9 @@ export default class AptosProvider
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           'Blocto-Application-Identifier': this.appId!,
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Session-Identifier': this.code!,
+          'Blocto-Session-Identifier': this.session.code!,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(formattedPayload),
       }
     ).then((response) =>
       responseSessionGuard<{ signatureId: string }>(response, this)
@@ -266,16 +275,16 @@ export default class AptosProvider
       );
     }
 
-    this.tryRetrieveSessionFromStorage();
+    this.tryRetrieveSessionFromStorage('aptos');
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') {
         return reject('Currently only supported in browser');
       }
 
-      if (this.connected && this.address) {
+      if (this.session.connected && this.session.accounts.aptos.length) {
         return resolve({
-          address: this.address,
+          address: this.session.accounts.aptos[0],
           publicKey: this.publicKey,
           authKey: null,
           minKeysRequired: 2,
@@ -298,30 +307,30 @@ export default class AptosProvider
               removeListener();
               detatchFrame(loginFrame);
 
-              this.code = e.data.code;
-              this.connected = true;
+              this.session.code = e.data.code;
+              this.session.connected = true;
 
               const address = e.data.address;
-              this.address = address ? address.aptos : undefined;
+              this.formatAndSetSessionAccount(address);
 
               setItemWithExpiry(
                 this.sessionKey,
                 {
-                  code: this.code,
+                  code: this.session.code,
                   address,
                 },
                 LOGIN_PERSISTING_TIME
               );
 
-              if (this.address) {
+              if (this.session.accounts.aptos.length) {
                 try {
                   const { public_keys: publicKeys } = await fetch(
-                    `${this.server}/blocto/aptos/accounts/${this.address}`
+                    `${this.server}/blocto/aptos/accounts/${this.session.accounts.aptos[0]}`
                   ).then((response) => response.json());
                   this.publicKey = publicKeys || [];
 
                   resolve({
-                    address: this.address || '',
+                    address: this.session.accounts.aptos[0] || '',
                     publicKey: this.publicKey,
                     authKey: null,
                     minKeysRequired: 2,
@@ -353,12 +362,12 @@ export default class AptosProvider
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.code!,
+        'Blocto-Session-Identifier': this.session.code!,
       },
     }).then((response) =>
       responseSessionGuard<{ accounts: string[] }>(response, this)
     );
-    this.address = accounts[0] || undefined;
-    return this.address;
+    this.session.accounts.aptos = accounts || [];
+    return this.session.accounts.aptos[0];
   }
 }

@@ -8,7 +8,6 @@ import json from 'rollup-plugin-json';
 import polyfills from 'rollup-plugin-node-polyfills';
 import alias from '@rollup/plugin-alias';
 import { babel } from '@rollup/plugin-babel';
-import dotenv from 'rollup-plugin-dotenv';
 import dts from 'rollup-plugin-dts';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 
@@ -30,7 +29,6 @@ export default [
       exports: 'auto',
     },
     plugins: [
-      dotenv(),
       alias({
         entries: {
           'readable-stream': 'stream',
@@ -47,7 +45,9 @@ export default [
       babel({
         babelHelpers: 'runtime',
         exclude: 'node_modules/**',
-        plugins: [['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }]],
+        plugins: [
+          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
+        ],
         presets: [['@babel/preset-env']],
       }),
       polyfills(),
@@ -63,7 +63,6 @@ export default [
       name: 'BloctoSDK',
     },
     plugins: [
-      dotenv(),
       alias({
         entries: {
           'readable-stream': 'stream',
@@ -80,7 +79,9 @@ export default [
       babel({
         babelHelpers: 'runtime',
         exclude: 'node_modules/**',
-        plugins: [['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }]],
+        plugins: [
+          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
+        ],
         presets: [['@babel/preset-env']],
       }),
       polyfills(),
@@ -96,7 +97,6 @@ export default [
       name: 'BloctoSDK',
     },
     plugins: [
-      dotenv(),
       alias({
         entries: {
           'readable-stream': 'stream',
@@ -124,4 +124,4 @@ export default [
     output: [{ file: 'dist/blocto-sdk.d.ts', format: 'es' }],
     plugins: [dts()],
   },
-]
+];

@@ -1,15 +1,15 @@
-name: Beta Release PR
+name: Publish to npm
 
 on:
   push:
     branches:
-      - develop
+      - main
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: Beta Release PR
+    name: Publish to npm
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -23,11 +23,11 @@ jobs:
       - name: Install Dependencies
         run: yarn
 
-      - name: Create Beta Release Pull Request
+      - name: Attempting to publish packages to npm
         uses: changesets/action@v1
         with:
-          version: yarn beta-ver
-          commit: 'ci: version packages'
-          title: 'ci: new beta release'
+          publish: yarn release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

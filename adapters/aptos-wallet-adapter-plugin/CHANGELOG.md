@@ -1,5 +1,28 @@
 # @blocto/aptos-wallet-adapter-plugin
 
+## 0.1.6
+
+### Patch Changes
+
+- 8313b19: Format signing message payload for Aptos
+- 8188f4f: Remove invariant lib prevent process undefined
+- 4da58d8: Fix incorrect session id error when the user logs in/out on the different chains
+- 655d1ca: Fix the formatting funciton for Aptos signing message
+- Updated dependencies [8313b19]
+- Updated dependencies [6e2cd2c]
+- Updated dependencies [8188f4f]
+- Updated dependencies [4da58d8]
+- Updated dependencies [655d1ca]
+  - @blocto/sdk@0.4.5
+
+## 0.1.6-beta.0
+
+### Patch Changes
+
+- 8188f4f: Remove invariant lib prevent process undefined
+- Updated dependencies [8188f4f]
+  - @blocto/sdk@0.4.5-beta.0
+
 ## 0.1.5
 
 ### Patch Changes
