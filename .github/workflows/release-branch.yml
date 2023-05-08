@@ -24,9 +24,12 @@ jobs:
         with:
           node-version: 16
 
-      - name: Bump Changeset Version
-        run: npx changeset version
+      - name: Install Dependencies
+        run: yarn
 
+      - name: Bump Changeset Version
+        run: yarn ver
+      
       - name: Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
