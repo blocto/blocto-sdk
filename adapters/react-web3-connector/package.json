@@ -1,6 +1,6 @@
 {
   "name": "@blocto/react-web3-connector",
-  "version": "0.4.1-beta.0",
+  "version": "0.4.1",
   "description": "A Blocto SDK connector for web3-react",
   "main": "dist/index.js",
   "module": "dist/react-web3-connector.esm.js",
@@ -39,7 +39,7 @@
     "url": "git://github.com/portto/blocto-sdk.git"
   },
   "dependencies": {
-    "@blocto/sdk": "^0.4.5-beta.0",
+    "@blocto/sdk": "^0.4.5",
     "@web3-react/abstract-connector": "^6.0.7",
     "@web3-react/types": "^6.0.7"
   },
