@@ -10,7 +10,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "beta-ver": "changeset pre enter beta && changeset version && changeset pre exit",
     "ver": "changeset version",
-    "beta-release": "turbo run build && changeset pre enter beta && changeset publish && changeset pre exit",
+    "beta-release": "turbo run build && changeset pre enter beta && changeset version && changeset publish && changeset pre exit",
     "release": "turbo run build && changeset publish && git push origin --tags",
     "postinstall": "husky install",
     "prepare": "husky install"
