@@ -1,16 +1,22 @@
+declare global {
+  interface Window {
+    memoryStorage: MemoryStorage;
+  }
+}
+
 class MemoryStorage {
   storage = {};
 
   getItem(key: string) {
-    return this[key] || null;
+    return (this as any)[key] || null;
   }
 
   setItem(key: string, value: any) {
-    this.storage[key] = value;
+    (this.storage as any)[key] = value;
   }
 
   removeItem(key: string) {
-    delete this.storage[key];
+    delete (this.storage as any)[key];
   }
 }
 

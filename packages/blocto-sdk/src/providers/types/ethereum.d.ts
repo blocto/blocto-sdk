@@ -2,7 +2,7 @@ import { IEthereumProvider } from 'eip1193-provider';
 import { BaseConfig } from '../../constants';
 import BloctoProviderInterface, { ProviderSession } from './blocto.d';
 
-export declare interface EthereumProviderConfig extends BaseConfig {
+export interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null;
   rpc?: string;
   server?: string;
@@ -16,7 +16,7 @@ export interface EIP1193RequestPayload {
   params?: Array<any>;
 }
 
-export declare interface EthereumProviderInterface
+export interface EthereumProviderInterface
   extends BloctoProviderInterface,
     IEthereumProvider {
   chainId: string | number;

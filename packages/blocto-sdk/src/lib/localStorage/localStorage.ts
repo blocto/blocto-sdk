@@ -85,7 +85,7 @@ export const removeOutdatedKeys = (): void => {
   );
 
   // Using 'Object.values()' fails unit testing because some browsers don't support it
-  const dexscanKeys = Object.keys(keys).map((it) => keys[it]);
+  const dexscanKeys = Object.keys(keys).map((it) => (keys as any)[it]);
 
   localDexscanKeys.forEach((localCobKey) => {
     const hasMatch = dexscanKeys.some((key) => key === localCobKey);

@@ -1,11 +1,10 @@
 import invariant from '../lib/invariant';
-import type {
+import type { Types as AptosTypes } from 'aptos';
+import BloctoProvider from './blocto';
+import {
   SignMessagePayload,
   SignMessageResponse,
-  SubmitTransactionRequest,
-  HexEncodedBytes,
-} from 'aptos';
-import BloctoProvider from './blocto';
+} from '@aptos-labs/wallet-adapter-core';
 import {
   AptosProviderConfig,
   AptosProviderInterface,
@@ -31,10 +30,10 @@ const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
   const { message, nonce, address, application, chainId } = payload;
 
   if (typeof message !== 'string') {
-    formattedPayload.message = message?.toString() ?? '';
+    formattedPayload.message = String(message) ?? '';
   }
   if (typeof nonce !== 'string') {
-    formattedPayload.nonce = nonce?.toString() ?? '';
+    formattedPayload.nonce = String(nonce) ?? '';
   }
   if (address && typeof address !== 'boolean') {
     formattedPayload.address = !!address;
@@ -100,7 +99,9 @@ export default class AptosProvider
     return this.session.connected;
   }
 
-  async signTransaction(transaction: any): Promise<SubmitTransactionRequest> {
+  async signTransaction(
+    transaction: any
+  ): Promise<AptosTypes.SubmitTransactionRequest> {
     const existedSDK = (window as any).bloctoAptos;
     if (existedSDK) {
       return existedSDK.signTransaction(transaction);
@@ -130,7 +131,7 @@ export default class AptosProvider
   async signAndSubmitTransaction(
     transaction: any,
     txOptions: TxOptions = {}
-  ): Promise<{ hash: HexEncodedBytes }> {
+  ): Promise<{ hash: AptosTypes.HexEncodedBytes }> {
     const existedSDK = (window as any).bloctoAptos;
 
     if (existedSDK) {

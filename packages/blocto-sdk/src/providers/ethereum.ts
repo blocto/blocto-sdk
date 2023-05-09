@@ -91,7 +91,7 @@ export default class EthereumProvider
     };
   }
 
-  private checkAndAddNetwork({
+  #checkAndAddNetwork({
     chainId,
     rpcUrls,
   }: {
@@ -122,7 +122,7 @@ export default class EthereumProvider
     }
   }
 
-  private checkNetworkMatched() {
+  #checkNetworkMatched() {
     const existedSDK = (window as any).ethereum;
     if (
       existedSDK &&
@@ -147,7 +147,7 @@ export default class EthereumProvider
         networkList.forEach(({ chainId: chain_id, rpcUrls }) => {
           invariant(rpcUrls, 'rpcUrls is required for networksList');
           if (!rpcUrls?.length) throw new Error('Empty rpcUrls array');
-          this.checkAndAddNetwork({ chainId: parseChainId(chain_id), rpcUrls });
+          this.#checkAndAddNetwork({ chainId: parseChainId(chain_id), rpcUrls });
         });
       }
       return null;
@@ -301,7 +301,7 @@ export default class EthereumProvider
           }
           await getEvmSupport().then((supportNetwork) => {
             this.supportNetwork = supportNetwork;
-            this.checkAndAddNetwork({
+            this.#checkAndAddNetwork({
               chainId: parseChainId(payload?.params?.[0]?.chainId),
               rpcUrls: payload?.params?.[0].rpcUrls,
             });
@@ -449,7 +449,7 @@ export default class EthereumProvider
   }
 
   async fetchAccounts() {
-    this.checkNetworkMatched();
+    this.#checkNetworkMatched();
     const { accounts } = await fetch(
       `${this.server}/api/${this.chain}/accounts`,
       {
@@ -469,7 +469,7 @@ export default class EthereumProvider
   }
 
   async handleReadRequests(payload: EIP1193RequestPayload) {
-    this.checkNetworkMatched();
+    this.#checkNetworkMatched();
     return fetch(this.rpc, {
       method: 'POST',
       headers: {
@@ -503,7 +503,7 @@ export default class EthereumProvider
       }
     }
 
-    this.checkNetworkMatched();
+    this.#checkNetworkMatched();
     const { signatureId } = await fetch(
       `${this.server}/api/${this.chain}/user-signature`,
       {
@@ -557,7 +557,7 @@ export default class EthereumProvider
   }
 
   async handleSendTransaction(payload: EIP1193RequestPayload) {
-    this.checkNetworkMatched();
+    this.#checkNetworkMatched();
     const { authorizationId } = await fetch(
       `${this.server}/api/${this.chain}/authz`,
       {
