@@ -1,9 +1,9 @@
 {
-  "name": "@blocto/react-web3-connector",
+  "name": "@blocto/web3-react-connector",
   "version": "0.4.1",
   "description": "A Blocto SDK connector for web3-react",
   "main": "dist/index.js",
-  "module": "dist/react-web3-connector.esm.js",
+  "module": "dist/web3-react-connector.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
     "/dist"
