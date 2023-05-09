@@ -36,7 +36,6 @@ export const ETH_CHAIN_ID_RPC_MAPPING: Mapping = {
 export const ETH_CHAIN_ID_CHAIN_MAPPING: Mapping = {
   // Ethereum
   1: 'ethereum',
-  4: 'ethereum',
   5: 'ethereum',
 
   // BSC
@@ -63,7 +62,6 @@ export const ETH_CHAIN_ID_CHAIN_MAPPING: Mapping = {
 export const ETH_CHAIN_ID_NET_MAPPING: Mapping = {
   // Ethereum
   1: 'mainnet',
-  4: 'rinkeby',
   5: 'testnet',
 
   // BSC
@@ -89,7 +87,6 @@ export const ETH_CHAIN_ID_NET_MAPPING: Mapping = {
 
 export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
   1: 'https://wallet-v2.blocto.app',
-  4: 'https://wallet-v2-dev.blocto.app',
   5: 'https://wallet-v2-dev.blocto.app',
   56: 'https://wallet-v2.blocto.app',
   97: 'https://wallet-v2-dev.blocto.app',
