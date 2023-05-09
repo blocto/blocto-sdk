@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.4.6
+
+### Patch Changes
+
+- 76a1b11: Add goerli support
+
 ## 0.4.5
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @blocto/react-web3-connector
 
+## 0.4.2
+
+### Patch Changes
+
+- 76a1b11: Add goerli support
+- Updated dependencies [76a1b11]
+  - @blocto/sdk@0.4.6
+
 ## 0.4.1
 
 ### Patch Changes
