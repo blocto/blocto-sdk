@@ -49,9 +49,9 @@ blocto-sdk
 │  │  └─ package.json
 │  ├─ @blocto/rainbowkit-connector
 │  │  └─ package.json
-│  └─ @blocto/react-web3-connector
+│  └─ @blocto/wagmi-connector
 │  │  └─ package.json
-│  ├─ @blocto/wagmi-connector
+│  ├─ @blocto/web3-react-connector
 │  │  └─ package.json
 └─ package.json
 ```

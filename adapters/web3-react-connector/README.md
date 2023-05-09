@@ -7,7 +7,7 @@ Blocto SDK connector for web3-react. For usage, please refer to [Blocto SDK web3
 ### Install Dependencies
 
 ```bash
-yarn
+yarn add @blocto/web3-react-connector
 ```
 
 ### Build
