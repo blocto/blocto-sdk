@@ -7,15 +7,15 @@ declare global {
 class MemoryStorage {
   storage = {};
 
-  getItem(key: string) {
+  getItem(key: string): string | null {
     return (this as any)[key] || null;
   }
 
-  setItem(key: string, value: any) {
+  setItem(key: string, value: unknown): void {
     (this.storage as any)[key] = value;
   }
 
-  removeItem(key: string) {
+  removeItem(key: string): void {
     delete (this.storage as any)[key];
   }
 }

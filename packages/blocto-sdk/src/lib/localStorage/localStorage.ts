@@ -17,11 +17,11 @@ const isSupported = () => {
 
 const storage = isSupported() ? window.localStorage : MemoryStorage;
 
-export const getItem = <T>(
+export const getItem = (
   key: string,
-  defaultValue: T | null = null
-): T | null => {
-  const value = storage.getItem(key);
+  defaultValue: string | null = null
+): string | null => {
+  const value = storage.getItem(key) || '';
 
   try {
     return JSON.parse(value) || defaultValue;
@@ -50,15 +50,19 @@ export const getItemWithExpiry = <T>(
   return rawExpiry.value;
 };
 
-export const getRawItem = (key: string): string => storage.getItem(key);
+export const getRawItem = (key: string): string | null => storage.getItem(key);
 
-export const setItem = (key: string, value: any): void =>
+export const setItem = (key: string, value: unknown): void =>
   storage.setItem(
     key,
     typeof value === 'string' ? value : JSON.stringify(value)
   );
 
-export const setItemWithExpiry = (key: string, value: any, ttl: number): void =>
+export const setItemWithExpiry = (
+  key: string,
+  value: unknown,
+  ttl: number
+): void =>
   setItem(key, {
     value,
     expiry: new Date().getTime() + ttl,

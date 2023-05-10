@@ -3,6 +3,25 @@ import BloctoProviderInterface, { ProviderSession } from './blocto.d';
 
 export { WalletAdapterNetwork } from '../../constants';
 
+export interface SignMessagePayload {
+  address?: boolean;
+  application?: boolean;
+  chainId?: boolean;
+  message: string;
+  nonce: string;
+}
+export interface SignMessageResponse {
+  address?: string;
+  application?: string;
+  chainId?: number;
+  fullMessage: string;
+  message: string;
+  nonce: string;
+  prefix: 'APTOS';
+  signature: string | string[];
+  bitmap?: Uint8Array;
+}
+
 export declare interface AptosProviderConfig extends BaseConfig {
   // @todo: support different network
   chainId: number;

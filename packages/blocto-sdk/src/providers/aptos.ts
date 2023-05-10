@@ -2,16 +2,14 @@ import invariant from '../lib/invariant';
 import type { Types as AptosTypes } from 'aptos';
 import BloctoProvider from './blocto';
 import {
-  SignMessagePayload,
-  SignMessageResponse,
-} from '@aptos-labs/wallet-adapter-core';
-import {
   AptosProviderConfig,
   AptosProviderInterface,
   NetworkInfo,
   PublicAccount,
   WalletAdapterNetwork,
   TxOptions,
+  SignMessagePayload,
+  SignMessageResponse,
 } from './types/aptos.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
@@ -100,7 +98,7 @@ export default class AptosProvider
   }
 
   async signTransaction(
-    transaction: any
+    transaction: unknown
   ): Promise<AptosTypes.SubmitTransactionRequest> {
     const existedSDK = (window as any).bloctoAptos;
     if (existedSDK) {
@@ -129,7 +127,7 @@ export default class AptosProvider
   }
 
   async signAndSubmitTransaction(
-    transaction: any,
+    transaction: AptosTypes.TransactionPayload,
     txOptions: TxOptions = {}
   ): Promise<{ hash: AptosTypes.HexEncodedBytes }> {
     const existedSDK = (window as any).bloctoAptos;
@@ -356,7 +354,7 @@ export default class AptosProvider
     });
   }
 
-  async fetchAddress() {
+  async fetchAddress(): Promise<string> {
     const { accounts } = await fetch(`${this.server}/api/aptos/accounts`, {
       headers: {
         // We already check the existence in the constructor

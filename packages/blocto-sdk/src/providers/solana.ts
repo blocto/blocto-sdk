@@ -69,7 +69,7 @@ export default class SolanaProvider
     }
   }
 
-  async request(payload: RequestArguments) {
+  async request(payload: RequestArguments): Promise<any> {
     if (!this.session.connected) {
       await this.connect();
     }
@@ -214,7 +214,7 @@ export default class SolanaProvider
     }
     this.session.code = null;
     this.session.accounts = {};
-    this.eventListeners.disconnect.forEach((listener) => listener());
+    this.eventListeners.disconnect.forEach((listener) => listener(null));
     this.session.connected = false;
   }
 
@@ -293,7 +293,10 @@ export default class SolanaProvider
 
   // solana web3 utility
   // eslint-disable-next-line class-methods-use-this
-  async toTransaction(raw: string, signatures: TransactionSignature[]) {
+  async toTransaction(
+    raw: string,
+    signatures: TransactionSignature[]
+  ): Promise<Transaction> {
     const message: Message = Solana.Message.from(Buffer.from(raw, 'hex'));
     const transaction = new Solana.Transaction();
     transaction.recentBlockhash = message.recentBlockhash;
@@ -332,7 +335,9 @@ export default class SolanaProvider
 
   // solana web3 utility
   // eslint-disable-next-line class-methods-use-this
-  async collectSignatures(transaction: Transaction) {
+  async collectSignatures(
+    transaction: Transaction
+  ): Promise<{ [key: string]: string }> {
     return transaction.signatures.reduce((acc, cur) => {
       if (cur.signature) {
         acc[cur.publicKey.toBase58()] = cur.signature.toString('hex');
@@ -341,7 +346,7 @@ export default class SolanaProvider
     }, {} as { [key: string]: string });
   }
 
-  async handleConvertTransaction(payload: RequestArguments) {
+  async handleConvertTransaction(payload: RequestArguments): Promise<unknown> {
     return fetch(`${this.server}/api/solana/convertToWalletTx`, {
       method: 'POST',
       headers: {

@@ -5,6 +5,9 @@ import {
   EIP1193RequestPayload,
   EthereumProviderConfig,
   EthereumProviderInterface,
+  JsonRpcRequest,
+  JsonRpcResponse,
+  JsonRpcCallback,
 } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
@@ -122,7 +125,7 @@ export default class EthereumProvider
     }
   }
 
-  #checkNetworkMatched() {
+  #checkNetworkMatched(): void {
     const existedSDK = (window as any).ethereum;
     if (
       existedSDK &&
@@ -147,41 +150,64 @@ export default class EthereumProvider
         networkList.forEach(({ chainId: chain_id, rpcUrls }) => {
           invariant(rpcUrls, 'rpcUrls is required for networksList');
           if (!rpcUrls?.length) throw new Error('Empty rpcUrls array');
-          this.#checkAndAddNetwork({ chainId: parseChainId(chain_id), rpcUrls });
+          this.#checkAndAddNetwork({
+            chainId: parseChainId(chain_id),
+            rpcUrls,
+          });
         });
       }
       return null;
     });
   }
 
-  // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
-  async send(arg1: any, arg2: any) {
+  // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
+  async send(
+    methodOrPayload: string | JsonRpcRequest,
+    paramsOrCallback: Array<unknown> | JsonRpcCallback
+  ): Promise<void | JsonRpcResponse> {
     switch (true) {
       // signature type 1: arg1 - JSON-RPC payload, arg2 - callback;
-      case arg2 instanceof Function:
-        return this.sendAsync(arg1, arg2);
+      // ethereum.send(payload: JsonRpcRequest, callback: JsonRpcCallback): void;
+      // This signature is exactly like ethereum.sendAsync()
+      case paramsOrCallback instanceof Function:
+        return this.sendAsync(
+          <JsonRpcRequest>methodOrPayload,
+          <JsonRpcCallback>paramsOrCallback
+        );
       // signature type 2: arg1 - JSON-RPC method name, arg2 - params array;
-      case typeof arg1 === 'string' && Array.isArray(arg2):
-        return this.sendAsync({ method: arg1, params: arg2 });
+      // ethereum.send(method: string, params?: Array<unknown>): Promise<JsonRpcResponse>;
+      // This signature is like an async ethereum.sendAsync() with method and params as arguments,
+      // instead of a JSON-RPC payload and callback
+      case typeof methodOrPayload === 'string' &&
+        Array.isArray(paramsOrCallback):
+        return this.sendAsync({
+          jsonrpc: '2.0',
+          method: <string>methodOrPayload,
+          params: <Array<any>>paramsOrCallback,
+        });
       // signature type 3: arg1 - JSON-RPC payload(should be synchronous methods)
+      // ethereum.send(payload: JsonRpcRequest): unknown;
+      // This signature enables you to call some type of RPC methods synchronously
       default:
-        return this.sendAsync(arg1);
+        return this.sendAsync(<JsonRpcRequest>methodOrPayload);
     }
   }
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
   // web3 v1.x BatchRequest still depends on it so we need to implement anyway ¯\_(ツ)_/¯
   async sendAsync(
-    payload: any,
-    callback?: (argOrError: any, arg?: any) => any
-  ) {
-    const handleRequest = new Promise((resolve) => {
+    payload: JsonRpcRequest | Array<JsonRpcRequest>,
+    callback?: JsonRpcCallback
+  ): Promise<void | JsonRpcResponse> {
+    const handleRequest: Promise<
+      void | JsonRpcResponse | Array<JsonRpcResponse>
+    > = new Promise((resolve) => {
       // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
       if (Array.isArray(payload)) {
         // collect transactions and send batch with custom method
         const transactions = payload
           .filter((request) => request.method === 'eth_sendTransaction')
-          .map((request) => request.params[0]);
+          .map((request) => request.params?.[0]);
 
         const idBase = Math.floor(Math.random() * 10000);
 
@@ -206,32 +232,35 @@ export default class EthereumProvider
         // resolve response when all request are executed
         Promise.allSettled(requests).then((responses) =>
           resolve(
-            responses.map((response, index) => ({
-              id: idBase + index + 1,
-              jsonrpc: '2.0',
-              result:
-                response.status === 'fulfilled' ? response.value : undefined,
-              error:
-                response.status !== 'fulfilled' ? response.reason : undefined,
-            }))
+            <Array<JsonRpcResponse>>responses.map((response, index) => {
+              return {
+                id: String(idBase + index + 1),
+                jsonrpc: '2.0',
+                method: payload[index].method,
+                result:
+                  response.status === 'fulfilled' ? response.value : undefined,
+                error:
+                  response.status !== 'fulfilled' ? response.reason : undefined,
+              };
+            })
           )
         );
       } else {
-        this.request(payload).then(resolve);
+        this.request({ ...payload, id: Number(payload.id) }).then(resolve);
       }
     });
 
     // execute callback or return promise, depdends on callback arg given or not
     if (callback) {
       handleRequest
-        .then((data) => callback(null, data))
+        .then((data) => callback(null, <JsonRpcResponse>(<unknown>data)))
         .catch((error) => callback(error));
     } else {
-      return handleRequest;
+      return <JsonRpcResponse>(<unknown>handleRequest);
     }
   }
 
-  async request(payload: EIP1193RequestPayload) {
+  async request(payload: EIP1193RequestPayload): Promise<any> {
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
       return existedSDK.request(payload);
@@ -448,7 +477,7 @@ export default class EthereumProvider
     });
   }
 
-  async fetchAccounts() {
+  async fetchAccounts(): Promise<ProviderAccounts> {
     this.#checkNetworkMatched();
     const { accounts } = await fetch(
       `${this.server}/api/${this.chain}/accounts`,
@@ -468,7 +497,7 @@ export default class EthereumProvider
     return accounts;
   }
 
-  async handleReadRequests(payload: EIP1193RequestPayload) {
+  async handleReadRequests(payload: EIP1193RequestPayload): Promise<any> {
     this.#checkNetworkMatched();
     return fetch(this.rpc, {
       method: 'POST',
@@ -479,7 +508,7 @@ export default class EthereumProvider
     }).then((response) => response.json());
   }
 
-  async handleSign({ method, params }: EIP1193RequestPayload) {
+  async handleSign({ method, params }: EIP1193RequestPayload): Promise<any> {
     let message = '';
     if (Array.isArray(params)) {
       if (method === 'eth_sign') {
@@ -556,7 +585,7 @@ export default class EthereumProvider
     );
   }
 
-  async handleSendTransaction(payload: EIP1193RequestPayload) {
+  async handleSendTransaction(payload: EIP1193RequestPayload): Promise<any> {
     this.#checkNetworkMatched();
     const { authorizationId } = await fetch(
       `${this.server}/api/${this.chain}/authz`,
