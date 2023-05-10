@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Connector, Chain, ConnectorData, SwitchChainError } from 'wagmi';
 import type {
   EthereumProviderConfig as BloctoOptions,
@@ -25,7 +26,7 @@ class BloctoConnector extends Connector<
     super(config);
   }
 
-  getProvider() {
+  getProvider(): Promise<BloctoProvider> {
     if (!this.#provider) {
       this.#provider = new BloctoSDK({ ethereum: this.options })?.ethereum;
     }
