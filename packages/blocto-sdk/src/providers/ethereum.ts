@@ -173,7 +173,7 @@ export default class EthereumProvider
         return this.sendAsync(
           <JsonRpcRequest>methodOrPayload,
           <JsonRpcCallback>paramsOrCallback
-        );
+        ) as Promise<void | JsonRpcResponse>;
       // signature type 2: arg1 - JSON-RPC method name, arg2 - params array;
       // ethereum.send(method: string, params?: Array<unknown>): Promise<JsonRpcResponse>;
       // This signature is like an async ethereum.sendAsync() with method and params as arguments,
@@ -184,12 +184,14 @@ export default class EthereumProvider
           jsonrpc: '2.0',
           method: <string>methodOrPayload,
           params: <Array<any>>paramsOrCallback,
-        });
+        }) as Promise<void | JsonRpcResponse>;
       // signature type 3: arg1 - JSON-RPC payload(should be synchronous methods)
       // ethereum.send(payload: JsonRpcRequest): unknown;
       // This signature enables you to call some type of RPC methods synchronously
       default:
-        return this.sendAsync(<JsonRpcRequest>methodOrPayload);
+        return this.sendAsync(
+          <JsonRpcRequest>methodOrPayload
+        ) as Promise<void | JsonRpcResponse>;
     }
   }
 
@@ -198,7 +200,7 @@ export default class EthereumProvider
   async sendAsync(
     payload: JsonRpcRequest | Array<JsonRpcRequest>,
     callback?: JsonRpcCallback
-  ): Promise<void | JsonRpcResponse> {
+  ): Promise<JsonRpcResponse | Array<JsonRpcResponse> | void> {
     const handleRequest: Promise<
       void | JsonRpcResponse | Array<JsonRpcResponse>
     > = new Promise((resolve) => {

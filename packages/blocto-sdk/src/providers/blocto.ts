@@ -30,11 +30,12 @@ class BloctoProvider implements EIP1193Provider {
 
   protected formatAndSetSessionAccount(
     address: Record<string, string> = {}
-  ): Record<string, string[]> | void {
+  ): void {
     this.session.accounts = Object.keys(address).reduce<
       Record<string, string[]>
     >((initial, current) => {
-      initial[current] = [address?.[current]];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      initial[current] = [address![current]];
       return initial;
     }, {});
   }

@@ -17,16 +17,12 @@ const isSupported = () => {
 
 const storage = isSupported() ? window.localStorage : MemoryStorage;
 
-export const getItem = (
-  key: string,
-  defaultValue: string | null = null
-): string | null => {
-  const value = storage.getItem(key) || '';
-
+export const getItem = <T>(key: string, defaultValue: T | null = null): T | null => {
+  const value = storage.getItem(key);
   try {
-    return JSON.parse(value) || defaultValue;
+    return (value && JSON.parse(value)) || defaultValue;
   } catch (SyntaxError) {
-    return value || defaultValue;
+    return (value as T) || defaultValue;
   }
 };
 

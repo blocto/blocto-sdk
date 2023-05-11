@@ -64,9 +64,7 @@ class BloctoConnector extends Connector<
 
     return provider
       .request({ method: 'eth_requestAccounts' })
-      .then(
-        (accounts): `0x${string}` => (accounts as string)[0] as `0x${string}`
-      );
+      .then((accounts): `0x${string}` => (accounts as `0x${string}`[])[0]);
   }
 
   async getChainId(): Promise<number> {
