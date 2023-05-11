@@ -587,7 +587,7 @@ export default class EthereumProvider
     );
   }
 
-  async handleSendTransaction(payload: EIP1193RequestPayload): Promise<any> {
+  async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
     const { authorizationId } = await fetch(
       `${this.server}/api/${this.chain}/authz`,
