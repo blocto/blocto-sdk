@@ -64,7 +64,7 @@ class BloctoConnector extends Connector<
 
     return provider
       .request({ method: 'eth_requestAccounts' })
-      .then((accounts): `0x${string}` => (accounts as `0x${string}`[])[0]);
+      .then((accounts): `0x${string}` => accounts[0]);
   }
 
   async getChainId(): Promise<number> {
@@ -72,7 +72,7 @@ class BloctoConnector extends Connector<
 
     return provider
       .request({ method: 'eth_chainId' })
-      .then((chainId): number => parseInt(chainId as string));
+      .then((chainId): number => parseInt(chainId));
   }
 
   async getSigner(

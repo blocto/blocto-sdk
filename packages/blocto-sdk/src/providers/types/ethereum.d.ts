@@ -25,7 +25,7 @@ export interface EthereumProviderInterface
   net: string;
   rpc: string;
   server: string;
-  request(args: EIP1193RequestPayload): Promise<unknown>;
+  request(args: EIP1193RequestPayload): Promise<any>;
   loadSwitchableNetwork(
     networkList: {
       chainId: string;
@@ -58,3 +58,9 @@ export type JsonRpcCallback = (
   error: Error | null,
   response?: JsonRpcResponse
 ) => unknown;
+
+export type Request<T> = T extends string
+  ? { url: string }
+  : T extends number
+  ? { count: number }
+  : { data: T };
