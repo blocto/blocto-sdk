@@ -510,7 +510,7 @@ export default class EthereumProvider
     }).then((response) => response.json());
   }
 
-  async handleSign({ method, params }: EIP1193RequestPayload): Promise<any> {
+  async handleSign({ method, params }: EIP1193RequestPayload): Promise<string> {
     let message = '';
     if (Array.isArray(params)) {
       if (method === 'eth_sign') {
