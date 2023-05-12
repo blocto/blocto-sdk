@@ -62,21 +62,17 @@ export class BloctoWallet implements AdapterPlugin {
   }
 
   async connect(): Promise<AccountInfo> {
-    try {
-      const accountInfo = await this.provider?.connect();
-      if (!accountInfo) throw `${BloctoWalletName} Address Info Error`;
-      if (!accountInfo.address) throw `${BloctoWalletName} address null`;
-      if (!accountInfo.publicKey) throw `${BloctoWalletName} publicKey null`;
-      if (!accountInfo.minKeysRequired)
-        throw `${BloctoWalletName} minKeysRequired null`;
-      return {
-        address: accountInfo.address,
-        publicKey: accountInfo.publicKey,
-        minKeysRequired: accountInfo.minKeysRequired,
-      };
-    } catch (error: any) {
-      throw error;
-    }
+    const accountInfo = await this.provider?.connect();
+    if (!accountInfo) throw `${BloctoWalletName} Address Info Error`;
+    if (!accountInfo.address) throw `${BloctoWalletName} address null`;
+    if (!accountInfo.publicKey) throw `${BloctoWalletName} publicKey null`;
+    if (!accountInfo.minKeysRequired)
+      throw `${BloctoWalletName} minKeysRequired null`;
+    return {
+      address: accountInfo.address,
+      publicKey: accountInfo.publicKey,
+      minKeysRequired: accountInfo.minKeysRequired,
+    };
   }
 
   async account(): Promise<AccountInfo> {
@@ -94,87 +90,54 @@ export class BloctoWallet implements AdapterPlugin {
   }
 
   async disconnect(): Promise<void> {
-    try {
-      await this.provider?.disconnect();
-    } catch (error: any) {
-      throw error;
-    }
+    await this.provider?.disconnect();
   }
 
   async signAndSubmitTransaction(
     transaction: Types.TransactionPayload,
     options?: any
   ): Promise<{ hash: Types.HexEncodedBytes }> {
-    try {
-      try {
-        const provider = this.provider;
-        const response = await provider?.signAndSubmitTransaction(
-          transaction,
-          options
-        );
-        if (response) {
-          return { hash: response.hash };
-        } else {
-          throw new Error('Transaction failed');
-        }
-      } catch (error: any) {
-        throw new Error(error.message || error);
-      }
-    } catch (error: any) {
-      const errMsg = error.message;
-      throw errMsg;
+    const provider = this.provider;
+    const response = await provider?.signAndSubmitTransaction(
+      transaction,
+      options
+    );
+    if (response) {
+      return { hash: response.hash };
+    } else {
+      throw new Error('Transaction failed');
     }
   }
 
   async signMessage(message: SignMessagePayload): Promise<SignMessageResponse> {
-    try {
-      if (typeof message !== 'object' || !message.nonce) {
-        `${BloctoWalletName} Invalid signMessage Payload`;
-      }
-      const response = await this.provider?.signMessage(message);
-      if (response) {
-        return response;
-      } else {
-        throw `${BloctoWalletName} Sign Message failed`;
-      }
-    } catch (error: any) {
-      const errMsg = error.message;
-      throw errMsg;
+    if (typeof message !== 'object' || !message.nonce) {
+      `${BloctoWalletName} Invalid signMessage Payload`;
+    }
+    const response = await this.provider?.signMessage(message);
+    if (response) {
+      return response;
+    } else {
+      throw `${BloctoWalletName} Sign Message failed`;
     }
   }
 
   async network(): Promise<NetworkInfo> {
-    try {
-      const response = await this.provider?.network();
-      if (!response) throw `${BloctoWalletName} Network Error`;
-      const name = response.name as unknown;
-      return {
-        name: name as NetworkName,
-        chainId: response.chainId,
-      };
-    } catch (error: any) {
-      throw error;
-    }
+    const response = await this.provider?.network();
+    if (!response) throw `${BloctoWalletName} Network Error`;
+    const name = response.name as unknown;
+    return {
+      name: name as NetworkName,
+      chainId: response.chainId,
+    };
   }
 
-  async onNetworkChange(callback: any): Promise<void> {
-    try {
-      // not supported yet
-      return Promise.resolve();
-    } catch (error: any) {
-      const errMsg = error.message;
-      throw errMsg;
-    }
+  async onNetworkChange(): Promise<void> {
+    // not supported yet
+    return Promise.resolve();
   }
 
-  async onAccountChange(callback: any): Promise<void> {
-    try {
-      // not supported yet
-      return Promise.resolve();
-    } catch (error: any) {
-      console.log(error);
-      const errMsg = error.message;
-      throw errMsg;
-    }
+  async onAccountChange(): Promise<void> {
+    // not supported yet
+    return Promise.resolve();
   }
 }

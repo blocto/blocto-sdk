@@ -17,16 +17,12 @@ const isSupported = () => {
 
 const storage = isSupported() ? window.localStorage : MemoryStorage;
 
-export const getItem = <T>(
-  key: string,
-  defaultValue: T | null = null
-): T | null => {
+export const getItem = <T>(key: string, defaultValue: T | null = null): T | null => {
   const value = storage.getItem(key);
-
   try {
-    return JSON.parse(value) || defaultValue;
+    return (value && JSON.parse(value)) || defaultValue;
   } catch (SyntaxError) {
-    return value || defaultValue;
+    return (value as T) || defaultValue;
   }
 };
 
@@ -50,15 +46,19 @@ export const getItemWithExpiry = <T>(
   return rawExpiry.value;
 };
 
-export const getRawItem = (key: string): string => storage.getItem(key);
+export const getRawItem = (key: string): string | null => storage.getItem(key);
 
-export const setItem = (key: string, value: any): void =>
+export const setItem = (key: string, value: unknown): void =>
   storage.setItem(
     key,
     typeof value === 'string' ? value : JSON.stringify(value)
   );
 
-export const setItemWithExpiry = (key: string, value: any, ttl: number): void =>
+export const setItemWithExpiry = (
+  key: string,
+  value: unknown,
+  ttl: number
+): void =>
   setItem(key, {
     value,
     expiry: new Date().getTime() + ttl,
@@ -85,7 +85,7 @@ export const removeOutdatedKeys = (): void => {
   );
 
   // Using 'Object.values()' fails unit testing because some browsers don't support it
-  const dexscanKeys = Object.keys(keys).map((it) => keys[it]);
+  const dexscanKeys = Object.keys(keys).map((it) => (keys as any)[it]);
 
   localDexscanKeys.forEach((localCobKey) => {
     const hasMatch = dexscanKeys.some((key) => key === localCobKey);

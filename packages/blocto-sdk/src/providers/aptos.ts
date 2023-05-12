@@ -1,10 +1,5 @@
 import invariant from '../lib/invariant';
-import type {
-  SignMessagePayload,
-  SignMessageResponse,
-  SubmitTransactionRequest,
-  HexEncodedBytes,
-} from 'aptos';
+import type { Types as AptosTypes } from 'aptos';
 import BloctoProvider from './blocto';
 import {
   AptosProviderConfig,
@@ -13,6 +8,8 @@ import {
   PublicAccount,
   WalletAdapterNetwork,
   TxOptions,
+  SignMessagePayload,
+  SignMessageResponse,
 } from './types/aptos.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
@@ -31,10 +28,10 @@ const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
   const { message, nonce, address, application, chainId } = payload;
 
   if (typeof message !== 'string') {
-    formattedPayload.message = message?.toString() ?? '';
+    formattedPayload.message = String(message) ?? '';
   }
   if (typeof nonce !== 'string') {
-    formattedPayload.nonce = nonce?.toString() ?? '';
+    formattedPayload.nonce = String(nonce) ?? '';
   }
   if (address && typeof address !== 'boolean') {
     formattedPayload.address = !!address;
@@ -100,7 +97,9 @@ export default class AptosProvider
     return this.session.connected;
   }
 
-  async signTransaction(transaction: any): Promise<SubmitTransactionRequest> {
+  async signTransaction(
+    transaction: unknown
+  ): Promise<AptosTypes.SubmitTransactionRequest> {
     const existedSDK = (window as any).bloctoAptos;
     if (existedSDK) {
       return existedSDK.signTransaction(transaction);
@@ -128,9 +127,9 @@ export default class AptosProvider
   }
 
   async signAndSubmitTransaction(
-    transaction: any,
+    transaction: AptosTypes.TransactionPayload,
     txOptions: TxOptions = {}
-  ): Promise<{ hash: HexEncodedBytes }> {
+  ): Promise<{ hash: AptosTypes.HexEncodedBytes }> {
     const existedSDK = (window as any).bloctoAptos;
 
     if (existedSDK) {
@@ -355,7 +354,7 @@ export default class AptosProvider
     });
   }
 
-  async fetchAddress() {
+  async fetchAddress(): Promise<string> {
     const { accounts } = await fetch(`${this.server}/api/aptos/accounts`, {
       headers: {
         // We already check the existence in the constructor

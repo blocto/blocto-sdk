@@ -26,8 +26,8 @@ export class BloctoConnector extends InjectedConnector {
     super({
       chains,
       options: {
-        getProvider: () => {
-          const getBlocto = (blocto?: any) =>
+        getProvider: (): any => {
+          const getBlocto = (blocto?: any): any =>
             blocto?.isBlocto ? blocto : undefined;
           if (typeof window === 'undefined') return;
           return getBlocto(window.blocto);
@@ -37,7 +37,7 @@ export class BloctoConnector extends InjectedConnector {
     this.#chains = chains;
   }
 
-  async connect() {
+  async connect(): Promise<any> {
     const res = super.connect();
     const blocto = await this.getBlocto();
     if (!blocto) throw new ConnectorNotFoundError();
@@ -45,13 +45,13 @@ export class BloctoConnector extends InjectedConnector {
     return res;
   }
 
-  async disconnect() {
+  async disconnect(): Promise<any> {
     super.disconnect();
     const blocto = await this.getBlocto();
     if (!blocto) throw new ConnectorNotFoundError();
     await blocto?.ethereum?.request({ method: 'wallet_disconnect' });
   }
-  async getBlocto() {
+  async getBlocto(): Promise<any> {
     if (!this.blocto) {
       const [defaultChain] = this.#chains ?? [];
       this.blocto = new BloctoSDK({
@@ -71,7 +71,7 @@ export class BloctoConnector extends InjectedConnector {
     return this.provider;
   }
 
-  async getAccount() {
+  async getAccount(): Promise<any> {
     const blocto = await this.getBlocto();
     if (!blocto) throw new ConnectorNotFoundError();
     const accounts = await blocto?.ethereum?.request({
@@ -102,7 +102,7 @@ export class BloctoConnector extends InjectedConnector {
     const provider = await this.getProvider();
     if (!provider) throw new ConnectorNotFoundError();
     try {
-      const providerRpcurl = provider.switchableNetwork[chainId]?.rpc_url
+      const providerRpcurl = provider.switchableNetwork[chainId]?.rpc_url;
       const chainUrl = chain.rpcUrls?.default?.http[0];
       if (providerRpcurl !== chainUrl) {
         await provider.request({
@@ -126,9 +126,7 @@ export class BloctoConnector extends InjectedConnector {
   }
 }
 
-export const bloctoWallet = ({
-  chains,
-}: BloctoWalletOptions): Wallet => ({
+export const bloctoWallet = ({ chains }: BloctoWalletOptions): Wallet => ({
   id: 'blocto',
   name: 'Blocto',
   iconBackground: '#ffffff',
@@ -139,7 +137,7 @@ export const bloctoWallet = ({
     android: 'https://play.google.com/store/apps/details?id=com.portto.blocto',
   },
   installed: true,
-  createConnector: () => {
+  createConnector: (): any => {
     const connector = new BloctoConnector({ chains });
     return {
       connector,

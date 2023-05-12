@@ -1,11 +1,20 @@
 module.exports = {
-  extends: ["next", "turbo", "prettier"],
+  extends: [
+    'turbo',
+    'prettier',
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  root: true,
   rules: {
-    "@next/next/no-html-link-for-pages": "off",
+    '@typescript-eslint/no-explicit-any': 'off',
   },
-  parserOptions: {
-    babelOptions: {
-      presets: [require.resolve("next/babel")],
-    },
+  env: {
+    node: true,
+    es6: true,
+    browser: true,
+    jest: true,
   },
 };

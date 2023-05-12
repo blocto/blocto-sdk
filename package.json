@@ -20,11 +20,11 @@
     "@commitlint/cli": "^17.6.1",
     "@commitlint/config-angular": "^17.6.1",
     "@commitlint/config-conventional": "^17.6.1",
-    "eslint": "^7.32.0",
+    "eslint": "^8.40.0",
     "eslint-config-custom": "*",
     "husky": "^8.0.0",
-    "prettier": "^2.5.1",
-    "turbo": "latest"
+    "prettier": "^2.8.8",
+    "turbo": "^1.9.4"
   },
   "workspaces": [
     "packages/*",
