@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.4.7-beta.1
+
+### Patch Changes
+
+- 0570b1e: Export types from Blocto SDK
+
 ## 0.4.7-beta.0
 
 ### Patch Changes

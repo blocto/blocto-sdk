@@ -2,15 +2,16 @@
   "mode": "exit",
   "tag": "beta",
   "initialVersions": {
-    "@blocto/aptos-wallet-adapter-plugin": "0.1.7",
-    "@blocto/rainbowkit-connector": "0.1.1",
-    "@blocto/wagmi-connector": "0.2.2",
-    "@blocto/web3-react-connector": "0.4.2",
-    "@blocto/sdk": "0.4.6",
+    "@blocto/aptos-wallet-adapter-plugin": "0.1.8-beta.0",
+    "@blocto/rainbowkit-connector": "0.1.2-beta.0",
+    "@blocto/wagmi-connector": "0.2.3-beta.0",
+    "@blocto/web3-react-connector": "0.4.3-beta.0",
+    "@blocto/sdk": "0.4.7-beta.0",
     "eslint-config-custom": "0.0.0",
     "tsconfig": "0.0.0"
   },
   "changesets": [
-    "giant-kiwis-beg"
+    "giant-kiwis-beg",
+    "rude-kings-shave"
   ]
 }
