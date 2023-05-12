@@ -1,5 +1,13 @@
 # @blocto/web3-react-connector
 
+## 0.4.3-beta.0
+
+### Patch Changes
+
+- ebfb0da: Fix TypeScript types and eslint errors
+- Updated dependencies [ebfb0da]
+  - @blocto/sdk@0.4.7-beta.0
+
 ## 0.4.2
 
 ### Patch Changes
