@@ -29,7 +29,8 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --ci --silent"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --ci --silent",
+    "lint": "eslint src --ext .ts"
   },
   "dependencies": {
     "@blocto/sdk": "^0.4.6",

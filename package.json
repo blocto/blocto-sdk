@@ -23,8 +23,8 @@
     "eslint": "^8.40.0",
     "eslint-config-custom": "*",
     "husky": "^8.0.0",
-    "prettier": "^2.5.1",
-    "turbo": "latest"
+    "prettier": "^2.8.8",
+    "turbo": "^1.9.4"
   },
   "workspaces": [
     "packages/*",
