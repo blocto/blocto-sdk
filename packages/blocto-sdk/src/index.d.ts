@@ -13,6 +13,8 @@ import {
 import {
   AptosProviderConfig,
   AptosProviderInterface,
+  SignMessagePayload as AptosSignMessagePayload,
+  SignMessageResponse as AptosSignMessageResponse,
 } from './providers/types/aptos.d';
 
 export * from './providers/types/blocto.d';
@@ -24,6 +26,8 @@ export {
   SolanaProviderInterface,
   AptosProviderConfig,
   AptosProviderInterface,
+  AptosSignMessagePayload,
+  AptosSignMessageResponse,
 };
 export declare interface BloctoSDKConfig extends BaseConfig {
   ethereum?: Omit<EthereumProviderConfig, 'appId' | 'session'>;
