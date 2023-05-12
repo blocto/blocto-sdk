@@ -1,0 +1,16 @@
+{
+  "mode": "exit",
+  "tag": "beta",
+  "initialVersions": {
+    "@blocto/aptos-wallet-adapter-plugin": "0.1.7",
+    "@blocto/rainbowkit-connector": "0.1.1",
+    "@blocto/wagmi-connector": "0.2.2",
+    "@blocto/web3-react-connector": "0.4.2",
+    "@blocto/sdk": "0.4.6",
+    "eslint-config-custom": "0.0.0",
+    "tsconfig": "0.0.0"
+  },
+  "changesets": [
+    "giant-kiwis-beg"
+  ]
+}

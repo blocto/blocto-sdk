@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.4.7-beta.0
+
+### Patch Changes
+
+- ebfb0da: Fix TypeScript types and eslint errors
+
 ## 0.4.6
 
 ### Patch Changes

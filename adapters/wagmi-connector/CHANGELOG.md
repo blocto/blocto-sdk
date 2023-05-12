@@ -1,5 +1,13 @@
 # @blocto/wagmi-connector
 
+## 0.2.3-beta.0
+
+### Patch Changes
+
+- ebfb0da: Fix TypeScript types and eslint errors
+- Updated dependencies [ebfb0da]
+  - @blocto/sdk@0.4.7-beta.0
+
 ## 0.2.2
 
 ### Patch Changes
