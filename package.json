@@ -8,6 +8,7 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "test": "turbo run test",
     "beta-ver": "changeset pre enter beta && changeset version && changeset pre exit",
     "ver": "changeset version",
     "beta-release": "turbo run build && changeset pre enter beta && changeset version && changeset publish && changeset pre exit",
@@ -24,7 +25,7 @@
     "eslint-config-custom": "*",
     "husky": "^8.0.0",
     "prettier": "^2.8.8",
-    "turbo": "^1.9.4"
+    "turbo": "^1.9.6"
   },
   "workspaces": [
     "packages/*",

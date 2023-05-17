@@ -29,7 +29,6 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --ci --silent",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
