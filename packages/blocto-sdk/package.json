@@ -78,5 +78,21 @@
     "aptos": {
       "optional": true
     }
-  }
+  },
+  "keywords": [
+    "portto",
+    "blocto",
+    "ethereum",
+    "solana",
+    "aptos",
+    "wallet",
+    "sdk",
+    "web3",
+    "web3.js",
+    "javascript",
+    "typescript",
+    "dapp",
+    "react",
+    "vue"
+  ]
 }
