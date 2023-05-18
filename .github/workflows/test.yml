@@ -14,6 +14,10 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 6.32.2
+
       - name: Cache turbo build setup
         uses: actions/cache@v3
         with:
@@ -26,10 +30,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: 'yarn'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: yarn
+        run: pnpm install
 
       - name: Lint, Test, and Try to Build
-        run: yarn turbo lint test build --cache-dir=.turbo
+        run: pnpm turbo lint test build --cache-dir=.turbo
