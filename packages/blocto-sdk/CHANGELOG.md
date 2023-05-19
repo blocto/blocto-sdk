@@ -1,5 +1,12 @@
 # @blocto/sdk
 
+## 0.4.7
+
+### Patch Changes
+
+- ebfb0da: Fix TypeScript types and eslint errors
+- 0570b1e: Export types from Blocto SDK
+
 ## 0.4.7-beta.1
 
 ### Patch Changes
