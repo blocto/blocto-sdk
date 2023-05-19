@@ -33,9 +33,9 @@
   },
   "dependencies": {
     "@blocto/sdk": "^0.4.7-beta.0",
-    "@rainbow-me/rainbowkit": "^0.12.12",
-    "ethers": "^5.7.1",
-    "wagmi": "0.12.12"
+    "@rainbow-me/rainbowkit": "^1.0.0",
+    "viem": "^0.3.27",
+    "wagmi": "1.0.5"
   },
   "devDependencies": {
     "@types/jest": "^29.2.3",
