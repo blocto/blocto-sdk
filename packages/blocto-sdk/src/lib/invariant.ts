@@ -1,5 +1,5 @@
 // instead invariant from package, since all error will throw on production
-function invariant(condition: any, format: string): void {
+function invariant(condition: unknown, format: string): void {
   if (!condition) {
     throw new Error(format);
   }

@@ -1,1 +1,1 @@
-export const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
+export const isEmail = (value: string): boolean => /\S+@\S+\.\S+/.test(value);

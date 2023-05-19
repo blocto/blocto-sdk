@@ -1,7 +1,18 @@
+<p align="center">
+   <a href="https://github.com/portto/blocto-sdk">
+    <img src="https://github.com/portto/blocto-sdk/assets/4176802/dc181640-6d85-4cd5-88f6-6bfb729c1113" alt="Blocto logo" width="500" />
+   </a>
+</p>
+
+
 # Blocto JavaScript SDK
 
 [![npm (lastest)](https://img.shields.io/npm/v/@blocto/sdk/latest)](https://www.npmjs.com/package/@blocto/sdk)
 [![npm (beta)](https://img.shields.io/npm/v/@blocto/sdk/beta)](https://www.npmjs.com/package/@blocto/sdk)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/@blocto/sdk)](https://www.npmjs.com/package/@blocto/sdk)
+[![Github Checks](https://github.com/portto/blocto-sdk/actions/workflows/test.yml/badge.svg)](https://github.com/portto/blocto-sdk/actions/workflows/test.yml)
+[![npm downloads](https://img.shields.io/npm/dw/@blocto/sdk)](https://www.npmjs.com/package/@blocto/sdk)
+[![LICENSE](https://img.shields.io/github/license/portto/blocto-sdk)](https://github.com/portto/blocto-sdk/blob/main/LICENSE)
 [![Discord](https://img.shields.io/discord/720454370650619984.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.com/invite/QRZTr6yHmY)
 
 This is a monorepo of Blocto JavaScript SDK. Check out the docs here: [docs.blocto.app](https://docs.blocto.app/).
@@ -10,7 +21,7 @@ There are some adapters to make it easier to integrate:
 |lib name|npm|
 |-|-|
 |[@blocto/aptos-wallet-adapter-plugin](./adapters/aptos-wallet-adapter-plugin/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/aptos-wallet-adapter-plugin/latest)](https://www.npmjs.com/package/@blocto/aptos-wallet-adapter-plugin)|
-|[@blocto/react-web3-connector](./adapters/react-web3-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/react-web3-connector/latest)](https://www.npmjs.com/package/@blocto/react-web3-connector)|
+|[@blocto/web3-react-connector](./adapters/web3-react-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/web3-react-connector/latest)](https://www.npmjs.com/package/@blocto/web3-react-connector)|
 |[@blocto/wagmi-connector](./adapters/wagmi-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/wagmi-connector/latest)](https://www.npmjs.com/package/@blocto/wagmi-connector)|
 |[@blocto/rainbowkit-connector](./adapters/rainbowkit-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/rainbowkit-connector/latest)](https://www.npmjs.com/package/@blocto/rainbowkit-connector)|
 
@@ -101,17 +112,4 @@ Changesets are designed to stack, so there's no problem with adding multiple. Yo
 - You want to release multiple packages with different changelog entries
 - You have made multiple changes to a package that should each be called out separately
 
-## Release
 
-Work in progress. Will automate in future.
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)

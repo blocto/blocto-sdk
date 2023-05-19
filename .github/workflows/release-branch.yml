@@ -19,17 +19,26 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
+      - name: Cache turbo build setup
+        uses: actions/cache@v3
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
       - name: Setup Node.js 16
         uses: actions/setup-node@v3
         with:
           node-version: 16
+          cache: 'yarn'
 
       - name: Install Dependencies
         run: yarn
 
       - name: Bump Changeset Version
         run: yarn ver
-      
+
       - name: Commit Changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:

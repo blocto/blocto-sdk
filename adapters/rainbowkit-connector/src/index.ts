@@ -1,6 +1,11 @@
 import BloctoSDK from '@blocto/sdk';
+import type { EthereumProviderInterface } from '@blocto/sdk';
 import { Chain, Wallet } from '@rainbow-me/rainbowkit';
-import { ConnectorNotFoundError, SwitchChainError } from 'wagmi';
+import { ConnectorNotFoundError } from 'wagmi';
+import {
+  SwitchChainError,
+  UserRejectedRequestError,
+} from "viem";
 import { InjectedConnector } from 'wagmi/connectors/injected';
 export interface BloctoWalletOptions {
   chains: Chain[];
@@ -8,6 +13,7 @@ export interface BloctoWalletOptions {
 
 declare global {
   interface Window {
+    ethereum: any;
     blocto: any;
   }
 }
@@ -18,7 +24,7 @@ export class BloctoConnector extends InjectedConnector {
   readonly name = 'Blocto';
 
   private blocto: BloctoSDK | any;
-  private provider: Window['ethereum'] | undefined;
+  private provider: EthereumProviderInterface | undefined;
 
   #chains: Chain[];
 
@@ -26,8 +32,8 @@ export class BloctoConnector extends InjectedConnector {
     super({
       chains,
       options: {
-        getProvider: () => {
-          const getBlocto = (blocto?: any) =>
+        getProvider: (): any => {
+          const getBlocto = (blocto?: any): any =>
             blocto?.isBlocto ? blocto : undefined;
           if (typeof window === 'undefined') return;
           return getBlocto(window.blocto);
@@ -37,7 +43,7 @@ export class BloctoConnector extends InjectedConnector {
     this.#chains = chains;
   }
 
-  async connect() {
+  async connect(): Promise<any> {
     const res = super.connect();
     const blocto = await this.getBlocto();
     if (!blocto) throw new ConnectorNotFoundError();
@@ -45,13 +51,13 @@ export class BloctoConnector extends InjectedConnector {
     return res;
   }
 
-  async disconnect() {
+  async disconnect(): Promise<any> {
     super.disconnect();
     const blocto = await this.getBlocto();
     if (!blocto) throw new ConnectorNotFoundError();
     await blocto?.ethereum?.request({ method: 'wallet_disconnect' });
   }
-  async getBlocto() {
+  async getBlocto(): Promise<any> {
     if (!this.blocto) {
       const [defaultChain] = this.#chains ?? [];
       this.blocto = new BloctoSDK({
@@ -66,17 +72,18 @@ export class BloctoConnector extends InjectedConnector {
   async getProvider(): Promise<any> {
     const blocto = this.blocto ?? (await this.getBlocto());
     if (!this.provider) {
-      this.provider = blocto.ethereum as unknown as Window['ethereum'];
+      this.provider = blocto.ethereum;
     }
     return this.provider;
   }
 
-  async getAccount() {
+  async getAccount(): Promise<any> {
     const blocto = await this.getBlocto();
     if (!blocto) throw new ConnectorNotFoundError();
     const accounts = await blocto?.ethereum?.request({
       method: 'eth_requestAccounts',
     });
+    if(!accounts?.length) throw new ConnectorNotFoundError()
     return accounts[0];
   }
   async getChainId(): Promise<number> {
@@ -102,7 +109,7 @@ export class BloctoConnector extends InjectedConnector {
     const provider = await this.getProvider();
     if (!provider) throw new ConnectorNotFoundError();
     try {
-      const providerRpcurl = provider.switchableNetwork[chainId]?.rpc_url
+      const providerRpcurl = provider.switchableNetwork[chainId]?.rpc_url;
       const chainUrl = chain.rpcUrls?.default?.http[0];
       if (providerRpcurl !== chainUrl) {
         await provider.request({
@@ -120,15 +127,20 @@ export class BloctoConnector extends InjectedConnector {
         params: [{ chainId }],
       });
       return chain;
-    } catch (error) {
+    } catch (error: any) {
+      const chain = this.chains.find((x) => x.id === chainId);
+      if (!chain){
+        throw new ConnectorNotFoundError('chain not found');
+      }
+      if (this.isUserRejectedRequestError(error)){
+        throw new UserRejectedRequestError(error);
+      }
       throw new SwitchChainError(error);
     }
   }
 }
 
-export const bloctoWallet = ({
-  chains,
-}: BloctoWalletOptions): Wallet => ({
+export const bloctoWallet = ({ chains }: BloctoWalletOptions): Wallet => ({
   id: 'blocto',
   name: 'Blocto',
   iconBackground: '#ffffff',
@@ -139,7 +151,7 @@ export const bloctoWallet = ({
     android: 'https://play.google.com/store/apps/details?id=com.portto.blocto',
   },
   installed: true,
-  createConnector: () => {
+  createConnector: (): any => {
     const connector = new BloctoConnector({ chains });
     return {
       connector,

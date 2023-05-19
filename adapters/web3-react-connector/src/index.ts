@@ -47,5 +47,7 @@ export class BloctoConnector extends AbstractConnector {
       .then((accounts: string[]): string => accounts[0]);
   }
 
-  public deactivate() {}
+  public deactivate(): void {
+    return;
+  }
 }

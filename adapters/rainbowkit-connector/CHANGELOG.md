@@ -1,5 +1,23 @@
 # @blocto/rainbowkit-connector
 
+## 0.1.2
+
+### Patch Changes
+
+- a94cb6c: support rainbowkit new version
+- ebfb0da: Fix TypeScript types and eslint errors
+- Updated dependencies [ebfb0da]
+- Updated dependencies [0570b1e]
+  - @blocto/sdk@0.4.7
+
+## 0.1.2-beta.0
+
+### Patch Changes
+
+- ebfb0da: Fix TypeScript types and eslint errors
+- Updated dependencies [ebfb0da]
+  - @blocto/sdk@0.4.7-beta.0
+
 ## 0.1.1
 
 ### Patch Changes

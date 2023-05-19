@@ -4,9 +4,9 @@
     "build": {
       "dependsOn": ["^build"]
     },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "lint": {}
   }
 }

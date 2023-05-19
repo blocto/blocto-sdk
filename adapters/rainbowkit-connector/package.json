@@ -1,6 +1,6 @@
 {
   "name": "@blocto/rainbowkit-connector",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "blocto wallet connector to use rainbowkit",
   "author": "Blcoto Wallet",
   "main": "./dist/index.js",
@@ -29,13 +29,13 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --ci --silent"
+    "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@blocto/sdk": "^0.4.6",
-    "@rainbow-me/rainbowkit": "^0.12.12",
-    "ethers": "^5.7.1",
-    "wagmi": "0.12.12"
+    "@blocto/sdk": "^0.4.7",
+    "@rainbow-me/rainbowkit": "^1.0.0",
+    "viem": "^0.3.27",
+    "wagmi": "1.0.5"
   },
   "devDependencies": {
     "@types/jest": "^29.2.3",

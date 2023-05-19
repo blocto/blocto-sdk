@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Connector, Chain, ConnectorData, SwitchChainError } from 'wagmi';
 import type {
   EthereumProviderConfig as BloctoOptions,
@@ -25,7 +26,7 @@ class BloctoConnector extends Connector<
     super(config);
   }
 
-  getProvider() {
+  getProvider(): Promise<BloctoProvider> {
     if (!this.#provider) {
       this.#provider = new BloctoSDK({ ethereum: this.options })?.ethereum;
     }
@@ -63,9 +64,7 @@ class BloctoConnector extends Connector<
 
     return provider
       .request({ method: 'eth_requestAccounts' })
-      .then(
-        (accounts: string[]): `0x${string}` => accounts[0] as `0x${string}`
-      );
+      .then((accounts): `0x${string}` => accounts[0]);
   }
 
   async getChainId(): Promise<number> {
@@ -73,7 +72,7 @@ class BloctoConnector extends Connector<
 
     return provider
       .request({ method: 'eth_chainId' })
-      .then((chainId: string): number => parseInt(chainId));
+      .then((chainId): number => parseInt(chainId));
   }
 
   async getSigner(
