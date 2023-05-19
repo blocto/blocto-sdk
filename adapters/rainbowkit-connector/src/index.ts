@@ -1,6 +1,11 @@
 import BloctoSDK from '@blocto/sdk';
+import type { EthereumProviderInterface } from '@blocto/sdk';
 import { Chain, Wallet } from '@rainbow-me/rainbowkit';
-import { ConnectorNotFoundError, SwitchChainError } from 'wagmi';
+import { ConnectorNotFoundError } from 'wagmi';
+import {
+  SwitchChainError,
+  UserRejectedRequestError,
+} from "viem";
 import { InjectedConnector } from 'wagmi/connectors/injected';
 export interface BloctoWalletOptions {
   chains: Chain[];
@@ -8,6 +13,7 @@ export interface BloctoWalletOptions {
 
 declare global {
   interface Window {
+    ethereum: any;
     blocto: any;
   }
 }
@@ -18,7 +24,7 @@ export class BloctoConnector extends InjectedConnector {
   readonly name = 'Blocto';
 
   private blocto: BloctoSDK | any;
-  private provider: Window['ethereum'] | undefined;
+  private provider: EthereumProviderInterface | undefined;
 
   #chains: Chain[];
 
@@ -66,7 +72,7 @@ export class BloctoConnector extends InjectedConnector {
   async getProvider(): Promise<any> {
     const blocto = this.blocto ?? (await this.getBlocto());
     if (!this.provider) {
-      this.provider = blocto.ethereum as unknown as Window['ethereum'];
+      this.provider = blocto.ethereum;
     }
     return this.provider;
   }
@@ -77,6 +83,7 @@ export class BloctoConnector extends InjectedConnector {
     const accounts = await blocto?.ethereum?.request({
       method: 'eth_requestAccounts',
     });
+    if(!accounts?.length) throw new ConnectorNotFoundError()
     return accounts[0];
   }
   async getChainId(): Promise<number> {
@@ -120,7 +127,14 @@ export class BloctoConnector extends InjectedConnector {
         params: [{ chainId }],
       });
       return chain;
-    } catch (error) {
+    } catch (error: any) {
+      const chain = this.chains.find((x) => x.id === chainId);
+      if (!chain){
+        throw new ConnectorNotFoundError('chain not found');
+      }
+      if (this.isUserRejectedRequestError(error)){
+        throw new UserRejectedRequestError(error);
+      }
       throw new SwitchChainError(error);
     }
   }
