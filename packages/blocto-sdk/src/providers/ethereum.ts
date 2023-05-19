@@ -52,8 +52,8 @@ export default class EthereumProvider
   extends BloctoProvider
   implements EthereumProviderInterface
 {
-  chainId: string | number; // current network id e.g.1
-  networkId: string | number; // same as chainId
+  chainId: `0x${string}`; // current chain id in hexadecimal
+  networkVersion: string = '1'; // same as chainId but in decimal
   chain: string; // network name "ethereum"
   net: string;
   rpc: string;
@@ -71,21 +71,22 @@ export default class EthereumProvider
     super(session);
     invariant(chainId, "'chainId' is required");
 
-    this.chainId = parseChainId(chainId);
-    this.networkId = this.chainId;
-    this.chain = ETH_CHAIN_ID_CHAIN_MAPPING[this.chainId];
-    this.net = ETH_CHAIN_ID_NET_MAPPING[this.chainId];
+    this.networkVersion = String(parseChainId(chainId));
+    this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
+    this.chain = ETH_CHAIN_ID_CHAIN_MAPPING[this.networkVersion];
+    this.net = ETH_CHAIN_ID_NET_MAPPING[this.networkVersion];
 
-    invariant(this.chain, `unsupported 'chainId': ${this.chainId}`);
+    invariant(this.chain, `unsupported 'chainId': ${this.networkVersion}`);
 
-    this.rpc = rpc || ETH_CHAIN_ID_RPC_MAPPING[this.chainId] || '';
+    this.rpc = rpc || ETH_CHAIN_ID_RPC_MAPPING[this.networkVersion] || '';
 
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
-    this.server = server || ETH_CHAIN_ID_SERVER_MAPPING[this.chainId] || '';
+    this.server =
+      server || ETH_CHAIN_ID_SERVER_MAPPING[this.networkVersion] || '';
     this.appId = appId || DEFAULT_APP_ID;
 
-    this.switchableNetwork[this.chainId] = {
+    this.switchableNetwork[this.networkVersion] = {
       name: this.chain,
       display_name: this.chain,
       network_type: this.net,
@@ -130,7 +131,7 @@ export default class EthereumProvider
     if (
       existedSDK &&
       existedSDK.isBlocto &&
-      parseInt(existedSDK.chainId, 16) !== this.chainId
+      existedSDK.chainId !== this.chainId
     ) {
       throw new Error('Blocto SDK network mismatched');
     }
@@ -294,12 +295,10 @@ export default class EthereumProvider
         }
         case 'eth_chainId': {
           result = this.chainId;
-          result = `0x${result.toString(16)}`;
           break;
         }
         case 'net_version': {
-          result = this.networkId || this.chainId;
-          result = `0x${result.toString(16)}`;
+          result = this.networkVersion;
           break;
         }
         case 'eth_signTypedData_v3':
@@ -355,21 +354,25 @@ export default class EthereumProvider
             throw error;
           }
 
-          this.chainId = parseChainId(payload.params[0].chainId);
-          this.networkId = this.chainId;
-          this.chain = this.switchableNetwork[this.chainId].name;
-          this.net = this.switchableNetwork[this.chainId].network_type;
+          this.networkVersion = String(parseChainId(payload.params[0].chainId));
+          this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
+          this.chain = ETH_CHAIN_ID_CHAIN_MAPPING[this.networkVersion];
+          this.net = ETH_CHAIN_ID_NET_MAPPING[this.networkVersion];
 
-          invariant(this.chain, `unsupported 'chainId': ${this.chainId}`);
+          invariant(
+            this.chain,
+            `unsupported 'chainId': ${this.networkVersion}`
+          );
 
-          this.rpc = this.switchableNetwork[this.chainId].rpc_url;
+          this.rpc = this.switchableNetwork[this.networkVersion].rpc_url;
 
           invariant(this.rpc, "'rpc' is required");
 
-          this.server = this.switchableNetwork[this.chainId].wallet_web_url;
+          this.server =
+            this.switchableNetwork[this.networkVersion].wallet_web_url;
           await this.fetchAccounts();
           this.eventListeners.chainChanged.forEach((listener) =>
-            listener(this.chainId)
+            listener(this.networkVersion)
           );
           result = null;
           break;
@@ -398,11 +401,11 @@ export default class EthereumProvider
   async enable(email?: string): Promise<ProviderAccounts> {
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
-      if (parseInt(existedSDK.chainId, 16) !== this.chainId) {
+      if (existedSDK.chainId !== this.chainId) {
         try {
           await existedSDK.request({
             method: 'wallet_addEthereumChain',
-            params: [{ chainId: `0x${this.chainId.toString(16)}` }],
+            params: [{ chainId: this.chainId }],
           });
           this.session.accounts[this.chain] = [existedSDK.address];
         } catch (e) {
@@ -451,7 +454,7 @@ export default class EthereumProvider
               this.session.connected = true;
 
               this.eventListeners.connect.forEach((listener) =>
-                listener(this.chainId)
+                listener(this.networkVersion)
               );
               const address = e.data.address;
               this.formatAndSetSessionAccount(address);

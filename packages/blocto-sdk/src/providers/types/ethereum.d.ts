@@ -20,7 +20,7 @@ export interface EthereumProviderInterface
   extends BloctoProviderInterface,
     IEthereumProvider {
   chainId: string | number;
-  networkId: string | number;
+  networkVersion: string | number;
   chain: string;
   net: string;
   rpc: string;
