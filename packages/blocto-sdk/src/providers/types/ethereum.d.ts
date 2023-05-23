@@ -5,7 +5,7 @@ import BloctoProviderInterface, { ProviderSession } from './blocto.d';
 export interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null;
   rpc?: string;
-  server?: string;
+  walletServer?: string;
   session: ProviderSession;
 }
 
@@ -21,10 +21,10 @@ export interface EthereumProviderInterface
     IEthereumProvider {
   chainId: string | number;
   networkVersion: string | number;
-  chain: string;
-  net: string;
+  blockchainName: string;
+  networkType: string;
   rpc: string;
-  server: string;
+  walletServer: string;
   request(args: EIP1193RequestPayload): Promise<any>;
   loadSwitchableNetwork(
     networkList: {

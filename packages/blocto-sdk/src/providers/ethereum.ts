@@ -54,17 +54,17 @@ export default class EthereumProvider
 {
   chainId: `0x${string}`; // current chain id in hexadecimal
   networkVersion: string = '1'; // same as chainId but in decimal
-  chain: string; // network name "ethereum"
-  net: string;
+  blockchainName: string; // network name "ethereum"
+  networkType: string;
   rpc: string;
-  server: string;
+  walletServer: string;
   supportNetwork: EvmSupportMapping = {};
   switchableNetwork: SwitchableNetwork = {};
 
   constructor({
     chainId,
     rpc,
-    server,
+    walletServer,
     appId,
     session,
   }: EthereumProviderConfig) {
@@ -73,24 +73,27 @@ export default class EthereumProvider
 
     this.networkVersion = String(parseChainId(chainId));
     this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
-    this.chain = ETH_CHAIN_ID_CHAIN_MAPPING[this.networkVersion];
-    this.net = ETH_CHAIN_ID_NET_MAPPING[this.networkVersion];
+    this.blockchainName = ETH_CHAIN_ID_CHAIN_MAPPING[this.networkVersion];
+    this.networkType = ETH_CHAIN_ID_NET_MAPPING[this.networkVersion];
 
-    invariant(this.chain, `unsupported 'chainId': ${this.networkVersion}`);
+    invariant(
+      this.blockchainName,
+      `unsupported 'chainId': ${this.networkVersion}`
+    );
 
     this.rpc = rpc || ETH_CHAIN_ID_RPC_MAPPING[this.networkVersion] || '';
 
     invariant(this.rpc, "'rpc' is required for Ethereum");
 
-    this.server =
-      server || ETH_CHAIN_ID_SERVER_MAPPING[this.networkVersion] || '';
+    this.walletServer =
+      walletServer || ETH_CHAIN_ID_SERVER_MAPPING[this.networkVersion] || '';
     this.appId = appId || DEFAULT_APP_ID;
 
     this.switchableNetwork[this.networkVersion] = {
-      name: this.chain,
-      display_name: this.chain,
-      network_type: this.net,
-      wallet_web_url: this.server,
+      name: this.blockchainName,
+      display_name: this.blockchainName,
+      network_type: this.networkType,
+      wallet_web_url: this.walletServer,
       rpc_url: this.rpc,
     };
   }
@@ -286,11 +289,11 @@ export default class EthereumProvider
           await this.fetchAccounts();
         // eslint-disable-next-line
         case 'eth_accounts':
-          result = this.session.accounts[this.chain];
+          result = this.session.accounts[this.blockchainName];
           break;
         case 'eth_coinbase': {
           // eslint-disable-next-line
-          result = this.session.accounts[this.chain][0];
+          result = this.session.accounts[this.blockchainName][0];
           break;
         }
         case 'eth_chainId': {
@@ -356,11 +359,11 @@ export default class EthereumProvider
 
           this.networkVersion = String(parseChainId(payload.params[0].chainId));
           this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
-          this.chain = ETH_CHAIN_ID_CHAIN_MAPPING[this.networkVersion];
-          this.net = ETH_CHAIN_ID_NET_MAPPING[this.networkVersion];
+          this.blockchainName = ETH_CHAIN_ID_CHAIN_MAPPING[this.networkVersion];
+          this.networkType = ETH_CHAIN_ID_NET_MAPPING[this.networkVersion];
 
           invariant(
-            this.chain,
+            this.blockchainName,
             `unsupported 'chainId': ${this.networkVersion}`
           );
 
@@ -368,7 +371,7 @@ export default class EthereumProvider
 
           invariant(this.rpc, "'rpc' is required");
 
-          this.server =
+          this.walletServer =
             this.switchableNetwork[this.networkVersion].wallet_web_url;
           await this.fetchAccounts();
           this.eventListeners.chainChanged.forEach((listener) =>
@@ -407,7 +410,7 @@ export default class EthereumProvider
             method: 'wallet_addEthereumChain',
             params: [{ chainId: this.chainId }],
           });
-          this.session.accounts[this.chain] = [existedSDK.address];
+          this.session.accounts[this.blockchainName] = [existedSDK.address];
         } catch (e) {
           console.error(e);
         }
@@ -418,7 +421,7 @@ export default class EthereumProvider
       );
     }
 
-    this.tryRetrieveSessionFromStorage(this.chain);
+    this.tryRetrieveSessionFromStorage(this.blockchainName);
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') {
@@ -426,7 +429,7 @@ export default class EthereumProvider
       }
 
       if (this.session.connected) {
-        return resolve(this.session.accounts[this.chain]);
+        return resolve(this.session.accounts[this.blockchainName]);
       }
 
       const params = new URLSearchParams();
@@ -434,8 +437,8 @@ export default class EthereumProvider
       const emailParam = email && isEmail(email) ? `/${email}` : '';
 
       const loginFrame = createFrame(
-        `${this.server}/${this.appId}/${
-          this.chain
+        `${this.walletServer}/${this.appId}/${
+          this.blockchainName
         }/authn${emailParam}?${params.toString()}`
       );
 
@@ -445,7 +448,7 @@ export default class EthereumProvider
         'message',
         (event: Event, removeListener: () => void) => {
           const e = event as MessageEvent;
-          if (e.origin === this.server) {
+          if (e.origin === this.walletServer) {
             if (e.data.type === 'ETH:FRAME:RESPONSE') {
               removeListener();
               detatchFrame(loginFrame);
@@ -468,7 +471,7 @@ export default class EthereumProvider
                 LOGIN_PERSISTING_TIME
               );
 
-              resolve(this.session.accounts[this.chain]);
+              resolve(this.session.accounts[this.blockchainName]);
             }
 
             if (e.data.type === 'ETH:FRAME:CLOSE') {
@@ -485,7 +488,7 @@ export default class EthereumProvider
   async fetchAccounts(): Promise<ProviderAccounts> {
     this.#checkNetworkMatched();
     const { accounts } = await fetch(
-      `${this.server}/api/${this.chain}/accounts`,
+      `${this.walletServer}/api/${this.blockchainName}/accounts`,
       {
         headers: {
           // We already check the existence in the constructor
@@ -498,7 +501,7 @@ export default class EthereumProvider
     ).then((response) =>
       responseSessionGuard<{ accounts: [] }>(response, this)
     );
-    this.session.accounts[this.chain] = accounts;
+    this.session.accounts[this.blockchainName] = accounts;
     return accounts;
   }
 
@@ -539,7 +542,7 @@ export default class EthereumProvider
 
     this.#checkNetworkMatched();
     const { signatureId } = await fetch(
-      `${this.server}/api/${this.chain}/user-signature`,
+      `${this.walletServer}/api/${this.blockchainName}/user-signature`,
       {
         method: 'POST',
         headers: {
@@ -560,7 +563,7 @@ export default class EthereumProvider
       throw new Error('Currently only supported in browser');
     }
 
-    const url = `${this.server}/${this.appId}/${this.chain}/user-signature/${signatureId}`;
+    const url = `${this.walletServer}/${this.appId}/${this.blockchainName}/user-signature/${signatureId}`;
     const signFrame = createFrame(url);
     attachFrame(signFrame);
 
@@ -570,7 +573,7 @@ export default class EthereumProvider
         (event: Event, removeEventListener: () => void) => {
           const e = event as MessageEvent;
           if (
-            e.origin === this.server &&
+            e.origin === this.walletServer &&
             e.data.type === 'ETH:FRAME:RESPONSE'
           ) {
             if (e.data.status === 'APPROVED') {
@@ -593,7 +596,7 @@ export default class EthereumProvider
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
     const { authorizationId } = await fetch(
-      `${this.server}/api/${this.chain}/authz`,
+      `${this.walletServer}/api/${this.blockchainName}/authz`,
       {
         method: 'POST',
         headers: {
@@ -615,7 +618,7 @@ export default class EthereumProvider
     }
 
     const authzFrame = createFrame(
-      `${this.server}/${this.appId}/${this.chain}/authz/${authorizationId}`
+      `${this.walletServer}/${this.appId}/${this.blockchainName}/authz/${authorizationId}`
     );
 
     attachFrame(authzFrame);
@@ -626,7 +629,7 @@ export default class EthereumProvider
         (event: Event, removeEventListener: () => void) => {
           const e = event as MessageEvent;
           if (
-            e.origin === this.server &&
+            e.origin === this.walletServer &&
             e.data.type === 'ETH:FRAME:RESPONSE'
           ) {
             if (e.data.status === 'APPROVED') {
