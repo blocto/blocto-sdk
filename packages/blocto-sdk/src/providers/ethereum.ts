@@ -323,6 +323,9 @@ export default class EthereumProvider
         case 'eth_sendRawTransaction':
           result = null;
           break;
+        case 'eth_sendUserOperation':
+          result = await this.handleSendUserOperation(payload);
+          break;
         case 'wallet_addEthereumChain':
           if (
             !payload?.params?.[0]?.chainId ||
@@ -631,6 +634,64 @@ export default class EthereumProvider
       )
     );
   }
+
+  async handleSendUserOperation(
+    payload: EIP1193RequestPayload
+  ): Promise<string> {
+    this.#checkNetworkMatched();
+    const { walletServer, blockchainName } = await this.#getBloctoProperties();
+    const { authorizationId } = await fetch(
+      `${walletServer}/api/${blockchainName}/user-operation`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Blocto-Application-Identifier': this.appId,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          'Blocto-Session-Identifier': this.session.code!,
+        },
+        body: JSON.stringify(payload.params),
+      }
+    ).then((response) =>
+      responseSessionGuard<{ authorizationId: string }>(response, this)
+    );
+
+    if (typeof window === 'undefined') {
+      throw new Error('Currently only supported in browser');
+    }
+
+    const userOPFrame = createFrame(
+      `${walletServer}/${this.appId}/${blockchainName}/user-operation/${authorizationId}`
+    );
+
+    attachFrame(userOPFrame);
+
+    return new Promise((resolve, reject) =>
+      addSelfRemovableHandler(
+        'message',
+        (event: Event, removeEventListener: () => void) => {
+          const e = event as MessageEvent;
+          if (
+            e.origin === walletServer &&
+            e.data.type === 'ETH:FRAME:RESPONSE'
+          ) {
+            if (e.data.status === 'APPROVED') {
+              removeEventListener();
+              detatchFrame(userOPFrame);
+              resolve(e.data.userOpHash);
+            }
+
+            if (e.data.status === 'DECLINED') {
+              removeEventListener();
+              detatchFrame(userOPFrame);
+              reject(new Error(e.data.errorMessage));
+            }
+          }
+        }
+      )
+    );
+  }
+
   async handleDisconnect(): Promise<void> {
     this.session.connected = false;
     this.session.code = null;
