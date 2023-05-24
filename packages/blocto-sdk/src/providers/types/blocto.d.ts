@@ -9,7 +9,7 @@ export interface ProviderSession {
 declare interface BloctoProviderInterface extends EIP1193Provider {
   isBlocto: boolean;
   isConnecting: boolean;
-  appId?: string;
+  appId: string;
   eventListeners: {
     [key: string]: Array<(arg?: any) => void>;
   };

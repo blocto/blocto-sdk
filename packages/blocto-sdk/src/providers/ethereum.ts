@@ -8,16 +8,14 @@ import {
   JsonRpcRequest,
   JsonRpcResponse,
   JsonRpcCallback,
+  SwitchableNetwork,
 } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import { removeItem, setItemWithExpiry } from '../lib/localStorage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
-  ETH_CHAIN_ID_RPC_MAPPING,
-  ETH_CHAIN_ID_CHAIN_MAPPING,
-  ETH_CHAIN_ID_NET_MAPPING,
-  ETH_CHAIN_ID_SERVER_MAPPING,
+  ETH_RPC_LIST,
   ETH_ENV_WALLET_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
@@ -25,16 +23,7 @@ import {
 import { KEY_SESSION } from '../lib/localStorage/constants';
 import { isEmail } from '../lib/is';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
-
-interface SwitchableNetwork {
-  [id: number | string]: {
-    name: string;
-    display_name: string;
-    network_type: string;
-    wallet_web_url: string;
-    rpc_url: string;
-  };
-}
+import { ProviderSession } from './types/blocto';
 
 function parseChainId(chainId: string | number | null): number {
   if (!chainId) {
@@ -53,13 +42,18 @@ export default class EthereumProvider
   implements EthereumProviderInterface
 {
   chainId: `0x${string}`; // current chain id in hexadecimal
-  networkVersion: string = '1'; // same as chainId but in decimal
-  blockchainName: string; // network name "ethereum"
-  networkType: string;
+  networkVersion: `${number}` = '1'; // same as chainId but in decimal
   rpc: string;
-  walletServer: string;
-  supportNetwork: EvmSupportMapping = {};
-  switchableNetwork: SwitchableNetwork = {};
+  injectedWalletServer?: string;
+  appId: string;
+  _blocto: {
+    session: ProviderSession;
+    walletServer: string;
+    blockchainName: string;
+    networkType: string;
+    supportNetworkList: EvmSupportMapping;
+    switchableNetwork: SwitchableNetwork;
+  };
 
   constructor({
     chainId,
@@ -69,64 +63,89 @@ export default class EthereumProvider
     session,
   }: EthereumProviderConfig) {
     super(session);
+    // setup chainId
     invariant(chainId, "'chainId' is required");
-
-    this.networkVersion = String(parseChainId(chainId));
+    this.networkVersion = `${parseChainId(chainId)}`;
     this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
-    this.blockchainName = ETH_CHAIN_ID_CHAIN_MAPPING[this.networkVersion];
-    this.networkType = ETH_CHAIN_ID_NET_MAPPING[this.networkVersion];
-
-    invariant(
-      this.blockchainName,
-      `unsupported 'chainId': ${this.networkVersion}`
-    );
-
-    this.rpc = rpc || ETH_CHAIN_ID_RPC_MAPPING[this.networkVersion] || '';
-
-    invariant(this.rpc, "'rpc' is required for Ethereum");
-
-    this.walletServer =
-      walletServer || ETH_CHAIN_ID_SERVER_MAPPING[this.networkVersion] || '';
-    this.appId = appId || DEFAULT_APP_ID;
-
-    this.switchableNetwork[this.networkVersion] = {
-      name: this.blockchainName,
-      display_name: this.blockchainName,
-      network_type: this.networkType,
-      wallet_web_url: this.walletServer,
-      rpc_url: this.rpc,
+    // setup rpc
+    this.rpc = rpc || ETH_RPC_LIST[this.networkVersion];
+    invariant(rpc, "'rpc' is required");
+    // setup injectedWalletServer
+    this.injectedWalletServer = walletServer;
+    // NOTE: _blocto is not fully initialized yet at this point
+    // Any function should call #getBloctoProperties() to get the full _blocto properties
+    this._blocto = {
+      session,
+      walletServer: this.injectedWalletServer || '',
+      blockchainName: '',
+      networkType: '',
+      supportNetworkList: {},
+      switchableNetwork: {},
     };
+    this.appId = appId || DEFAULT_APP_ID;
   }
 
-  #checkAndAddNetwork({
+  async #getBloctoProperties(): Promise<EthereumProvider['_blocto']> {
+    if (!Object.keys(this._blocto.supportNetworkList).length) {
+      await getEvmSupport().then(
+        (result) => (this._blocto.supportNetworkList = result)
+      );
+    }
+    const {
+      chain_id,
+      name,
+      network_type,
+      blocto_service_environment,
+      display_name,
+    } = this._blocto.supportNetworkList[this.networkVersion];
+    invariant(
+      chain_id,
+      `Get blocto server failed: ${this.networkVersion} might not be supported yet.`
+    );
+    this._blocto = {
+      ...this._blocto,
+      session: this.session,
+      walletServer:
+        this.injectedWalletServer ||
+        ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment],
+      blockchainName: name,
+      networkType: network_type,
+      switchableNetwork: {
+        [chain_id]: {
+          name,
+          display_name,
+          network_type,
+          wallet_web_url: this._blocto.walletServer,
+          rpc_url: this.rpc,
+        },
+      },
+    };
+    return this._blocto;
+  }
+
+  #addToSwitchable({
     chainId,
     rpcUrls,
   }: {
-    chainId: number;
+    chainId: `${number}`;
     rpcUrls: string[];
   }): void {
-    const domain = new URL(rpcUrls[0]).hostname;
     const {
       chain_id,
       name,
       display_name,
       network_type,
       blocto_service_environment,
-      rpc_endpoint_domains,
-    } = this.supportNetwork[chainId];
-    if (rpc_endpoint_domains.includes(domain)) {
-      const wallet_web_url =
-        ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment];
-      this.switchableNetwork[chain_id] = {
-        name,
-        display_name,
-        network_type,
-        wallet_web_url,
-        rpc_url: rpcUrls[0],
-      };
-    } else {
-      console.warn(`The rpc url ${rpcUrls[0]} is not supported.`);
-    }
+    } = this._blocto.supportNetworkList[chainId];
+    const wallet_web_url =
+      ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment];
+    this._blocto.switchableNetwork[chain_id] = {
+      name,
+      display_name,
+      network_type,
+      wallet_web_url,
+      rpc_url: rpcUrls[0],
+    };
   }
 
   #checkNetworkMatched(): void {
@@ -138,30 +157,6 @@ export default class EthereumProvider
     ) {
       throw new Error('Blocto SDK network mismatched');
     }
-  }
-
-  async loadSwitchableNetwork(
-    networkList: {
-      chainId: string;
-      rpcUrls?: string[];
-    }[]
-  ): Promise<null> {
-    return getEvmSupport().then((result) => {
-      // setup supported network
-      this.supportNetwork = result;
-      // setup switchable list if user set networkList
-      if (networkList?.length) {
-        networkList.forEach(({ chainId: chain_id, rpcUrls }) => {
-          invariant(rpcUrls, 'rpcUrls is required for networksList');
-          if (!rpcUrls?.length) throw new Error('Empty rpcUrls array');
-          this.#checkAndAddNetwork({
-            chainId: parseChainId(chain_id),
-            rpcUrls,
-          });
-        });
-      }
-      return null;
-    });
   }
 
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
@@ -281,6 +276,9 @@ export default class EthereumProvider
       }
     }
 
+    const { blockchainName, switchableNetwork } =
+      await this.#getBloctoProperties();
+
     try {
       let response = null;
       let result = null;
@@ -289,11 +287,11 @@ export default class EthereumProvider
           await this.fetchAccounts();
         // eslint-disable-next-line
         case 'eth_accounts':
-          result = this.session.accounts[this.blockchainName];
+          result = this.session.accounts[blockchainName];
           break;
         case 'eth_coinbase': {
           // eslint-disable-next-line
-          result = this.session.accounts[this.blockchainName][0];
+          result = this.session.accounts[blockchainName][0];
           break;
         }
         case 'eth_chainId': {
@@ -332,12 +330,9 @@ export default class EthereumProvider
           ) {
             throw new Error('Invalid params');
           }
-          await getEvmSupport().then((supportNetwork) => {
-            this.supportNetwork = supportNetwork;
-            this.#checkAndAddNetwork({
-              chainId: parseChainId(payload?.params?.[0]?.chainId),
-              rpcUrls: payload?.params?.[0].rpcUrls,
-            });
+          this.#addToSwitchable({
+            chainId: `${parseChainId(payload?.params?.[0]?.chainId)}`,
+            rpcUrls: payload?.params?.[0].rpcUrls,
           });
           result = null;
           break;
@@ -345,10 +340,7 @@ export default class EthereumProvider
           if (!payload?.params?.[0]?.chainId) {
             throw new Error('Invalid params');
           }
-
-          if (
-            !this.switchableNetwork[parseChainId(payload.params[0].chainId)]
-          ) {
+          if (!switchableNetwork[parseChainId(payload.params[0].chainId)]) {
             const error: any = new Error(
               'This chain has not been added to SDK. Please try wallet_addEthereumChain first.'
             );
@@ -356,23 +348,10 @@ export default class EthereumProvider
             error.code = 4902;
             throw error;
           }
-
-          this.networkVersion = String(parseChainId(payload.params[0].chainId));
+          this.networkVersion = `${parseChainId(payload.params[0].chainId)}`;
           this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
-          this.blockchainName = ETH_CHAIN_ID_CHAIN_MAPPING[this.networkVersion];
-          this.networkType = ETH_CHAIN_ID_NET_MAPPING[this.networkVersion];
-
-          invariant(
-            this.blockchainName,
-            `unsupported 'chainId': ${this.networkVersion}`
-          );
-
-          this.rpc = this.switchableNetwork[this.networkVersion].rpc_url;
-
-          invariant(this.rpc, "'rpc' is required");
-
-          this.walletServer =
-            this.switchableNetwork[this.networkVersion].wallet_web_url;
+          this.rpc = switchableNetwork[this.networkVersion].rpc_url;
+          await this.#getBloctoProperties();
           await this.fetchAccounts();
           this.eventListeners.chainChanged.forEach((listener) =>
             listener(this.networkVersion)
@@ -403,6 +382,7 @@ export default class EthereumProvider
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
   async enable(email?: string): Promise<ProviderAccounts> {
     const existedSDK = (window as any).ethereum;
+    const { walletServer, blockchainName } = await this.#getBloctoProperties();
     if (existedSDK && existedSDK.isBlocto) {
       if (existedSDK.chainId !== this.chainId) {
         try {
@@ -410,7 +390,7 @@ export default class EthereumProvider
             method: 'wallet_addEthereumChain',
             params: [{ chainId: this.chainId }],
           });
-          this.session.accounts[this.blockchainName] = [existedSDK.address];
+          this.session.accounts[blockchainName] = [existedSDK.address];
         } catch (e) {
           console.error(e);
         }
@@ -421,7 +401,7 @@ export default class EthereumProvider
       );
     }
 
-    this.tryRetrieveSessionFromStorage(this.blockchainName);
+    this.tryRetrieveSessionFromStorage(blockchainName);
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') {
@@ -429,7 +409,7 @@ export default class EthereumProvider
       }
 
       if (this.session.connected) {
-        return resolve(this.session.accounts[this.blockchainName]);
+        return resolve(this.session.accounts[blockchainName]);
       }
 
       const params = new URLSearchParams();
@@ -437,9 +417,9 @@ export default class EthereumProvider
       const emailParam = email && isEmail(email) ? `/${email}` : '';
 
       const loginFrame = createFrame(
-        `${this.walletServer}/${this.appId}/${
-          this.blockchainName
-        }/authn${emailParam}?${params.toString()}`
+        `${walletServer}/${
+          this.appId
+        }/${blockchainName}/authn${emailParam}?${params.toString()}`
       );
 
       attachFrame(loginFrame);
@@ -448,7 +428,7 @@ export default class EthereumProvider
         'message',
         (event: Event, removeListener: () => void) => {
           const e = event as MessageEvent;
-          if (e.origin === this.walletServer) {
+          if (e.origin === walletServer) {
             if (e.data.type === 'ETH:FRAME:RESPONSE') {
               removeListener();
               detatchFrame(loginFrame);
@@ -471,7 +451,7 @@ export default class EthereumProvider
                 LOGIN_PERSISTING_TIME
               );
 
-              resolve(this.session.accounts[this.blockchainName]);
+              resolve(this.session.accounts[blockchainName]);
             }
 
             if (e.data.type === 'ETH:FRAME:CLOSE') {
@@ -487,8 +467,9 @@ export default class EthereumProvider
 
   async fetchAccounts(): Promise<ProviderAccounts> {
     this.#checkNetworkMatched();
+    const { walletServer, blockchainName } = await this.#getBloctoProperties();
     const { accounts } = await fetch(
-      `${this.walletServer}/api/${this.blockchainName}/accounts`,
+      `${walletServer}/api/${blockchainName}/accounts`,
       {
         headers: {
           // We already check the existence in the constructor
@@ -501,7 +482,7 @@ export default class EthereumProvider
     ).then((response) =>
       responseSessionGuard<{ accounts: [] }>(response, this)
     );
-    this.session.accounts[this.blockchainName] = accounts;
+    this.session.accounts[blockchainName] = accounts;
     return accounts;
   }
 
@@ -541,8 +522,9 @@ export default class EthereumProvider
     }
 
     this.#checkNetworkMatched();
+    const { walletServer, blockchainName } = await this.#getBloctoProperties();
     const { signatureId } = await fetch(
-      `${this.walletServer}/api/${this.blockchainName}/user-signature`,
+      `${walletServer}/api/${blockchainName}/user-signature`,
       {
         method: 'POST',
         headers: {
@@ -563,7 +545,7 @@ export default class EthereumProvider
       throw new Error('Currently only supported in browser');
     }
 
-    const url = `${this.walletServer}/${this.appId}/${this.blockchainName}/user-signature/${signatureId}`;
+    const url = `${walletServer}/${this.appId}/${blockchainName}/user-signature/${signatureId}`;
     const signFrame = createFrame(url);
     attachFrame(signFrame);
 
@@ -573,7 +555,7 @@ export default class EthereumProvider
         (event: Event, removeEventListener: () => void) => {
           const e = event as MessageEvent;
           if (
-            e.origin === this.walletServer &&
+            e.origin === walletServer &&
             e.data.type === 'ETH:FRAME:RESPONSE'
           ) {
             if (e.data.status === 'APPROVED') {
@@ -595,8 +577,9 @@ export default class EthereumProvider
 
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
+    const { walletServer, blockchainName } = await this.#getBloctoProperties();
     const { authorizationId } = await fetch(
-      `${this.walletServer}/api/${this.blockchainName}/authz`,
+      `${walletServer}/api/${blockchainName}/authz`,
       {
         method: 'POST',
         headers: {
@@ -618,7 +601,7 @@ export default class EthereumProvider
     }
 
     const authzFrame = createFrame(
-      `${this.walletServer}/${this.appId}/${this.blockchainName}/authz/${authorizationId}`
+      `${walletServer}/${this.appId}/${blockchainName}/authz/${authorizationId}`
     );
 
     attachFrame(authzFrame);
@@ -629,7 +612,7 @@ export default class EthereumProvider
         (event: Event, removeEventListener: () => void) => {
           const e = event as MessageEvent;
           if (
-            e.origin === this.walletServer &&
+            e.origin === walletServer &&
             e.data.type === 'ETH:FRAME:RESPONSE'
           ) {
             if (e.data.status === 'APPROVED') {
@@ -653,5 +636,25 @@ export default class EthereumProvider
     this.session.code = null;
     this.session.accounts = {};
     removeItem(KEY_SESSION);
+  }
+
+  async loadSwitchableNetwork(
+    networkList: {
+      chainId: string;
+      rpcUrls?: string[];
+    }[]
+  ): Promise<null> {
+    // setup switchable list if user set networkList
+    if (networkList?.length) {
+      networkList.forEach(({ chainId: chain_id, rpcUrls }) => {
+        invariant(rpcUrls, 'rpcUrls is required for networksList');
+        if (!rpcUrls?.length) throw new Error('Empty rpcUrls array');
+        this.#addToSwitchable({
+          chainId: `${parseChainId(chain_id)}`,
+          rpcUrls,
+        });
+      });
+    }
+    return null;
   }
 }

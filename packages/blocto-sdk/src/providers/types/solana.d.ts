@@ -15,6 +15,7 @@ export declare interface SolanaProviderInterface
   net: string;
   rpc: string;
   server: string;
+  appId: string;
 
   connect(): Promise<void>;
   disconnect(): Promise<void>;

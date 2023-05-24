@@ -1,6 +1,7 @@
 import { IEthereumProvider } from 'eip1193-provider';
 import { BaseConfig } from '../../constants';
 import BloctoProviderInterface, { ProviderSession } from './blocto.d';
+import { EvmSupportMapping } from '../../lib/getEvmSupport';
 
 export interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null;
@@ -16,15 +17,30 @@ export interface EIP1193RequestPayload {
   params?: Array<any>;
 }
 
+interface SwitchableNetwork {
+  [id: number | string]: {
+    name: string;
+    display_name: string;
+    network_type: string;
+    wallet_web_url: string;
+    rpc_url: string;
+  };
+}
+
 export interface EthereumProviderInterface
   extends BloctoProviderInterface,
     IEthereumProvider {
   chainId: string | number;
   networkVersion: string | number;
-  blockchainName: string;
-  networkType: string;
   rpc: string;
-  walletServer: string;
+  _blocto: {
+    session: ProviderSession;
+    walletServer: string;
+    blockchainName: string;
+    networkType: string;
+    supportNetworkList: EvmSupportMapping;
+    switchableNetwork: SwitchableNetwork;
+  };
   request(args: EIP1193RequestPayload): Promise<any>;
   loadSwitchableNetwork(
     networkList: {
@@ -32,6 +48,7 @@ export interface EthereumProviderInterface
       rpcUrls?: string[];
     }[]
   ): Promise<null>;
+  injectedWalletServer?: string;
 }
 
 export interface AddEthereumChainParameter {

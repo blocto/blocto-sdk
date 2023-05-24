@@ -6,12 +6,13 @@ import { EIP1193_EVENTS } from '../constants';
 import { KEY_SESSION, getItemWithExpiry } from '../lib/localStorage';
 import Session from '../lib/session.d';
 import { ProviderSession } from './types/blocto.d';
+import { DEFAULT_APP_ID } from '../constants';
 
 class BloctoProvider implements EIP1193Provider {
   isBlocto = true;
 
   isConnecting = false;
-  appId?: string;
+  appId: string;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   eventListeners: { [key: string]: Array<(arg: any) => void> } = {};
@@ -26,6 +27,7 @@ class BloctoProvider implements EIP1193Provider {
     EIP1193_EVENTS.forEach((event) => {
       this.eventListeners[event] = [];
     });
+    this.appId = DEFAULT_APP_ID;
   }
 
   protected formatAndSetSessionAccount(
