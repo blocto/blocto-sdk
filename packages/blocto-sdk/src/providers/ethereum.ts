@@ -381,6 +381,20 @@ export default class EthereumProvider
     }
   }
 
+  async bloctoApi<T>(url: string, options?: RequestInit): Promise<T> {
+    const { walletServer, blockchainName } = await this.#getBloctoProperties();
+    return fetch(`${walletServer}/api/${blockchainName}${url}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Application-Identifier': this.appId!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        'Blocto-Session-Identifier': this.session.code!,
+      },
+      ...options,
+    }).then((response) => responseSessionGuard<T>(response, this));
+  }
+
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
   async enable(email?: string): Promise<ProviderAccounts> {
@@ -470,21 +484,8 @@ export default class EthereumProvider
 
   async fetchAccounts(): Promise<ProviderAccounts> {
     this.#checkNetworkMatched();
-    const { walletServer, blockchainName } = await this.#getBloctoProperties();
-    const { accounts } = await fetch(
-      `${walletServer}/api/${blockchainName}/accounts`,
-      {
-        headers: {
-          // We already check the existence in the constructor
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Application-Identifier': this.appId!,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Session-Identifier': this.session.code!,
-        },
-      }
-    ).then((response) =>
-      responseSessionGuard<{ accounts: [] }>(response, this)
-    );
+    const { blockchainName } = await this.#getBloctoProperties();
+    const { accounts } = await this.bloctoApi<{ accounts: [] }>(`/accounts`);
     this.session.accounts[blockchainName] = accounts;
     return accounts;
   }
@@ -526,22 +527,9 @@ export default class EthereumProvider
 
     this.#checkNetworkMatched();
     const { walletServer, blockchainName } = await this.#getBloctoProperties();
-    const { signatureId } = await fetch(
-      `${walletServer}/api/${blockchainName}/user-signature`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // We already check the existence in the constructor
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Application-Identifier': this.appId!,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Session-Identifier': this.session.code!,
-        },
-        body: JSON.stringify({ method, message }),
-      }
-    ).then((response) =>
-      responseSessionGuard<{ signatureId: string }>(response, this)
+    const { signatureId } = await this.bloctoApi<{ signatureId: string }>(
+      `/user-signature`,
+      { method: 'POST' }
     );
 
     if (typeof window === 'undefined') {
@@ -581,23 +569,9 @@ export default class EthereumProvider
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
     const { walletServer, blockchainName } = await this.#getBloctoProperties();
-    const { authorizationId } = await fetch(
-      `${walletServer}/api/${blockchainName}/authz`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // We already check the existence in the constructor
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Application-Identifier': this.appId!,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Session-Identifier': this.session.code!,
-        },
-        body: JSON.stringify(payload.params),
-      }
-    ).then((response) =>
-      responseSessionGuard<{ authorizationId: string }>(response, this)
-    );
+    const { authorizationId } = await this.bloctoApi<{
+      authorizationId: string;
+    }>(`/authz`, { method: 'POST', body: JSON.stringify(payload.params) });
 
     if (typeof window === 'undefined') {
       throw new Error('Currently only supported in browser');
@@ -640,21 +614,12 @@ export default class EthereumProvider
   ): Promise<string> {
     this.#checkNetworkMatched();
     const { walletServer, blockchainName } = await this.#getBloctoProperties();
-    const { authorizationId } = await fetch(
-      `${walletServer}/api/${blockchainName}/user-operation`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Blocto-Application-Identifier': this.appId,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Session-Identifier': this.session.code!,
-        },
-        body: JSON.stringify(payload.params),
-      }
-    ).then((response) =>
-      responseSessionGuard<{ authorizationId: string }>(response, this)
-    );
+    const { authorizationId } = await this.bloctoApi<{
+      authorizationId: string;
+    }>(`/user-operation`, {
+      method: 'POST',
+      body: JSON.stringify(payload.params),
+    });
 
     if (typeof window === 'undefined') {
       throw new Error('Currently only supported in browser');
