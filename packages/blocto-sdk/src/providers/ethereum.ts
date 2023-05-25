@@ -361,6 +361,12 @@ export default class EthereumProvider
           );
           result = null;
           break;
+        case 'eth_estimateUserOperationGas':
+        case 'eth_getUserOperationByHash':
+        case 'eth_getUserOperationReceipt':
+        case 'eth_supportedEntryPoints':
+          result = await this.handleBundler(payload);
+          break;
         default:
           response = await this.handleReadRequests(payload);
       }
@@ -600,6 +606,14 @@ export default class EthereumProvider
       `/user-operation/${authorizationId}`
     );
     return this.responseListener(userOPFrame, 'userOpHash');
+  }
+
+  async handleBundler(payload: EIP1193RequestPayload): Promise<JSON> {
+    this.#checkNetworkMatched();
+    return this.bloctoApi<JSON>(`/rpc/bundler`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   async handleDisconnect(): Promise<void> {
