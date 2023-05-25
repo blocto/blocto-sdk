@@ -395,6 +395,49 @@ export default class EthereumProvider
     }).then((response) => responseSessionGuard<T>(response, this));
   }
 
+  async responseListener(
+    frame: HTMLIFrameElement,
+    objectKey: string
+  ): Promise<any> {
+    const { walletServer } = await this.#getBloctoProperties();
+    return new Promise((resolve, reject) =>
+      addSelfRemovableHandler(
+        'message',
+        (event: Event, removeEventListener: () => void) => {
+          const e = event as MessageEvent;
+          if (
+            e.origin === walletServer &&
+            e.data.type === 'ETH:FRAME:RESPONSE'
+          ) {
+            if (e.data.status === 'APPROVED') {
+              removeEventListener();
+              detatchFrame(frame);
+              resolve(e.data[objectKey]);
+            }
+
+            if (e.data.status === 'DECLINED') {
+              removeEventListener();
+              detatchFrame(frame);
+              reject(new Error(e.data.errorMessage));
+            }
+          }
+        }
+      )
+    );
+  }
+
+  async setIframe(url: string): Promise<HTMLIFrameElement> {
+    if (typeof window === 'undefined') {
+      throw new Error('Currently only supported in browser');
+    }
+    const { walletServer, blockchainName } = await this.#getBloctoProperties();
+    const frame = createFrame(
+      `${walletServer}/${this.appId}/${blockchainName}${url}`
+    );
+    attachFrame(frame);
+    return frame;
+  }
+
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
   async enable(email?: string): Promise<ProviderAccounts> {
@@ -526,135 +569,37 @@ export default class EthereumProvider
     }
 
     this.#checkNetworkMatched();
-    const { walletServer, blockchainName } = await this.#getBloctoProperties();
     const { signatureId } = await this.bloctoApi<{ signatureId: string }>(
       `/user-signature`,
       { method: 'POST' }
     );
-
-    if (typeof window === 'undefined') {
-      throw new Error('Currently only supported in browser');
-    }
-
-    const url = `${walletServer}/${this.appId}/${blockchainName}/user-signature/${signatureId}`;
-    const signFrame = createFrame(url);
-    attachFrame(signFrame);
-
-    return new Promise((resolve, reject) =>
-      addSelfRemovableHandler(
-        'message',
-        (event: Event, removeEventListener: () => void) => {
-          const e = event as MessageEvent;
-          if (
-            e.origin === walletServer &&
-            e.data.type === 'ETH:FRAME:RESPONSE'
-          ) {
-            if (e.data.status === 'APPROVED') {
-              removeEventListener();
-              detatchFrame(signFrame);
-              resolve(e.data.signature);
-            }
-
-            if (e.data.status === 'DECLINED') {
-              removeEventListener();
-              detatchFrame(signFrame);
-              reject(new Error(e.data.errorMessage));
-            }
-          }
-        }
-      )
-    );
+    const signFrame = await this.setIframe(`/user-signature/${signatureId}`);
+    return this.responseListener(signFrame, 'signature');
   }
 
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
-    const { walletServer, blockchainName } = await this.#getBloctoProperties();
     const { authorizationId } = await this.bloctoApi<{
       authorizationId: string;
     }>(`/authz`, { method: 'POST', body: JSON.stringify(payload.params) });
-
-    if (typeof window === 'undefined') {
-      throw new Error('Currently only supported in browser');
-    }
-
-    const authzFrame = createFrame(
-      `${walletServer}/${this.appId}/${blockchainName}/authz/${authorizationId}`
-    );
-
-    attachFrame(authzFrame);
-
-    return new Promise((resolve, reject) =>
-      addSelfRemovableHandler(
-        'message',
-        (event: Event, removeEventListener: () => void) => {
-          const e = event as MessageEvent;
-          if (
-            e.origin === walletServer &&
-            e.data.type === 'ETH:FRAME:RESPONSE'
-          ) {
-            if (e.data.status === 'APPROVED') {
-              removeEventListener();
-              detatchFrame(authzFrame);
-              resolve(e.data.txHash);
-            }
-
-            if (e.data.status === 'DECLINED') {
-              removeEventListener();
-              detatchFrame(authzFrame);
-              reject(new Error(e.data.errorMessage));
-            }
-          }
-        }
-      )
-    );
+    const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
+    return this.responseListener(authzFrame, 'txHash');
   }
 
   async handleSendUserOperation(
     payload: EIP1193RequestPayload
   ): Promise<string> {
     this.#checkNetworkMatched();
-    const { walletServer, blockchainName } = await this.#getBloctoProperties();
     const { authorizationId } = await this.bloctoApi<{
       authorizationId: string;
     }>(`/user-operation`, {
       method: 'POST',
       body: JSON.stringify(payload.params),
     });
-
-    if (typeof window === 'undefined') {
-      throw new Error('Currently only supported in browser');
-    }
-
-    const userOPFrame = createFrame(
-      `${walletServer}/${this.appId}/${blockchainName}/user-operation/${authorizationId}`
+    const userOPFrame = await this.setIframe(
+      `/user-operation/${authorizationId}`
     );
-
-    attachFrame(userOPFrame);
-
-    return new Promise((resolve, reject) =>
-      addSelfRemovableHandler(
-        'message',
-        (event: Event, removeEventListener: () => void) => {
-          const e = event as MessageEvent;
-          if (
-            e.origin === walletServer &&
-            e.data.type === 'ETH:FRAME:RESPONSE'
-          ) {
-            if (e.data.status === 'APPROVED') {
-              removeEventListener();
-              detatchFrame(userOPFrame);
-              resolve(e.data.userOpHash);
-            }
-
-            if (e.data.status === 'DECLINED') {
-              removeEventListener();
-              detatchFrame(userOPFrame);
-              reject(new Error(e.data.errorMessage));
-            }
-          }
-        }
-      )
-    );
+    return this.responseListener(userOPFrame, 'userOpHash');
   }
 
   async handleDisconnect(): Promise<void> {
