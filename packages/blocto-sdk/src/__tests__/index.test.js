@@ -9,6 +9,43 @@ describe('Testing BloctoSDK', () => {
 });
 
 function ethereumProviderTest(ethereum) {
+  fetch.mockResponse((req) => {
+    if (req.url === 'https://api.blocto.app/networks/evm') {
+      return new Promise((resolve, reject) => {
+        resolve({
+          status: 200,
+          body: JSON.stringify({
+            networks: [
+              {
+                chain_id: 5,
+                name: 'ethereum',
+                display_name: 'Ethereum',
+                network_type: 'testnet',
+                blocto_service_environment: 'dev',
+                rpc_endpoint_domains: [],
+              },
+              {
+                chain_id: 56,
+                name: 'bsc',
+                display_name: 'Smart Chain',
+                network_type: 'mainnet',
+                blocto_service_environment: 'prod',
+                rpc_endpoint_domains: [],
+              },
+            ],
+          }),
+        });
+      });
+    }
+    return new Promise((resolve, reject) => {
+      resolve({
+        status: 200,
+        body: JSON.stringify({
+          test: 'pass',
+        }),
+      });
+    });
+  });
   test('should have ethereum provider', () => {
     expect(ethereum).toBeInstanceOf(Object);
   });
@@ -21,40 +58,31 @@ function ethereumProviderTest(ethereum) {
   test('should have ethereum provider with rpc', () => {
     expect(ethereum.rpc).toBe('https://bsc-dataseed.binance.org');
   });
-  fetch.mockResponseOnce(
-    JSON.stringify({
-      networks: [
-        {
-          chain_id: 5,
-          name: 'ethereum',
-          display_name: 'Ethereum',
-          network_type: 'testnet',
-          blocto_service_environment: 'dev',
-          rpc_endpoint_domains: [],
-        },
-        {
-          chain_id: 56,
-          name: 'bsc',
-          display_name: 'Smart Chain',
-          network_type: 'mainnet',
-          blocto_service_environment: 'prod',
-          rpc_endpoint_domains: [],
-        },
-      ],
-    })
-  );
   ethereum.loadSwitchableNetwork([
     { chainId: '0x5', rpcUrls: ['https://goerli.infura.io/v3/'] },
   ]);
   test('should setup _blocto', () => {
     expect(ethereum._blocto.networkType).toBe('mainnet');
   });
+  ethereum.session.connected = true;
+  test('should ethereum.request chainId work', () => {
+    ethereum.request({ method: 'eth_chainId' }).then((chainId) => {
+      expect(chainId).toBe('0x38');
+    });
+  });
+  test('should ethereum.request eth_estimateUserOperationGas works', () => {
+    ethereum
+      .request({ method: 'eth_estimateUserOperationGas' })
+      .then((response) => {
+        expect(JSON.parse(fetch.mock.lastCall[1].body).method).toBe(
+          'eth_estimateUserOperationGas'
+        );
+        expect(response.test).toBe('pass');
+      });
+  });
 }
 
 describe('Testing BloctoSDK providers without appId', () => {
-  beforeEach(() => {
-    fetch.resetMocks();
-  });
   const bloctoSDK = new BloctoSDK({
     ethereum: {
       chainId: 56,
