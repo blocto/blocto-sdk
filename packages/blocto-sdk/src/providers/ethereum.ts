@@ -66,7 +66,7 @@ export default class EthereumProvider
     // setup chainId
     invariant(chainId, "'chainId' is required");
     this.networkVersion = `${parseChainId(chainId)}`;
-    this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
+    this.chainId = `0x${parseChainId(chainId).toString(16)}`;
     // setup rpc
     this.rpc = rpc || ETH_RPC_LIST[this.networkVersion];
     invariant(rpc, "'rpc' is required");
@@ -123,20 +123,21 @@ export default class EthereumProvider
     return this._blocto;
   }
 
-  #addToSwitchable({
+  async #addToSwitchable({
     chainId,
     rpcUrls,
   }: {
     chainId: `${number}`;
     rpcUrls: string[];
-  }): void {
+  }): Promise<void> {
+    const { supportNetworkList } = await this.#getBloctoProperties();
     const {
       chain_id,
       name,
       display_name,
       network_type,
       blocto_service_environment,
-    } = this._blocto.supportNetworkList[chainId];
+    } = supportNetworkList[chainId];
     const wallet_web_url =
       ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment];
     this._blocto.switchableNetwork[chain_id] = {
