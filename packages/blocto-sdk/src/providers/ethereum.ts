@@ -87,9 +87,11 @@ export default class EthereumProvider
 
   async #getBloctoProperties(): Promise<EthereumProvider['_blocto']> {
     if (!Object.keys(this._blocto.supportNetworkList).length) {
-      await getEvmSupport().then(
-        (result) => (this._blocto.supportNetworkList = result)
-      );
+      await getEvmSupport()
+        .then((result) => (this._blocto.supportNetworkList = result))
+        .catch((e) => {
+          console.error(e);
+        });
     }
     const {
       chain_id,
