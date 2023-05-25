@@ -580,7 +580,7 @@ export default class EthereumProvider
     this.#checkNetworkMatched();
     const { signatureId } = await this.bloctoApi<{ signatureId: string }>(
       `/user-signature`,
-      { method: 'POST' }
+      { method: 'POST', body: JSON.stringify({ method, message }) }
     );
     const signFrame = await this.setIframe(`/user-signature/${signatureId}`);
     return this.responseListener(signFrame, 'signature');
