@@ -430,6 +430,11 @@ export default class EthereumProvider
               reject(new Error(e.data.errorMessage));
             }
           }
+          if (e.data.type === 'ETH:FRAME:CLOSE') {
+            removeEventListener();
+            detatchFrame(frame);
+            reject(new Error('User declined the request'));
+          }
         }
       )
     );
@@ -472,27 +477,21 @@ export default class EthereumProvider
 
     this.tryRetrieveSessionFromStorage(blockchainName);
 
+    const params = new URLSearchParams();
+    params.set('l6n', window.location.origin);
+    const emailParam = email && isEmail(email) ? `/${email}` : '';
+
+    const loginFrame = await this.setIframe(
+      `/authn${emailParam}?${params.toString()}`
+    );
+
+    if (this.session.connected) {
+      return new Promise((resolve) => {
+        resolve(this.session.accounts[blockchainName]);
+      });
+    }
+
     return new Promise((resolve, reject) => {
-      if (typeof window === 'undefined') {
-        return reject('Currently only supported in browser');
-      }
-
-      if (this.session.connected) {
-        return resolve(this.session.accounts[blockchainName]);
-      }
-
-      const params = new URLSearchParams();
-      params.set('l6n', window.location.origin);
-      const emailParam = email && isEmail(email) ? `/${email}` : '';
-
-      const loginFrame = createFrame(
-        `${walletServer}/${
-          this.appId
-        }/${blockchainName}/authn${emailParam}?${params.toString()}`
-      );
-
-      attachFrame(loginFrame);
-
       addSelfRemovableHandler(
         'message',
         (event: Event, removeListener: () => void) => {
@@ -501,16 +500,13 @@ export default class EthereumProvider
             if (e.data.type === 'ETH:FRAME:RESPONSE') {
               removeListener();
               detatchFrame(loginFrame);
-
               this.session.code = e.data.code;
               this.session.connected = true;
-
               this.eventListeners.connect.forEach((listener) =>
                 listener(this.networkVersion)
               );
               const address = e.data.address;
               this.formatAndSetSessionAccount(address);
-
               setItemWithExpiry(
                 this.sessionKey,
                 {
@@ -519,7 +515,6 @@ export default class EthereumProvider
                 },
                 LOGIN_PERSISTING_TIME
               );
-
               resolve(this.session.accounts[blockchainName]);
             }
 
