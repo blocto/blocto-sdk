@@ -13,7 +13,8 @@ import {
 } from './types/aptos.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import { setItemWithExpiry } from '../lib/localStorage';
+import { removeItem, setItemWithExpiry } from '../lib/localStorage';
+import { KEY_SESSION } from '../lib/localStorage/constants';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   APT_CHAIN_ID_SERVER_MAPPING,
@@ -124,6 +125,7 @@ export default class AptosProvider
     this.session.code = null;
     this.session.accounts = {};
     this.session.connected = false;
+    removeItem(KEY_SESSION);
   }
 
   async signAndSubmitTransaction(
