@@ -156,7 +156,7 @@ export default class EthereumProvider
     if (
       existedSDK &&
       existedSDK.isBlocto &&
-      existedSDK.chainId !== this.chainId
+      parseChainId(existedSDK.chainId) !== parseChainId(this.chainId)
     ) {
       throw new Error('Blocto SDK network mismatched');
     }
