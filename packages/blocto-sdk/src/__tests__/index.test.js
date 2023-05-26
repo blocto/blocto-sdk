@@ -11,7 +11,7 @@ describe('Testing BloctoSDK', () => {
 function ethereumProviderTest(ethereum) {
   fetch.mockResponse((req) => {
     if (req.url === 'https://api.blocto.app/networks/evm') {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         resolve({
           status: 200,
           body: JSON.stringify({
@@ -37,7 +37,7 @@ function ethereumProviderTest(ethereum) {
         });
       });
     }
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       resolve({
         status: 200,
         body: JSON.stringify({
