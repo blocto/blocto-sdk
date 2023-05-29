@@ -16,7 +16,8 @@ import {
 } from './types/solana.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import { setItemWithExpiry } from '../lib/localStorage';
+import { removeItem, setItemWithExpiry } from '../lib/localStorage';
+import { KEY_SESSION } from '../lib/localStorage/constants';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   SOL_NET_SERVER_MAPPING,
@@ -216,6 +217,7 @@ export default class SolanaProvider
     this.session.accounts = {};
     this.eventListeners.disconnect.forEach((listener) => listener(null));
     this.session.connected = false;
+    removeItem(KEY_SESSION);
   }
 
   async fetchAccounts(): Promise<string[]> {
