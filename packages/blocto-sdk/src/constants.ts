@@ -6,7 +6,10 @@ export interface BaseConfig {
 
 /* eth series constants begin */
 
-export const ETH_CHAIN_ID_RPC_MAPPING: Mapping = {
+export const ETH_RPC_LIST: Mapping = {
+  // This is the list of public RPC endpoints that we known to be working
+  // Used to help developers did not set up their own RPC endpoints
+
   // BSC mainnet
   56: 'https://bsc-dataseed1.binance.org',
   // BSC testnet
@@ -31,73 +34,6 @@ export const ETH_CHAIN_ID_RPC_MAPPING: Mapping = {
   10: 'https://mainnet.optimism.io',
   // Optimism Goerli Testnet
   420: 'https://goerli.optimism.io',
-};
-
-export const ETH_CHAIN_ID_CHAIN_MAPPING: Mapping = {
-  // Ethereum
-  1: 'ethereum',
-  5: 'ethereum',
-
-  // BSC
-  56: 'bsc',
-  97: 'bsc',
-
-  // Polygon
-  137: 'polygon',
-  80001: 'polygon',
-
-  // Avalanche
-  43114: 'avalanche',
-  43113: 'avalanche',
-
-  // Arbitrum
-  42161: 'arbitrum',
-  421613: 'arbitrum',
-
-  // Optimism
-  10: 'optimism',
-  420: 'optimism',
-};
-
-export const ETH_CHAIN_ID_NET_MAPPING: Mapping = {
-  // Ethereum
-  1: 'mainnet',
-  5: 'testnet',
-
-  // BSC
-  56: 'mainnet',
-  97: 'testnet',
-
-  // Polygon
-  137: 'mainnet',
-  80001: 'testnet',
-
-  // Avalanche
-  43114: 'mainnet',
-  43113: 'testnet',
-
-  // Arbitrum
-  42161: 'mainnet',
-  421613: 'testnet',
-
-  // Optimism
-  10: 'mainnet',
-  420: 'testnet',
-};
-
-export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
-  1: 'https://wallet-v2.blocto.app',
-  5: 'https://wallet-v2-dev.blocto.app',
-  56: 'https://wallet-v2.blocto.app',
-  97: 'https://wallet-v2-dev.blocto.app',
-  137: 'https://wallet-v2.blocto.app',
-  80001: 'https://wallet-v2-dev.blocto.app',
-  43114: 'https://wallet-v2.blocto.app',
-  43113: 'https://wallet-v2-dev.blocto.app',
-  42161: 'https://wallet-v2.blocto.app',
-  421613: 'https://wallet-v2-dev.blocto.app',
-  10: 'https://wallet-v2.blocto.app',
-  420: 'https://wallet-v2-dev.blocto.app',
 };
 
 export const ETH_ENV_WALLET_SERVER_MAPPING: Mapping = {
