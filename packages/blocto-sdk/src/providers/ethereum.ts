@@ -90,7 +90,7 @@ export default class EthereumProvider
       await getEvmSupport()
         .then((result) => (this._blocto.supportNetworkList = result))
         .catch((e) => {
-          console.error(e);
+          throw new Error(`Get blocto server failed: ${e.message}`);
         });
     }
     const {
