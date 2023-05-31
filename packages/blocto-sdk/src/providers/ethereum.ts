@@ -21,7 +21,7 @@ import {
   DEFAULT_APP_ID,
 } from '../constants';
 import { KEY_SESSION } from '../lib/localStorage/constants';
-import { isEmail } from '../lib/is';
+import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
 import { ProviderSession } from './types/blocto';
 
@@ -585,6 +585,9 @@ export default class EthereumProvider
 
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
+    if (!isValidTransaction(payload.params)) {
+      throw new Error('Invalid transaction in params');
+    }
     const { authorizationId } = await this.bloctoApi<{
       authorizationId: string;
     }>(`/authz`, { method: 'POST', body: JSON.stringify(payload.params) });
@@ -605,6 +608,10 @@ export default class EthereumProvider
       );
     const formatParams = extractParams(payload.params as Array<any>);
     const copyPayload = { ...payload, params: formatParams };
+
+    if (!isValidTransactions(copyPayload.params)) {
+      throw new Error('Invalid transaction in params');
+    }
 
     return this.handleSendTransaction(copyPayload);
   }
