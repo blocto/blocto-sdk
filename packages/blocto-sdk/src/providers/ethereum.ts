@@ -605,7 +605,7 @@ export default class EthereumProvider
       );
     const formatParams = extractParams(payload.params as Array<any>);
     const copyPayload = { ...payload, params: formatParams };
-    
+
     return this.handleSendTransaction(copyPayload);
   }
 
