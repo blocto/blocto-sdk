@@ -162,14 +162,6 @@ export default class EthereumProvider
     }
   }
 
-  #extractParams(params: Array<any>): Array<any> {
-    return params.map(param => {
-      return 'params' in param ?
-        param.params[0] : // handle passing web3.eth.sendTransaction.request(...) as a parameter with params
-        param;
-    })
-  }
-
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
   async send(
     methodOrPayload: string | JsonRpcRequest,
@@ -326,9 +318,11 @@ export default class EthereumProvider
           result = null;
           break;
         }
-        case 'blocto_sendBatchTransaction':
         case 'eth_sendTransaction':
           result = await this.handleSendTransaction(payload);
+          break;
+        case 'blocto_sendBatchTransaction':
+          result = await this.handleSendBatchTransaction(payload);
           break;
         case 'eth_signTransaction':
         case 'eth_sendRawTransaction':
@@ -591,12 +585,28 @@ export default class EthereumProvider
 
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
-    const formatParams = this.#extractParams(payload.params as Array<any>);
     const { authorizationId } = await this.bloctoApi<{
       authorizationId: string;
-    }>(`/authz`, { method: 'POST', body: JSON.stringify(formatParams) });
+    }>(`/authz`, { method: 'POST', body: JSON.stringify(payload.params) });
     const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
     return this.responseListener(authzFrame, 'txHash');
+  }
+
+  async handleSendBatchTransaction(
+    payload: EIP1193RequestPayload
+  ): Promise<string> {
+    this.#checkNetworkMatched();
+
+    const extractParams = (params: Array<any>): Array<any> =>
+      params.map((param) =>
+        'params' in param
+          ? param.params[0] // handle passing web3.eth.sendTransaction.request(...) as a parameter with params
+          : param
+      );
+    const formatParams = extractParams(payload.params as Array<any>);
+    const copyPayload = { ...payload, params: formatParams };
+    
+    return this.handleSendTransaction(copyPayload);
   }
 
   async handleSendUserOperation(
