@@ -110,5 +110,3 @@ Changesets are designed to stack, so there's no problem with adding multiple. Yo
 
 - You want to release multiple packages with different changelog entries
 - You have made multiple changes to a package that should each be called out separately
-
-

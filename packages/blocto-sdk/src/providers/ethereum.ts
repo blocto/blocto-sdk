@@ -21,7 +21,7 @@ import {
   DEFAULT_APP_ID,
 } from '../constants';
 import { KEY_SESSION } from '../lib/localStorage/constants';
-import { isEmail } from '../lib/is';
+import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
 import { ProviderSession } from './types/blocto';
 
@@ -318,9 +318,11 @@ export default class EthereumProvider
           result = null;
           break;
         }
-        case 'blocto_sendBatchTransaction':
         case 'eth_sendTransaction':
           result = await this.handleSendTransaction(payload);
+          break;
+        case 'blocto_sendBatchTransaction':
+          result = await this.handleSendBatchTransaction(payload);
           break;
         case 'eth_signTransaction':
         case 'eth_sendRawTransaction':
@@ -583,11 +585,35 @@ export default class EthereumProvider
 
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
+    if (!isValidTransaction(payload.params)) {
+      throw new Error('Invalid transaction in params');
+    }
     const { authorizationId } = await this.bloctoApi<{
       authorizationId: string;
     }>(`/authz`, { method: 'POST', body: JSON.stringify(payload.params) });
     const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
     return this.responseListener(authzFrame, 'txHash');
+  }
+
+  async handleSendBatchTransaction(
+    payload: EIP1193RequestPayload
+  ): Promise<string> {
+    this.#checkNetworkMatched();
+
+    const extractParams = (params: Array<any>): Array<any> =>
+      params.map((param) =>
+        'params' in param
+          ? param.params[0] // handle passing web3.eth.sendTransaction.request(...) as a parameter with params
+          : param
+      );
+    const formatParams = extractParams(payload.params as Array<any>);
+    const copyPayload = { ...payload, params: formatParams };
+
+    if (!isValidTransactions(copyPayload.params)) {
+      throw new Error('Invalid transaction in params');
+    }
+
+    return this.handleSendTransaction(copyPayload);
   }
 
   async handleSendUserOperation(

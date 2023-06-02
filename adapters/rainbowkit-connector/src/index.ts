@@ -2,10 +2,7 @@ import BloctoSDK from '@blocto/sdk';
 import type { EthereumProviderInterface } from '@blocto/sdk';
 import { Chain, Wallet } from '@rainbow-me/rainbowkit';
 import { ConnectorNotFoundError } from 'wagmi';
-import {
-  SwitchChainError,
-  UserRejectedRequestError,
-} from "viem";
+import { SwitchChainError, UserRejectedRequestError } from 'viem';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 export interface BloctoWalletOptions {
   chains: Chain[];
@@ -83,7 +80,7 @@ export class BloctoConnector extends InjectedConnector {
     const accounts = await blocto?.ethereum?.request({
       method: 'eth_requestAccounts',
     });
-    if(!accounts?.length) throw new ConnectorNotFoundError()
+    if (!accounts?.length) throw new ConnectorNotFoundError();
     return accounts[0];
   }
   async getChainId(): Promise<number> {
@@ -129,10 +126,10 @@ export class BloctoConnector extends InjectedConnector {
       return chain;
     } catch (error: any) {
       const chain = this.chains.find((x) => x.id === chainId);
-      if (!chain){
+      if (!chain) {
         throw new ConnectorNotFoundError('chain not found');
       }
-      if (this.isUserRejectedRequestError(error)){
+      if (this.isUserRejectedRequestError(error)) {
         throw new UserRejectedRequestError(error);
       }
       throw new SwitchChainError(error);

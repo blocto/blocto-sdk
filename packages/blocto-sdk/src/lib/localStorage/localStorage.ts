@@ -17,7 +17,10 @@ const isSupported = () => {
 
 const storage = isSupported() ? window.localStorage : MemoryStorage;
 
-export const getItem = <T>(key: string, defaultValue: T | null = null): T | null => {
+export const getItem = <T>(
+  key: string,
+  defaultValue: T | null = null
+): T | null => {
   const value = storage.getItem(key);
   try {
     return (value && JSON.parse(value)) || defaultValue;
