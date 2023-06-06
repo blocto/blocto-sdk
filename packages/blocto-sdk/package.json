@@ -23,6 +23,7 @@
     "start": "npm-run-all --parallel rollup-watch serve"
   },
   "dependencies": {
+    "@metamask/rpc-errors": "^5.1.1",
     "bs58": "^5.0.0",
     "buffer": "^6.0.3",
     "eip1193-provider": "^1.0.1",
