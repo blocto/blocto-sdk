@@ -483,15 +483,11 @@ export default class EthereumProvider
     const { walletServer, blockchainName } = await this.#getBloctoProperties();
     if (existedSDK && existedSDK.isBlocto) {
       if (existedSDK.chainId !== this.chainId) {
-        try {
-          await existedSDK.request({
-            method: 'wallet_addEthereumChain',
-            params: [{ chainId: this.chainId }],
-          });
-          this.session.accounts[blockchainName] = [existedSDK.address];
-        } catch (e) {
-          console.error(e);
-        }
+        await existedSDK.request({
+          method: 'wallet_addEthereumChain',
+          params: [{ chainId: this.chainId }],
+        });
+        this.session.accounts[blockchainName] = [existedSDK.address];
       }
       return new Promise((resolve, reject) =>
         // add a small delay to make sure the network has been switched
