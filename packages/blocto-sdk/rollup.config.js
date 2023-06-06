@@ -10,13 +10,6 @@ import { babel } from '@rollup/plugin-babel';
 import dts from 'rollup-plugin-dts';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 
-import pkg from './package.json';
-
-const babelRuntimeVersion = pkg.devDependencies['@babel/runtime'].replace(
-  /^[^0-9]*/,
-  ''
-);
-
 export default [
   // CommonJS
   {
@@ -44,9 +37,7 @@ export default [
       babel({
         babelHelpers: 'runtime',
         exclude: 'node_modules/**',
-        plugins: [
-          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
-        ],
+        plugins: [['@babel/plugin-transform-runtime']],
         presets: [['@babel/preset-env']],
       }),
       polyfills(),
@@ -78,9 +69,7 @@ export default [
       babel({
         babelHelpers: 'runtime',
         exclude: 'node_modules/**',
-        plugins: [
-          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
-        ],
+        plugins: [['@babel/plugin-transform-runtime']],
         presets: [['@babel/preset-env']],
       }),
       polyfills(),
