@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.4.8
+
+### Patch Changes
+
+- 105381a: Fix insert iframe styles
+
 ## 0.4.7
 
 ### Patch Changes
