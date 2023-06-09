@@ -607,7 +607,7 @@ export default class EthereumProvider
 
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
-    if (!isValidTransaction(payload.params)) {
+    if (!isValidTransaction(payload.params?.[0])) {
       throw rpcErrors.invalidParams();
     }
     const { authorizationId } = await this.bloctoApi<{
