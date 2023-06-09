@@ -677,14 +677,15 @@ export default class EthereumProvider
   ): Promise<null> {
     // setup switchable list if user set networkList
     if (networkList?.length) {
-      networkList.forEach(({ chainId: chain_id, rpcUrls }) => {
+      const listToAdd = networkList.map(({ chainId: chain_id, rpcUrls }) => {
         invariant(rpcUrls, 'rpcUrls is required for networksList');
         if (!rpcUrls?.length) throw rpcErrors.invalidParams('Empty rpcUrls');
-        this.#addToSwitchable({
+        return this.#addToSwitchable({
           chainId: `${parseChainId(chain_id)}`,
           rpcUrls,
         });
       });
+      return Promise.all(listToAdd).then(() => null);
     }
     return null;
   }
