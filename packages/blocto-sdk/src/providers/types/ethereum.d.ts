@@ -75,3 +75,55 @@ export type JsonRpcCallback = (
   error: Error | null,
   response?: JsonRpcResponse
 ) => unknown;
+
+/**
+ *  A [[HexString]] whose length is even, which ensures it is a valid
+ *  representation of binary data.
+ */
+export type DataHexString = string;
+
+/**
+ *  An object that can be used to represent binary data.
+ */
+export type BytesLike = DataHexString | Uint8Array;
+
+/**
+ *  Any type that can be used where a numeric value is needed.
+ */
+export type Numeric = number | bigint;
+
+/**
+ *  Any type that can be used where a big number is needed.
+ */
+export type BigNumberish = string | Numeric;
+
+/**
+ *  An interface for an ERC-4337 transaction object.
+ *  Note: BloctoSDK do not need sender, nonce, initCode, signature to send userOperation.
+ *  These parameters will be ignored.
+ */
+export interface IUserOperation {
+  callData: BytesLike;
+  callGasLimit?: BigNumberish;
+  verificationGasLimit?: BigNumberish;
+  preVerificationGas?: BigNumberish;
+  maxFeePerGas?: BigNumberish;
+  maxPriorityFeePerGas?: BigNumberish;
+  paymasterAndData?: BytesLike;
+  /**
+   *  BloctoSDK do not need sender to send userOperation. Will be ignored.
+   */
+  sender?: string;
+  /**
+   * BloctoSDK do not need nonce to send userOperation. Will be ignored.
+   * */
+  nonce?: BigNumberish;
+  /**
+   * BloctoSDK do not need initCode to send userOperation. Will be ignored.
+   * */
+  initCode?: BytesLike;
+  /**
+   * BloctoSDK do not need signature to send userOperation. Will be ignored.
+   * */
+  signature?: BytesLike;
+}
