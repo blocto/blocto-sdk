@@ -111,7 +111,7 @@ export interface IUserOperation {
   maxPriorityFeePerGas?: BigNumberish;
   paymasterAndData?: BytesLike;
   /**
-   *  BloctoSDK do not need sender to send userOperation. Will be ignored.
+   *  If provided, please ensure it is same as login account.
    */
   sender?: string;
   /**

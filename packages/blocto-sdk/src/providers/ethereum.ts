@@ -280,7 +280,7 @@ export default class EthereumProvider
   /**
    * Sending userOperation using Blocto SDK.
    * @param {IUserOperation} userOp - userOperation object
-   * @remarks BloctoSDK do not need sender, nonce, initCode, signature to send userOperation.
+   * @remarks No need to include nonce, initCode, and signature as parameters when using BloctoSDK to send userOperation.
    * These parameters will be ignored.
    * @returns {Promise<string>} - userOperation hash
    */
