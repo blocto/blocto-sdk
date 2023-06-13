@@ -21,7 +21,6 @@ import {
   DEFAULT_APP_ID,
   KEY_SESSION_MAPPING,
 } from '../constants';
-import { KEY_SESSION } from '../lib/storage/constants';
 import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
 import { rpcErrors, providerErrors } from '@metamask/rpc-errors';
