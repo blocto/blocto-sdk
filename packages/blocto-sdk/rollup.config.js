@@ -9,6 +9,7 @@ import alias from '@rollup/plugin-alias';
 import { babel } from '@rollup/plugin-babel';
 import dts from 'rollup-plugin-dts';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import versionInjector from 'rollup-plugin-version-injector';
 
 export default [
   // CommonJS
@@ -21,6 +22,7 @@ export default [
       exports: 'auto',
     },
     plugins: [
+      versionInjector(),
       alias({
         entries: {
           'readable-stream': 'stream',
@@ -53,6 +55,7 @@ export default [
       name: 'BloctoSDK',
     },
     plugins: [
+      versionInjector(),
       alias({
         entries: {
           'readable-stream': 'stream',
@@ -85,6 +88,7 @@ export default [
       name: 'BloctoSDK',
     },
     plugins: [
+      versionInjector(),
       alias({
         entries: {
           'readable-stream': 'stream',

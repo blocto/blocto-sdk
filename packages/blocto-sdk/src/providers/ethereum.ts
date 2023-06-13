@@ -499,6 +499,8 @@ export default class EthereumProvider
 
     const params = new URLSearchParams();
     params.set('l6n', window.location.origin);
+    // [VI]{version}[/VI] will inject the version of the SDK by versionInjector
+    params.set('v', '[VI]{version}[/VI]');
     const emailParam = email && isEmail(email) ? `/${email}` : '';
 
     const loginFrame = await this.setIframe(
