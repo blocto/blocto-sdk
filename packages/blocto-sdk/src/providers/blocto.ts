@@ -3,7 +3,7 @@
 import { EIP1193Provider, RequestArguments } from 'eip1193-provider';
 
 import { EIP1193_EVENTS } from '../constants';
-import { KEY_SESSION, getItemWithExpiry } from '../lib/localStorage';
+import { KEY_SESSION, getItemWithExpiry } from '../lib/storage';
 import Session from '../lib/session.d';
 import { ProviderSession } from './types/blocto.d';
 import { DEFAULT_APP_ID } from '../constants';
@@ -17,7 +17,7 @@ class BloctoProvider implements EIP1193Provider {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   eventListeners: { [key: string]: Array<(arg: any) => void> } = {};
 
-  sessionKey = KEY_SESSION;
+  sessionKey = KEY_SESSION.prod;
 
   session: ProviderSession;
 

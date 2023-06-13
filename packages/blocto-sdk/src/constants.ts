@@ -1,3 +1,4 @@
+import { KEY_SESSION } from './lib/storage';
 type Mapping = Record<number | string, string>;
 
 export interface BaseConfig {
@@ -58,6 +59,14 @@ export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta'];
 
 /* aptos constants begin */
 
+export const APT_SESSION_KEY_MAPPING: Record<number | string, KEY_SESSION> = {
+  1: KEY_SESSION.prod,
+  2: KEY_SESSION.dev,
+  3: KEY_SESSION.dev,
+  4: KEY_SESSION.dev,
+  5: KEY_SESSION.staging,
+};
+
 export const APT_CHAIN_ID_SERVER_MAPPING: Mapping = {
   // MAINNET
   1: 'https://wallet-v2.blocto.app',
@@ -108,3 +117,9 @@ export const EIP1193_EVENTS: Array<string> = [
 // Preserve login for 1 day
 export const LOGIN_PERSISTING_TIME = 86400 * 1000;
 export const DEFAULT_APP_ID = '00000000-0000-0000-0000-000000000000';
+
+export const KEY_SESSION_MAPPING: Record<string, KEY_SESSION> = {
+  prod: KEY_SESSION.prod,
+  staging: KEY_SESSION.staging,
+  dev: KEY_SESSION.dev,
+};

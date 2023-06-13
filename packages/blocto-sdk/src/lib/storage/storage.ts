@@ -6,16 +6,16 @@ const isSupported = () => {
     return false;
   }
   try {
-    window.localStorage.setItem('local_storage_supported', '1');
-    const result = window.localStorage.getItem('local_storage_supported');
-    window.localStorage.removeItem('local_storage_supported');
+    window.sessionStorage.setItem('local_storage_supported', '1');
+    const result = window.sessionStorage.getItem('local_storage_supported');
+    window.sessionStorage.removeItem('local_storage_supported');
     return result === '1';
   } catch (error) {
     return false;
   }
 };
 
-const storage = isSupported() ? window.localStorage : MemoryStorage;
+const storage = isSupported() ? window.sessionStorage : MemoryStorage;
 
 export const getItem = <T>(
   key: string,
@@ -83,7 +83,7 @@ export const removeOutdatedKeys = (): void => {
 
   setItem(keys.KEY_LOCAL_STORAGE_VERSION, keys.LOCAL_STORAGE_VERSION);
 
-  const localDexscanKeys = Object.keys(localStorage).filter(
+  const localDexscanKeys = Object.keys(sessionStorage).filter(
     (key) => key.indexOf('flow.') === 0
   );
 
@@ -93,7 +93,7 @@ export const removeOutdatedKeys = (): void => {
   localDexscanKeys.forEach((localCobKey) => {
     const hasMatch = dexscanKeys.some((key) => key === localCobKey);
     if (!hasMatch) {
-      localStorage.removeItem(localCobKey);
+      sessionStorage.removeItem(localCobKey);
     }
   });
 };

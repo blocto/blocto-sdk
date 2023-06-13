@@ -13,8 +13,7 @@ import {
 } from './types/aptos.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import { removeItem, setItemWithExpiry } from '../lib/localStorage';
-import { KEY_SESSION } from '../lib/localStorage/constants';
+import { removeItem, setItemWithExpiry } from '../lib/storage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   APT_CHAIN_ID_SERVER_MAPPING,
@@ -22,6 +21,7 @@ import {
   APT_CHAIN_ID_RPC_MAPPING,
   LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
+  APT_SESSION_KEY_MAPPING,
 } from '../constants';
 
 const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
@@ -69,6 +69,7 @@ export default class AptosProvider
     this.chainId = chainId;
     this.networkName = APT_CHAIN_ID_NAME_MAPPING[chainId];
     this.api = APT_CHAIN_ID_RPC_MAPPING[chainId];
+    this.sessionKey = APT_SESSION_KEY_MAPPING[chainId];
 
     const defaultServer = APT_CHAIN_ID_SERVER_MAPPING[chainId];
 
@@ -125,7 +126,7 @@ export default class AptosProvider
     this.session.code = null;
     this.session.accounts = {};
     this.session.connected = false;
-    removeItem(KEY_SESSION);
+    removeItem(this.sessionKey);
   }
 
   async signAndSubmitTransaction(

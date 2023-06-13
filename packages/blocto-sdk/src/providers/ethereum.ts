@@ -12,15 +12,16 @@ import {
 } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import { removeItem, setItemWithExpiry } from '../lib/localStorage';
+import { removeItem, setItemWithExpiry } from '../lib/storage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   ETH_RPC_LIST,
   ETH_ENV_WALLET_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
+  KEY_SESSION_MAPPING,
 } from '../constants';
-import { KEY_SESSION } from '../lib/localStorage/constants';
+import { KEY_SESSION } from '../lib/storage/constants';
 import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
 import { rpcErrors, providerErrors } from '@metamask/rpc-errors';
@@ -108,6 +109,9 @@ export default class EthereumProvider
       chain_id,
       `Get blocto server failed: ${this.networkVersion} might not be supported yet.`
     );
+    if (blocto_service_environment !== 'prod') {
+      this.sessionKey = KEY_SESSION_MAPPING[blocto_service_environment];
+    }
     this._blocto = {
       ...this._blocto,
       session: this.session,
@@ -666,7 +670,7 @@ export default class EthereumProvider
     this.session.connected = false;
     this.session.code = null;
     this.session.accounts = {};
-    removeItem(KEY_SESSION);
+    removeItem(this.sessionKey);
   }
 
   async loadSwitchableNetwork(

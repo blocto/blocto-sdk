@@ -16,8 +16,8 @@ import {
 } from './types/solana.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import { removeItem, setItemWithExpiry } from '../lib/localStorage';
-import { KEY_SESSION } from '../lib/localStorage/constants';
+import { removeItem, setItemWithExpiry } from '../lib/storage';
+import { KEY_SESSION } from '../lib/storage/constants';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   SOL_NET_SERVER_MAPPING,
@@ -62,7 +62,9 @@ export default class SolanaProvider
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || '';
     this.appId = appId || DEFAULT_APP_ID;
-
+    if (this.net === 'devnet' || this.net === 'testnet') {
+      this.sessionKey = KEY_SESSION.dev;
+    }
     if (!Solana) {
       throw new Error(
         'No @solana/web3.js installed. Please install it to interact with Solana.'
@@ -217,7 +219,7 @@ export default class SolanaProvider
     this.session.accounts = {};
     this.eventListeners.disconnect.forEach((listener) => listener(null));
     this.session.connected = false;
-    removeItem(KEY_SESSION);
+    removeItem(this.sessionKey);
   }
 
   async fetchAccounts(): Promise<string[]> {
