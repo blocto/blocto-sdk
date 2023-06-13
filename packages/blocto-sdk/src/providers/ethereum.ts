@@ -25,6 +25,7 @@ import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
 import { rpcErrors, providerErrors } from '@metamask/rpc-errors';
 import { ProviderSession } from './types/blocto';
+import { isHexString, utf8ToHex } from '../lib/utf8toHex';
 
 function parseChainId(chainId: string | number | null): number {
   if (!chainId) {
@@ -446,7 +447,7 @@ export default class EthereumProvider
             if (e.data.status === 'DECLINED') {
               removeEventListener();
               detatchFrame(frame);
-              reject(providerErrors.userRejectedRequest());
+              reject(providerErrors.userRejectedRequest(e.data.errorMessage));
             }
           }
           if (e.data.type === 'ETH:FRAME:CLOSE') {
@@ -576,9 +577,13 @@ export default class EthereumProvider
     let message = '';
     if (Array.isArray(params)) {
       if (method === 'eth_sign') {
-        message = params[1].slice(2);
+        message = isHexString(params[1])
+          ? params[1].slice(2)
+          : utf8ToHex(params[1]);
       } else if (method === 'personal_sign') {
-        message = params[0].slice(2);
+        message = isHexString(params[0])
+          ? params[0].slice(2)
+          : utf8ToHex(params[0]);
       } else if (
         [
           'eth_signTypedData',

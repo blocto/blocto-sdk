@@ -96,6 +96,26 @@ describe('Testing BloctoSDK ethereum provider', () => {
         expect(response.test).toBe('pass');
       });
   });
+  test('should request personal_sign send right param', async () => {
+    const exampleMessage = 'Test `personal_sign` message.';
+    return ethereum
+      .request({
+        method: 'personal_sign',
+        params: [exampleMessage, '0x123'],
+      })
+      .then(() => {
+        expect(fetch.mock.lastCall[0]).toBe(
+          'https://wallet-v2.blocto.app/api/bsc/user-signature'
+        );
+        expect(fetch.mock.lastCall[1].body).toBe(
+          JSON.stringify({
+            method: 'personal_sign',
+            message:
+              '546573742060706572736f6e616c5f7369676e60206d6573736167652e',
+          })
+        );
+      });
+  });
   test('should request eth_signTypedData call right api', async () => {
     const msgParams = JSON.stringify({
       domain: {
