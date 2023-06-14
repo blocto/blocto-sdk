@@ -23,9 +23,5 @@ class MemoryStorage {
 const memoryStorage =
   typeof window !== 'undefined' ? window.memoryStorage : new MemoryStorage();
 
-if (typeof window !== 'undefined') {
-  window.memoryStorage = memoryStorage;
-}
-
 export default memoryStorage;
 export { MemoryStorage };

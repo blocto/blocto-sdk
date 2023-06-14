@@ -1,4 +1,4 @@
-import { removeItem } from './localStorage';
+import { removeItem } from './storage';
 
 export default async function responseSessionGuard<T>(
   response: Response,

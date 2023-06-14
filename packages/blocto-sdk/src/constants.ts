@@ -1,3 +1,4 @@
+import { KEY_SESSION } from './lib/storage';
 type Mapping = Record<number | string, string>;
 
 export interface BaseConfig {
@@ -42,21 +43,45 @@ export const ETH_ENV_WALLET_SERVER_MAPPING: Mapping = {
   dev: 'https://wallet-v2-dev.blocto.app',
 };
 
+export const ETH_SESSION_KEY_MAPPING: Record<string, KEY_SESSION> = {
+  prod: KEY_SESSION.prod,
+  staging: KEY_SESSION.staging,
+  dev: KEY_SESSION.dev,
+};
+
 /* eth series constants end */
 
 /* sol constants begin */
 
-export const SOL_NET_SERVER_MAPPING: Mapping = {
-  devnet: 'https://wallet-v2-dev.blocto.app',
-  testnet: 'https://wallet-v2-dev.blocto.app',
-  'mainnet-beta': 'https://wallet-v2.blocto.app',
+export const SOL_NET = {
+  MainnetBeta: 'mainnet-beta',
+  Testnet: 'testnet',
+  Devnet: 'devnet',
 };
 
-export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta'];
+export const SOL_NET_SERVER_MAPPING: Mapping = {
+  [SOL_NET.MainnetBeta]: 'https://wallet-v2.blocto.app',
+  [SOL_NET.Devnet]: 'https://wallet-v2-dev.blocto.app',
+  [SOL_NET.Testnet]: 'https://wallet-v2-dev.blocto.app',
+};
+
+export const SOL_SESSION_KEY_MAPPING: Record<number | string, KEY_SESSION> = {
+  [SOL_NET.MainnetBeta]: KEY_SESSION.prod,
+  [SOL_NET.Devnet]: KEY_SESSION.dev,
+  [SOL_NET.Testnet]: KEY_SESSION.dev,
+};
 
 /* sol constants end */
 
 /* aptos constants begin */
+
+export const APT_SESSION_KEY_MAPPING: Record<number | string, KEY_SESSION> = {
+  1: KEY_SESSION.prod,
+  2: KEY_SESSION.dev,
+  3: KEY_SESSION.dev,
+  4: KEY_SESSION.dev,
+  5: KEY_SESSION.staging,
+};
 
 export const APT_CHAIN_ID_SERVER_MAPPING: Mapping = {
   // MAINNET
