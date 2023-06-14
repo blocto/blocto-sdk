@@ -1,5 +1,28 @@
 import { ethers, BigNumberish, BytesLike } from 'ethers';
-import bloctoAccountAbi from '../lib/BloctoAccountABI';
+const bloctoAccountAbi = `[
+    {
+    "inputs": [
+      { "internalType": "address", "name": "dest", "type": "address" },
+      { "internalType": "uint256", "name": "value", "type": "uint256" },
+      { "internalType": "bytes", "name": "func", "type": "bytes" }
+    ],
+    "name": "execute",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address[]", "name": "dest", "type": "address[]" },
+      { "internalType": "uint256[]", "name": "value", "type": "uint256[]" },
+      { "internalType": "bytes[]", "name": "func", "type": "bytes[]" }
+    ],
+    "name": "executeBatch",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+]`;
 
 const account = new ethers.Interface(bloctoAccountAbi);
 
