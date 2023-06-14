@@ -10,7 +10,7 @@
   "types": "dist/blocto-sdk.d.ts",
   "type": "module",
   "files": [
-    "/dist"
+    "/dist/**/!(*.html)"
   ],
   "scripts": {
     "build": "NODE_ENV=production rollup -c",
