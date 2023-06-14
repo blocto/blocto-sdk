@@ -19,7 +19,7 @@ import {
   ETH_ENV_WALLET_SERVER_MAPPING,
   LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
-  KEY_SESSION_MAPPING,
+  ETH_SESSION_KEY_MAPPING,
 } from '../constants';
 import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
@@ -108,9 +108,7 @@ export default class EthereumProvider
       chain_id,
       `Get blocto server failed: ${this.networkVersion} might not be supported yet.`
     );
-    if (blocto_service_environment !== 'prod') {
-      this.sessionKey = KEY_SESSION_MAPPING[blocto_service_environment];
-    }
+    this.sessionKey = ETH_SESSION_KEY_MAPPING[blocto_service_environment];
     this._blocto = {
       ...this._blocto,
       session: this.session,

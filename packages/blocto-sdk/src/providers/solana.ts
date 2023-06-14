@@ -17,13 +17,13 @@ import {
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import { removeItem, setItemWithExpiry } from '../lib/storage';
-import { KEY_SESSION } from '../lib/storage/constants';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
   LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
+  SOL_SESSION_KEY_MAPPING,
 } from '../constants';
 
 let Solana: any;
@@ -51,7 +51,7 @@ export default class SolanaProvider
     super(session);
 
     invariant(net, "'net' is required");
-    invariant(SOL_NET.includes(net), 'unsupported net');
+    invariant(Object.values(SOL_NET).includes(net), 'unsupported net');
     this.net = net;
 
     this.rpc =
@@ -62,9 +62,7 @@ export default class SolanaProvider
 
     this.server = server || SOL_NET_SERVER_MAPPING[this.net] || '';
     this.appId = appId || DEFAULT_APP_ID;
-    if (this.net === 'devnet' || this.net === 'testnet') {
-      this.sessionKey = KEY_SESSION.dev;
-    }
+    this.sessionKey = SOL_SESSION_KEY_MAPPING[this.net];
     if (!Solana) {
       throw new Error(
         'No @solana/web3.js installed. Please install it to interact with Solana.'
