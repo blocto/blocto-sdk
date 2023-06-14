@@ -1,28 +1,8 @@
 import { ethers, BigNumberish, BytesLike } from 'ethers';
-const bloctoAccountAbi = `[
-    {
-    "inputs": [
-      { "internalType": "address", "name": "dest", "type": "address" },
-      { "internalType": "uint256", "name": "value", "type": "uint256" },
-      { "internalType": "bytes", "name": "func", "type": "bytes" }
-    ],
-    "name": "execute",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address[]", "name": "dest", "type": "address[]" },
-      { "internalType": "uint256[]", "name": "value", "type": "uint256[]" },
-      { "internalType": "bytes[]", "name": "func", "type": "bytes[]" }
-    ],
-    "name": "executeBatch",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-]`;
+const bloctoAccountAbi = [
+  'function execute(address dest, uint256 value, bytes func)',
+  'function executeBatch(address[] dest, uint256[] value, bytes[] func)',
+];
 
 const account = new ethers.Interface(bloctoAccountAbi);
 
