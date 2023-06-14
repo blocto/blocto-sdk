@@ -9,6 +9,7 @@ import {
   JsonRpcResponse,
   JsonRpcCallback,
   SwitchableNetwork,
+  IUserOperation,
 } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
@@ -274,6 +275,20 @@ export default class EthereumProvider
     } else {
       return <JsonRpcResponse>(<unknown>handleRequest);
     }
+  }
+
+  /**
+   * Sending userOperation using Blocto SDK.
+   * @param {IUserOperation} userOp - userOperation object
+   * @remarks No need to include nonce, initCode, and signature as parameters when using BloctoSDK to send userOperation.
+   * These parameters will be ignored.
+   * @returns {Promise<string>} - userOperation hash
+   */
+  async sendUserOperation(userOp: IUserOperation): Promise<string> {
+    return this.handleSendUserOperation({
+      method: 'eth_sendUserOperation',
+      params: [userOp],
+    });
   }
 
   async request(payload: EIP1193RequestPayload): Promise<any> {
