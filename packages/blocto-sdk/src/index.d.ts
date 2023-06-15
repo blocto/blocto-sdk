@@ -44,4 +44,15 @@ declare class BloctoSDK {
   constructor(config: BloctoSDKConfig);
 }
 
+export interface Presets {
+  bloctoAccount: {
+    execute: (to: string, value: BigNumberish, data: BytesLike) => string;
+    executeBatch: (
+      to: Array<string>,
+      value: Array<BigNumberish>,
+      data: Array<BytesLike>
+    ) => string;
+  };
+}
+
 export default BloctoSDK;

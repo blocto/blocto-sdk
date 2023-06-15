@@ -2,6 +2,7 @@ import { IEthereumProvider } from 'eip1193-provider';
 import { BaseConfig } from '../../constants';
 import BloctoProviderInterface, { ProviderSession } from './blocto.d';
 import { EvmSupportMapping } from '../../lib/getEvmSupport';
+import { BigNumberish, BytesLike } from 'ethers';
 
 export interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null;
@@ -75,27 +76,6 @@ export type JsonRpcCallback = (
   error: Error | null,
   response?: JsonRpcResponse
 ) => unknown;
-
-/**
- *  A [[HexString]] whose length is even, which ensures it is a valid
- *  representation of binary data.
- */
-export type DataHexString = string;
-
-/**
- *  An object that can be used to represent binary data.
- */
-export type BytesLike = DataHexString | Uint8Array;
-
-/**
- *  Any type that can be used where a numeric value is needed.
- */
-export type Numeric = number | bigint;
-
-/**
- *  Any type that can be used where a big number is needed.
- */
-export type BigNumberish = string | Numeric;
 
 /**
  *  An interface for an ERC-4337 transaction object.
