@@ -24,7 +24,7 @@ import {
 } from '../constants';
 import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
-import { rpcErrors, providerErrors } from '@metamask/rpc-errors';
+import { ethErrors } from 'eth-rpc-errors';
 import { ProviderSession } from './types/blocto';
 import { isHexString, utf8ToHex } from '../lib/utf8toHex';
 
@@ -93,7 +93,7 @@ export default class EthereumProvider
       await getEvmSupport()
         .then((result) => (this._blocto.supportNetworkList = result))
         .catch((e) => {
-          throw providerErrors.custom({
+          throw ethErrors.provider.custom({
             code: 1001,
             message: `Get blocto server failed: ${e.message}`,
           });
@@ -165,7 +165,7 @@ export default class EthereumProvider
       existedSDK.isBlocto &&
       parseChainId(existedSDK.chainId) !== parseChainId(this.chainId)
     ) {
-      throw providerErrors.chainDisconnected();
+      throw ethErrors.provider.chainDisconnected();
     }
   }
 
@@ -262,7 +262,7 @@ export default class EthereumProvider
             )
           )
           .catch((error) => {
-            throw rpcErrors.internal(error?.message);
+            throw ethErrors.rpc.internal(error?.message);
           });
       } else {
         this.request({ ...payload, id: Number(payload.id) }).then(resolve);
@@ -365,7 +365,7 @@ export default class EthereumProvider
             !payload?.params?.[0]?.chainId ||
             !payload?.params?.[0]?.rpcUrls.length
           ) {
-            throw rpcErrors.invalidParams();
+            throw ethErrors.rpc.invalidParams();
           }
           this.#addToSwitchable({
             chainId: `${parseChainId(payload?.params?.[0]?.chainId)}`,
@@ -375,10 +375,10 @@ export default class EthereumProvider
           break;
         case 'wallet_switchEthereumChain':
           if (!payload?.params?.[0]?.chainId) {
-            throw rpcErrors.invalidParams();
+            throw ethErrors.rpc.invalidParams();
           }
           if (!switchableNetwork[parseChainId(payload.params[0].chainId)]) {
-            throw providerErrors.custom({
+            throw ethErrors.provider.custom({
               code: 4902, // To-be-standardized "unrecognized chain ID" error
               message: `Unrecognized chain ID "${parseChainId(
                 payload.params[0].chainId
@@ -409,13 +409,13 @@ export default class EthereumProvider
         const errorMessage = response.error.message
           ? response.error.message
           : 'Request failed';
-        throw rpcErrors.internal(errorMessage);
+        throw ethErrors.rpc.internal(errorMessage);
       }
 
       if (response) return response.result;
       return result;
     } catch (error: any) {
-      throw rpcErrors.internal(error?.message);
+      throw ethErrors.rpc.internal(error?.message);
     }
   }
 
@@ -433,7 +433,7 @@ export default class EthereumProvider
     })
       .then((response) => responseSessionGuard<T>(response, this))
       .catch((e) => {
-        throw rpcErrors.server({
+        throw ethErrors.rpc.server({
           code: -32603,
           message: `Blocto server error: ${e.message}`,
         });
@@ -463,14 +463,18 @@ export default class EthereumProvider
             if (e.data.status === 'DECLINED') {
               removeEventListener();
               detatchFrame(frame);
-              reject(providerErrors.userRejectedRequest(e.data.errorMessage));
+              reject(
+                ethErrors.provider.userRejectedRequest(e.data.errorMessage)
+              );
             }
           }
           if (e.data.type === 'ETH:FRAME:CLOSE') {
             removeEventListener();
             detatchFrame(frame);
             reject(
-              providerErrors.userRejectedRequest('User declined the request')
+              ethErrors.provider.userRejectedRequest(
+                'User declined the request'
+              )
             );
           }
         }
@@ -480,7 +484,7 @@ export default class EthereumProvider
 
   async setIframe(url: string): Promise<HTMLIFrameElement> {
     if (typeof window === 'undefined') {
-      throw providerErrors.custom({
+      throw ethErrors.provider.custom({
         code: 1001,
         message: 'Blocto SDK only works in browser environment',
       });
@@ -560,7 +564,7 @@ export default class EthereumProvider
             if (e.data.type === 'ETH:FRAME:CLOSE') {
               removeListener();
               detatchFrame(loginFrame);
-              reject(providerErrors.userRejectedRequest());
+              reject(ethErrors.provider.userRejectedRequest());
             }
           }
         }
@@ -587,7 +591,7 @@ export default class EthereumProvider
     })
       .then((response) => response.json())
       .catch((e) => {
-        throw rpcErrors.server(e);
+        throw ethErrors.rpc.server(e);
       });
   }
 
@@ -612,7 +616,7 @@ export default class EthereumProvider
         message = params[1];
         const { domain } = JSON.parse(message);
         if (parseChainId(domain.chainId) !== parseChainId(this.chainId)) {
-          throw rpcErrors.invalidParams(
+          throw ethErrors.rpc.invalidParams(
             `Provided chainId "${domain.chainId}" must match the active chainId "${this.chainId}"`
           );
         }
@@ -631,7 +635,7 @@ export default class EthereumProvider
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
     if (!isValidTransaction(payload.params?.[0])) {
-      throw rpcErrors.invalidParams();
+      throw ethErrors.rpc.invalidParams();
     }
     const { authorizationId } = await this.bloctoApi<{
       authorizationId: string;
@@ -655,7 +659,7 @@ export default class EthereumProvider
     const copyPayload = { ...payload, params: formatParams };
 
     if (!isValidTransactions(copyPayload.params)) {
-      throw rpcErrors.invalidParams();
+      throw ethErrors.rpc.invalidParams();
     }
 
     return this.handleSendTransaction(copyPayload);
@@ -702,7 +706,8 @@ export default class EthereumProvider
     if (networkList?.length) {
       const listToAdd = networkList.map(({ chainId: chain_id, rpcUrls }) => {
         invariant(rpcUrls, 'rpcUrls is required for networksList');
-        if (!rpcUrls?.length) throw rpcErrors.invalidParams('Empty rpcUrls');
+        if (!rpcUrls?.length)
+          throw ethErrors.rpc.invalidParams('Empty rpcUrls');
         return this.#addToSwitchable({
           chainId: `${parseChainId(chain_id)}`,
           rpcUrls,

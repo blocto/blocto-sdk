@@ -23,7 +23,6 @@
     "start": "npm-run-all --parallel rollup-watch serve"
   },
   "dependencies": {
-    "@metamask/rpc-errors": "^5.1.1",
     "bs58": "^5.0.0",
     "buffer": "^6.0.3",
     "eip1193-provider": "^1.0.1",
@@ -55,6 +54,7 @@
     "eslint-import-resolver-babel-module": "^5.3.1",
     "eslint-plugin-import": "^2.23.4",
     "ethers": "^6.6.0",
+    "eth-rpc-errors": "^4.0.3",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
     "jest-fetch-mock": "^3.0.3",
