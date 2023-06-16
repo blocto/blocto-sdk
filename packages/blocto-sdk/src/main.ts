@@ -2,11 +2,10 @@ import EthereumProvider from './providers/ethereum';
 import SolanaProvider from './providers/solana';
 import AptosProvider from './providers/aptos';
 import { BloctoSDKConfig } from './index.d';
-import bloctoAccount from './presets/bloctoAccount';
 
 const sharedSession = { connected: false, code: null, accounts: {} };
 
-export class BloctoSDK {
+export default class BloctoSDK {
   ethereum?: EthereumProvider;
   solana?: SolanaProvider;
   aptos?: AptosProvider;
@@ -35,7 +34,3 @@ export class BloctoSDK {
     }
   }
 }
-const Presets = { bloctoAccount };
-
-export { Presets };
-export default BloctoSDK;

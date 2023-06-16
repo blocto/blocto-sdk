@@ -103,7 +103,7 @@ export default [
       json(),
       babel({
         babelHelpers: 'bundled',
-        exclude: 'node_modules/!(ethers)/**',
+        exclude: 'node_modules/**',
         presets: [['@babel/preset-env']],
       }),
       polyfills(),
