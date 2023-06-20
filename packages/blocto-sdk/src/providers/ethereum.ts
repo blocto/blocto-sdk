@@ -361,16 +361,7 @@ export default class EthereumProvider
           result = await this.handleSendUserOperation(payload);
           break;
         case 'wallet_addEthereumChain':
-          if (
-            !payload?.params?.[0]?.chainId ||
-            !payload?.params?.[0]?.rpcUrls.length
-          ) {
-            throw ethErrors.rpc.invalidParams();
-          }
-          this.#addToSwitchable({
-            chainId: `${parseChainId(payload?.params?.[0]?.chainId)}`,
-            rpcUrls: payload?.params?.[0].rpcUrls,
-          });
+          await this.loadSwitchableNetwork(payload?.params || []);
           result = null;
           break;
         case 'wallet_switchEthereumChain':
@@ -704,12 +695,13 @@ export default class EthereumProvider
   ): Promise<null> {
     // setup switchable list if user set networkList
     if (networkList?.length) {
-      const listToAdd = networkList.map(({ chainId: chain_id, rpcUrls }) => {
+      const listToAdd = networkList.map(({ chainId, rpcUrls }) => {
         invariant(rpcUrls, 'rpcUrls is required for networksList');
+        if (!chainId) throw ethErrors.rpc.invalidParams('Empty chainId');
         if (!rpcUrls?.length)
           throw ethErrors.rpc.invalidParams('Empty rpcUrls');
         return this.#addToSwitchable({
-          chainId: `${parseChainId(chain_id)}`,
+          chainId: `${parseChainId(chainId)}`,
           rpcUrls,
         });
       });
