@@ -1,5 +1,25 @@
 # @blocto/web3-react-connector
 
+## 0.4.4-beta.0
+
+### Patch Changes
+
+- 2f87cbf: Update dependencies
+- c8a3b32: Fix eth_sendTransaction function
+- cd1f781: Move session id to session storage
+- Updated dependencies [68e1e82]
+- Updated dependencies [2f87cbf]
+- Updated dependencies [448c667]
+- Updated dependencies [d495e61]
+- Updated dependencies [c8a3b32]
+- Updated dependencies [f078a5f]
+- Updated dependencies [e180c58]
+- Updated dependencies [26cc3e9]
+- Updated dependencies [0351fca]
+- Updated dependencies [cd1f781]
+- Updated dependencies [7830573]
+  - @blocto/sdk@0.5.0-beta.0
+
 ## 0.4.3
 
 ### Patch Changes
