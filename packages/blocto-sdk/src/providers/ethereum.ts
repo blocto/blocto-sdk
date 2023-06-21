@@ -684,8 +684,8 @@ export default class EthereumProvider
     if (existedSDK && existedSDK.isBlocto) {
       return existedSDK.disconnect();
     }
-    const { sessionKey } = await this.#getBloctoProperties();
-    removeChainAddress(sessionKey, 'ethereum');
+    const { sessionKey, blockchainName } = await this.#getBloctoProperties();
+    removeChainAddress(sessionKey, blockchainName);
   }
 
   async loadSwitchableNetwork(
