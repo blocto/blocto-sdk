@@ -421,10 +421,14 @@ export default class EthereumProvider
     })
       .then((response) => responseSessionGuard<T>(response, sessionKey))
       .catch((e) => {
-        throw ethErrors.rpc.server({
-          code: -32603,
-          message: `Blocto server error: ${e.message}`,
-        });
+        if (e.status === 404) {
+          throw ethErrors.rpc.methodNotFound();
+        } else {
+          throw ethErrors.rpc.server({
+            code: -32005,
+            message: `Blocto server error: ${e.message}`,
+          });
+        }
       });
   }
 
