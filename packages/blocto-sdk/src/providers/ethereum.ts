@@ -21,6 +21,7 @@ import {
   LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
   ETH_SESSION_KEY_MAPPING,
+  SDK_VERSION,
 } from '../constants';
 import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
@@ -511,8 +512,7 @@ export default class EthereumProvider
 
     const params = new URLSearchParams();
     params.set('l6n', window.location.origin);
-    // [VI]{version}[/VI] will inject the version of the SDK by versionInjector
-    params.set('v', '[VI]{version}[/VI]');
+    params.set('v', SDK_VERSION);
     const emailParam = email && isEmail(email) ? `/${email}` : '';
 
     const loginFrame = await this.setIframe(

@@ -24,6 +24,7 @@ import {
   LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
   SOL_SESSION_KEY_MAPPING,
+  SDK_VERSION,
 } from '../constants';
 
 let Solana: any;
@@ -160,9 +161,8 @@ export default class SolanaProvider
       }
 
       const location = encodeURIComponent(window.location.origin);
-      // [VI]{version}[/VI] will inject the version of the SDK by versionInjector
       const loginFrame = createFrame(
-        `${this.server}/${this.appId}/solana/authn?l6n=${location}&v=[VI]{version}[/VI]`
+        `${this.server}/${this.appId}/solana/authn?l6n=${location}&v=${SDK_VERSION}`
       );
 
       attachFrame(loginFrame);

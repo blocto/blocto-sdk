@@ -22,6 +22,7 @@ import {
   LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
   APT_SESSION_KEY_MAPPING,
+  SDK_VERSION,
 } from '../constants';
 
 const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
@@ -294,9 +295,8 @@ export default class AptosProvider
       }
 
       const location = encodeURIComponent(window.location.origin);
-      // [VI]{version}[/VI] will inject the version of the SDK by versionInjector
       const loginFrame = createFrame(
-        `${this.server}/${this.appId}/aptos/authn?l6n=${location}&v=[VI]{version}[/VI]`
+        `${this.server}/${this.appId}/aptos/authn?l6n=${location}&v=${SDK_VERSION}}`
       );
 
       attachFrame(loginFrame);
