@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.1
+
+### Patch Changes
+
+- a94fdba: Support multiple params of wallet_addEthereumChain method
+
 ## 0.5.0-beta.0
 
 ### Minor Changes
