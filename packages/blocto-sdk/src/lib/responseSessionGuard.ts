@@ -1,13 +1,12 @@
 import { removeItem } from './storage';
+import { KEY_SESSION } from './storage/constants';
 
 export default async function responseSessionGuard<T>(
   response: Response,
-  instance: { session: { code: string | null }; sessionKey: string }
+  key: KEY_SESSION
 ): Promise<T> {
   if (response.status === 403) {
-    // eslint-disable-next-line
-    instance.session.code = null;
-    removeItem(instance.sessionKey);
+    removeItem(key);
     throw new Error('[Blocto SDK]: Session expired!');
   }
   return response.json();

@@ -1,5 +1,30 @@
 # @blocto/sdk
 
+## 0.5.0-beta.1
+
+### Patch Changes
+
+- a94fdba: Support multiple params of wallet_addEthereumChain method
+
+## 0.5.0-beta.0
+
+### Minor Changes
+
+- e180c58: Refactor ethereum provider to support EIP4337
+- 0351fca: Migrate this.session to sessionStorage
+
+### Patch Changes
+
+- 68e1e82: Add a helper function ethereum.sendUserOperation with type-safe parameters
+- 2f87cbf: Update dependencies
+- 448c667: Send sdk version to authn url params
+- d495e61: Fix: clean session storage in aptos and solana when disconnect
+- c8a3b32: Fix eth_sendTransaction function
+- f078a5f: Change @metamask/rpc-errors to eth-rpc-errors
+- 26cc3e9: blocto_batchTransaction support web3 sendTx type
+- cd1f781: Move session id to session storage
+- 7830573: Help convert eth_sign and personal_sign msg to hex if is string
+
 ## 0.4.8
 
 ### Patch Changes

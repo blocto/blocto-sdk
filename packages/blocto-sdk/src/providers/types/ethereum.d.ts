@@ -1,13 +1,13 @@
 import { IEthereumProvider } from 'eip1193-provider';
 import { BaseConfig } from '../../constants';
-import BloctoProviderInterface, { ProviderSession } from './blocto.d';
+import BloctoProviderInterface from './blocto.d';
 import { EvmSupportMapping } from '../../lib/getEvmSupport';
+import { KEY_SESSION } from '../../lib/storage';
 
 export interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null;
   rpc?: string;
   walletServer?: string;
-  session: ProviderSession;
 }
 
 export interface EIP1193RequestPayload {
@@ -34,7 +34,7 @@ export interface EthereumProviderInterface
   networkVersion: string | number;
   rpc: string;
   _blocto: {
-    session: ProviderSession;
+    sessionKey: KEY_SESSION;
     walletServer: string;
     blockchainName: string;
     networkType: string;

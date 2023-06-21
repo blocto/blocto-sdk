@@ -16,14 +16,22 @@ import {
 } from './types/solana.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import { removeItem, setItemWithExpiry } from '../lib/storage';
+import {
+  setAccountStorage,
+  getAccountStorage,
+  removeChainAddress,
+  getChainAddress,
+  setChainAddress,
+  KEY_SESSION,
+  CHAIN,
+} from '../lib/storage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   SOL_NET_SERVER_MAPPING,
   SOL_NET,
-  LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
   SOL_SESSION_KEY_MAPPING,
+  SDK_VERSION,
 } from '../constants';
 
 let Solana: any;
@@ -40,15 +48,15 @@ export default class SolanaProvider
   net: string;
   rpc: string;
   server: string;
+  sessionKey: KEY_SESSION;
 
   constructor({
     net = 'mainnet-beta',
     server,
     appId,
     rpc,
-    session,
   }: SolanaProviderConfig) {
-    super(session);
+    super();
 
     invariant(net, "'net' is required");
     invariant(Object.values(SOL_NET).includes(net), 'unsupported net');
@@ -71,7 +79,11 @@ export default class SolanaProvider
   }
 
   async request(payload: RequestArguments): Promise<any> {
-    if (!this.session.connected) {
+    const existedSDK = (window as any).solana;
+    if (existedSDK && existedSDK.isBlocto) {
+      return existedSDK.request(payload);
+    }
+    if (!getChainAddress(this.sessionKey, CHAIN.SOLANA)) {
       await this.connect();
     }
 
@@ -86,8 +98,8 @@ export default class SolanaProvider
           this.disconnect();
           break;
         case 'getAccounts':
-          result = this.session.accounts.solana.length
-            ? this.session.accounts.solana
+          result = getChainAddress(this.sessionKey, CHAIN.SOLANA)?.length
+            ? getChainAddress(this.sessionKey, CHAIN.SOLANA)
             : await this.fetchAccounts();
           break;
         case 'getAccountInfo': {
@@ -141,28 +153,27 @@ export default class SolanaProvider
     if (existedSDK && existedSDK.isBlocto) {
       return new Promise((resolve) => {
         existedSDK.on('connect', () => {
-          this.session.accounts.solana = [existedSDK.publicKey.toBase58()];
+          setChainAddress(this.sessionKey, CHAIN.SOLANA, [
+            existedSDK.publicKey.toBase58(),
+          ]);
           resolve();
         });
         existedSDK.connect();
       });
     }
 
-    this.tryRetrieveSessionFromStorage('solana');
-
     return new Promise((resolve: () => void, reject) => {
       if (typeof window === 'undefined') {
         return reject('Currently only supported in browser');
       }
 
-      if (this.session.connected) {
+      if (getChainAddress(this.sessionKey, CHAIN.SOLANA)) {
         return resolve();
       }
 
       const location = encodeURIComponent(window.location.origin);
-      // [VI]{version}[/VI] will inject the version of the SDK by versionInjector
       const loginFrame = createFrame(
-        `${this.server}/${this.appId}/solana/authn?l6n=${location}&v=[VI]{version}[/VI]`
+        `${this.server}/${this.appId}/solana/authn?l6n=${location}&v=${SDK_VERSION}`
       );
 
       attachFrame(loginFrame);
@@ -175,23 +186,19 @@ export default class SolanaProvider
             if (e.data.type === 'SOL:FRAME:RESPONSE') {
               removeListener();
               detatchFrame(loginFrame);
-
-              this.session.code = e.data.code;
-              this.session.connected = true;
-
               this.eventListeners.connect.forEach((listener) =>
                 listener(this.net)
               );
-              const address = e.data.address;
-              this.formatAndSetSessionAccount(address);
-
-              setItemWithExpiry(
+              setAccountStorage(
                 this.sessionKey,
                 {
-                  code: this.session.code,
-                  address,
+                  code: e.data.code,
+                  connected: true,
+                  accounts: {
+                    [CHAIN.SOLANA]: [e.data.addr],
+                  },
                 },
-                LOGIN_PERSISTING_TIME
+                e.data.exp
               );
 
               resolve();
@@ -214,24 +221,23 @@ export default class SolanaProvider
       await existedSDK.disconnect();
       return;
     }
-    this.session.code = null;
-    this.session.accounts = {};
     this.eventListeners.disconnect.forEach((listener) => listener(null));
-    this.session.connected = false;
-    removeItem(this.sessionKey);
+    removeChainAddress(this.sessionKey, CHAIN.SOLANA);
   }
 
   async fetchAccounts(): Promise<string[]> {
+    const sessionId = getAccountStorage(this.sessionKey)?.code || '';
     const { accounts } = await fetch(`${this.server}/api/solana/accounts`, {
       headers: {
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.session.code!,
+        'Blocto-Session-Identifier': sessionId,
       },
-    }).then((response) => response.json());
-    this.session.accounts.solana = accounts;
+    }).then((response) =>
+      responseSessionGuard<{ accounts: string[] }>(response, this.sessionKey)
+    );
+    setChainAddress(this.sessionKey, CHAIN.SOLANA, accounts);
     return accounts;
   }
 
@@ -350,6 +356,7 @@ export default class SolanaProvider
   }
 
   async handleConvertTransaction(payload: RequestArguments): Promise<unknown> {
+    const sessionId = getAccountStorage(this.sessionKey)?.code || '';
     return fetch(`${this.server}/api/solana/convertToWalletTx`, {
       method: 'POST',
       headers: {
@@ -357,16 +364,16 @@ export default class SolanaProvider
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.session.code!,
+        'Blocto-Session-Identifier': sessionId,
       },
       body: JSON.stringify(payload.params),
-    }).then((response) => responseSessionGuard(response, this));
+    }).then((response) => responseSessionGuard(response, this.sessionKey));
   }
 
   async handleSignAndSendTransaction(
     payload: RequestArguments
   ): Promise<string> {
+    const sessionId = getAccountStorage(this.sessionKey)?.code || '';
     const { authorizationId } = await fetch(`${this.server}/api/solana/authz`, {
       method: 'POST',
       headers: {
@@ -374,12 +381,14 @@ export default class SolanaProvider
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.session.code!,
+        'Blocto-Session-Identifier': sessionId,
       },
       body: JSON.stringify(payload.params),
     }).then((response) =>
-      responseSessionGuard<{ authorizationId: string }>(response, this)
+      responseSessionGuard<{ authorizationId: string }>(
+        response,
+        this.sessionKey
+      )
     );
 
     if (typeof window === 'undefined') {

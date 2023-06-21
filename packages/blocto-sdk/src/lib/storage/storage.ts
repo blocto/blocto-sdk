@@ -1,5 +1,13 @@
 import MemoryStorage from './memoryStorage';
 import * as keys from './constants';
+import { ProviderSession } from '../../providers/types/blocto';
+import { LOGIN_PERSISTING_TIME, SDK_VERSION } from '../../constants';
+
+export interface AccountStorage {
+  expiry: number;
+  v: string;
+  data: ProviderSession;
+}
 
 const isSupported = () => {
   if (typeof window === 'undefined') {
@@ -70,6 +78,91 @@ export const setItemWithExpiry = (
 export const removeItem = (key: string): void => {
   setItem(key, ''); // Due to some versions of browser bug can't removeItem correctly.
   storage.removeItem(key);
+};
+
+/**
+ * @param {keys.KEY_SESSION} key - key to retrieve the data
+ * @returns {ProviderSession | null} ProviderSession | null
+ * @description
+ * Get ProviderSession from storage.
+ * If the data is expired, will remove the data and return null
+ */
+export const getAccountStorage = (
+  key: keys.KEY_SESSION
+): ProviderSession | null => {
+  const rawAccountStorage = getItem<AccountStorage>(key, null);
+  if (!rawAccountStorage) return null;
+
+  // compare the expiry time of the item with the current time
+  if (new Date().getTime() > rawAccountStorage.expiry) {
+    removeItem(key);
+    return null;
+  }
+
+  return rawAccountStorage?.data;
+};
+
+/** 
+  @param {keys.KEY_SESSION} key - key to store the data
+  @param {ProviderSession} data - Only the part of ProviderSession that needs to be updated
+  {
+    connected?: boolean;
+    code?: string | null;
+    accounts: Record<string, string[] | undefined>;
+  }
+  @param {number} expiry - expiry time of the data
+*/
+export const setAccountStorage = (
+  key: keys.KEY_SESSION,
+  data: ProviderSession,
+  expiry?: number
+): void => {
+  const rawAccountStorage = getItem<AccountStorage>(key);
+  const newAccountStorage: AccountStorage = {
+    data: {
+      code: rawAccountStorage?.data?.code || data.code,
+      connected: rawAccountStorage?.data?.connected || data.connected,
+      accounts: {
+        ...rawAccountStorage?.data?.accounts,
+        ...data.accounts,
+      },
+    },
+    expiry:
+      expiry ||
+      rawAccountStorage?.expiry ||
+      new Date().getTime() + LOGIN_PERSISTING_TIME,
+    v: SDK_VERSION,
+  };
+  setItem(key, newAccountStorage);
+  return;
+};
+
+export const getChainAddress = (
+  key: keys.KEY_SESSION,
+  chain: string
+): string[] | null => {
+  if (!getAccountStorage(key)?.code) {
+    removeItem(key);
+    return null;
+  }
+  return getAccountStorage(key)?.accounts[chain] || null;
+};
+
+export const setChainAddress = (
+  key: keys.KEY_SESSION,
+  chain: string,
+  account: string[]
+): void => {
+  setAccountStorage(key, { accounts: { [chain]: account } });
+  return;
+};
+
+export const removeChainAddress = (
+  key: keys.KEY_SESSION,
+  chain: string
+): void => {
+  setAccountStorage(key, { accounts: { [chain]: undefined } });
+  return;
 };
 
 export const isLatestLocalStorageVersion = (): boolean => {
