@@ -119,6 +119,7 @@ export default class EthereumProvider
       blockchainName: name,
       networkType: network_type,
       switchableNetwork: {
+        ...this._blocto.switchableNetwork,
         [chain_id]: {
           name,
           display_name,
