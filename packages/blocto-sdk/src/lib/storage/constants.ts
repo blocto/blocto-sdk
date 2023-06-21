@@ -2,7 +2,7 @@
 export const LOCAL_STORAGE_VERSION = '0.0.1';
 export const KEY_LOCAL_STORAGE_VERSION = 'sdk.version';
 export enum KEY_SESSION {
-  prod = 'sdk.session',
-  dev = 'sdk.session.dev',
-  staging = 'sdk.session.staging',
+  prod = 'BLOCTO_SDK',
+  dev = 'BLOCTO_SDK_DEV',
+  staging = 'BLOCTO_SDK_STAGING',
 }

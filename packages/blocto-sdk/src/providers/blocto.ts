@@ -1,7 +1,6 @@
 // The root class for all providers
 
 import { EIP1193Provider, RequestArguments } from 'eip1193-provider';
-
 import { EIP1193_EVENTS } from '../constants';
 import { KEY_SESSION, getItemWithExpiry } from '../lib/storage';
 import Session from '../lib/session.d';
