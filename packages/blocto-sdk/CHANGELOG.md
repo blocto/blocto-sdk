@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.3
+
+### Patch Changes
+
+- 17340c0: Fix internal rpc error code
+
 ## 0.5.0-beta.1
 
 ### Patch Changes
