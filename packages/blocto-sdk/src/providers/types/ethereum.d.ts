@@ -41,6 +41,7 @@ export interface EthereumProviderInterface
     supportNetworkList: EvmSupportMapping;
     switchableNetwork: SwitchableNetwork;
   };
+  sendUserOperation(userOp: IUserOperation): Promise<string>;
   request(args: EIP1193RequestPayload): Promise<any>;
   loadSwitchableNetwork(
     networkList: {
