@@ -1,5 +1,5 @@
 import { BaseConfig, WalletAdapterNetwork } from '../../constants';
-import BloctoProviderInterface, { ProviderSession } from './blocto.d';
+import BloctoProviderInterface from './blocto.d';
 
 export { WalletAdapterNetwork } from '../../constants';
 
@@ -26,7 +26,6 @@ export declare interface AptosProviderConfig extends BaseConfig {
   // @todo: support different network
   chainId: number;
   server?: string;
-  session: ProviderSession;
 }
 
 export declare interface PublicAccount {

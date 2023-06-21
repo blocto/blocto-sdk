@@ -2,9 +2,6 @@
 
 import { EIP1193Provider, RequestArguments } from 'eip1193-provider';
 import { EIP1193_EVENTS } from '../constants';
-import { KEY_SESSION, getItemWithExpiry } from '../lib/storage';
-import Session from '../lib/session.d';
-import { ProviderSession } from './types/blocto.d';
 import { DEFAULT_APP_ID } from '../constants';
 
 class BloctoProvider implements EIP1193Provider {
@@ -16,39 +13,12 @@ class BloctoProvider implements EIP1193Provider {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   eventListeners: { [key: string]: Array<(arg: any) => void> } = {};
 
-  sessionKey = KEY_SESSION.prod;
-
-  session: ProviderSession;
-
-  constructor(session: ProviderSession) {
-    this.session = session;
+  constructor() {
     // init event listeners
     EIP1193_EVENTS.forEach((event) => {
       this.eventListeners[event] = [];
     });
     this.appId = DEFAULT_APP_ID;
-  }
-
-  protected formatAndSetSessionAccount(
-    address: Record<string, string> = {}
-  ): void {
-    this.session.accounts = Object.keys(address).reduce<
-      Record<string, string[]>
-    >((initial, current) => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      initial[current] = [address![current]];
-      return initial;
-    }, {});
-  }
-
-  protected tryRetrieveSessionFromStorage(chain: string): void {
-    // load previous connected state
-    const session = getItemWithExpiry<Session>(this.sessionKey, {});
-    const sessionCode = session && session.code;
-    const sessionAccount = session && session.address && session.address[chain];
-    this.session.connected = Boolean(sessionCode && sessionAccount);
-    this.session.code = sessionCode || null;
-    this.formatAndSetSessionAccount(session ? session.address : {});
   }
 
   // implement by children

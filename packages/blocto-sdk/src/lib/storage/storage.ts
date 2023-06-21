@@ -141,19 +141,19 @@ export const getChainAddress = (
   key: keys.KEY_SESSION,
   chain: string
 ): string[] | null => {
+  if (!getAccountStorage(key)?.code) {
+    removeItem(key);
+    return null;
+  }
   return getAccountStorage(key)?.accounts[chain] || null;
 };
 
-export const updateChainAddress = (
+export const setChainAddress = (
   key: keys.KEY_SESSION,
   chain: string,
-  account: string
+  account: string[]
 ): void => {
-  const rawAccountStorage = getItem<AccountStorage>(key, null);
-  if (!rawAccountStorage) return;
-  const newAccounts = rawAccountStorage.data.accounts;
-  newAccounts[chain] = [account];
-  setAccountStorage(key, { accounts: newAccounts });
+  setAccountStorage(key, { accounts: { [chain]: account } });
   return;
 };
 
@@ -161,11 +161,7 @@ export const removeChainAddress = (
   key: keys.KEY_SESSION,
   chain: string
 ): void => {
-  const rawAccountStorage = getItem<AccountStorage>(key, null);
-  if (!rawAccountStorage) return;
-  const newAccounts = rawAccountStorage.data.accounts;
-  delete newAccounts[chain];
-  setAccountStorage(key, { accounts: newAccounts });
+  setAccountStorage(key, { accounts: { [chain]: undefined } });
   return;
 };
 

@@ -6,3 +6,8 @@ export enum KEY_SESSION {
   dev = 'BLOCTO_SDK_DEV',
   staging = 'BLOCTO_SDK_STAGING',
 }
+export enum CHAIN {
+  ETHEREUM = 'ethereum',
+  SOLANA = 'solana',
+  APTOS = 'aptos',
+}

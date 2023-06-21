@@ -1,5 +1,6 @@
 import BloctoSDK from '../main';
 import { enableFetchMocks } from 'jest-fetch-mock';
+import { setAccountStorage } from '../lib/storage';
 
 beforeAll(() => {
   enableFetchMocks();
@@ -40,6 +41,13 @@ beforeAll(() => {
       });
     });
   });
+  setAccountStorage('BLOCTO_SDK', {
+    code: '123',
+    connected: true,
+    accounts: {
+      bsc: ['0x123'],
+    },
+  });
 });
 
 describe('Testing BloctoSDK', () => {
@@ -56,7 +64,6 @@ describe('Testing BloctoSDK ethereum provider', () => {
     },
   });
   const ethereum = bloctoSDK.ethereum;
-  ethereum.session.connected = true;
   ethereum.setIframe = jest.fn();
   ethereum.responseListener = jest.fn();
 
@@ -250,7 +257,6 @@ describe('Testing BloctoSDK providers with appId', () => {
     appId: '6f6b97c5-d97b-4799-8ad7-d7e8426d3369',
   });
   const ethereum = bloctoSDK.ethereum;
-  ethereum.session.connected = true;
   ethereum.setIframe = jest.fn();
   ethereum.responseListener = jest.fn();
   test('should be a object', () => {

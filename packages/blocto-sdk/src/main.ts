@@ -3,8 +3,6 @@ import SolanaProvider from './providers/solana';
 import AptosProvider from './providers/aptos';
 import { BloctoSDKConfig } from './index.d';
 
-const sharedSession = { connected: false, code: null, accounts: {} };
-
 export default class BloctoSDK {
   ethereum?: EthereumProvider;
   solana?: SolanaProvider;
@@ -15,21 +13,18 @@ export default class BloctoSDK {
       this.ethereum = new EthereumProvider({
         ...ethereum,
         appId,
-        session: sharedSession,
       });
     }
     if (solana) {
       this.solana = new SolanaProvider({
         ...solana,
         appId,
-        session: sharedSession,
       });
     }
     if (aptos) {
       this.aptos = new AptosProvider({
         ...aptos,
         appId,
-        session: sharedSession,
       });
     }
   }
