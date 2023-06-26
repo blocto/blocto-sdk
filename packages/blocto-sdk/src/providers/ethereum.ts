@@ -379,6 +379,9 @@ export default class EthereumProvider
           this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
           this.rpc = switchableNetwork[this.networkVersion].rpc_url;
           await this.enable();
+          this.eventListeners.chainChanged.forEach((listener) =>
+            listener(this.chainId)
+          );
           result = null;
           break;
         case 'eth_estimateUserOperationGas':
@@ -419,7 +422,11 @@ export default class EthereumProvider
       },
       ...options,
     })
-      .then((response) => responseSessionGuard<T>(response, sessionKey))
+      .then((response) =>
+        responseSessionGuard<T>(response, sessionKey, () => {
+          this.eventListeners?.disconnect.forEach((listener) => listener(null));
+        })
+      )
       .catch((e) => {
         if (e.status === 404) {
           throw ethErrors.rpc.methodNotFound();
@@ -538,8 +545,8 @@ export default class EthereumProvider
             if (e.data.type === 'ETH:FRAME:RESPONSE') {
               removeListener();
               detatchFrame(loginFrame);
-              this.eventListeners.connect.forEach((listener) =>
-                listener(this.networkVersion)
+              this.eventListeners?.connect.forEach((listener) =>
+                listener(this.chainId)
               );
               setAccountStorage(
                 sessionKey,
@@ -690,6 +697,7 @@ export default class EthereumProvider
     }
     const { sessionKey, blockchainName } = await this.#getBloctoProperties();
     removeChainAddress(sessionKey, blockchainName);
+    this.eventListeners?.disconnect.forEach((listener) => listener(null));
   }
 
   async loadSwitchableNetwork(
