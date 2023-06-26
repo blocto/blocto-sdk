@@ -422,7 +422,11 @@ export default class EthereumProvider
       },
       ...options,
     })
-      .then((response) => responseSessionGuard<T>(response, sessionKey))
+      .then((response) =>
+        responseSessionGuard<T>(response, sessionKey, () => {
+          this.eventListeners?.disconnect.forEach((listener) => listener(null));
+        })
+      )
       .catch((e) => {
         if (e.status === 404) {
           throw ethErrors.rpc.methodNotFound();
@@ -693,9 +697,7 @@ export default class EthereumProvider
     }
     const { sessionKey, blockchainName } = await this.#getBloctoProperties();
     removeChainAddress(sessionKey, blockchainName);
-    this.eventListeners?.disconnect.forEach((listener) =>
-      listener(null)
-    );
+    this.eventListeners?.disconnect.forEach((listener) => listener(null));
   }
 
   async loadSwitchableNetwork(
