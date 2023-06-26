@@ -106,10 +106,10 @@ export default class EthereumProvider
       blocto_service_environment,
       display_name,
     } = this._blocto.supportNetworkList[this.networkVersion];
-    invariant(
-      chain_id,
-      `Get blocto server failed: ${this.networkVersion} might not be supported yet.`
-    );
+    if (!chain_id)
+      throw ethErrors.provider.unsupportedMethod(
+        `Get support chain failed: ${this.networkVersion} might not be supported yet.`
+      );
     this._blocto = {
       ...this._blocto,
       sessionKey: ETH_SESSION_KEY_MAPPING[blocto_service_environment],
@@ -701,7 +701,6 @@ export default class EthereumProvider
     // setup switchable list if user set networkList
     if (networkList?.length) {
       const listToAdd = networkList.map(({ chainId, rpcUrls }) => {
-        invariant(rpcUrls, 'rpcUrls is required for networksList');
         if (!chainId) throw ethErrors.rpc.invalidParams('Empty chainId');
         if (!rpcUrls?.length)
           throw ethErrors.rpc.invalidParams('Empty rpcUrls');
