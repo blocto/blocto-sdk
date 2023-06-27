@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.6
+
+### Patch Changes
+
+- Throw error if response not ok in responseSessionGuard
+
 ## 0.5.0-beta.5
 
 ### Patch Changes
