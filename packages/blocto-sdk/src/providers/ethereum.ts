@@ -675,6 +675,11 @@ export default class EthereumProvider
     }>(`/user-operation`, {
       method: 'POST',
       body: JSON.stringify(payload.params),
+    }).catch((e) => {
+      throw ethErrors.rpc.server({
+        code: -32005,
+        message: e.message,
+      });
     });
     const userOPFrame = await this.setIframe(
       `/user-operation/${authorizationId}`
