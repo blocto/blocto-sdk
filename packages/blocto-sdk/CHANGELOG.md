@@ -1,5 +1,13 @@
 # @blocto/sdk
 
+## 0.5.0-beta.5
+
+### Patch Changes
+
+- 652eefb: Throw error when user-operation api fail
+- 5ea9bdd: Add ethereum chainChanged and disconnect event listener
+- 17cf594: Fix unstandard errors in ethereum provider
+
 ## 0.5.0-beta.3
 
 ### Patch Changes
