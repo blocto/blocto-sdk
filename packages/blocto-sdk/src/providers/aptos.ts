@@ -274,7 +274,6 @@ export default class AptosProvider
       );
     }
 
-    this.tryRetrieveSessionFromStorage('aptos');
 
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') {
