@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.4.9
+
+### Patch Changes
+
+- 17ead9c: aptos login condition
+
 ## 0.4.8
 
 ### Patch Changes
