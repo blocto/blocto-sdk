@@ -121,7 +121,7 @@ export const setAccountStorage = (
   const newAccountStorage: AccountStorage = {
     data: {
       code: data?.code || rawAccountStorage?.data?.code,
-      connected: data?.connected || rawAccountStorage?.data?.connected,
+      connected: !!(data?.code || rawAccountStorage?.data?.code),
       accounts: {
         ...rawAccountStorage?.data?.accounts,
         ...data?.accounts,
