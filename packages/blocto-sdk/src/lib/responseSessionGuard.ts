@@ -13,5 +13,9 @@ export default async function responseSessionGuard<T>(
     removeItem(key);
     throw new Error('[Blocto SDK]: Session expired!');
   }
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message);
+  }
   return response.json();
 }
