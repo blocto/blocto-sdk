@@ -120,11 +120,11 @@ export const setAccountStorage = (
   const rawAccountStorage = getItem<AccountStorage>(key);
   const newAccountStorage: AccountStorage = {
     data: {
-      code: rawAccountStorage?.data?.code || data.code,
-      connected: rawAccountStorage?.data?.connected || data.connected,
+      code: data?.code || rawAccountStorage?.data?.code,
+      connected: !!(data?.code || rawAccountStorage?.data?.code),
       accounts: {
         ...rawAccountStorage?.data?.accounts,
-        ...data.accounts,
+        ...data?.accounts,
       },
     },
     expiry:
