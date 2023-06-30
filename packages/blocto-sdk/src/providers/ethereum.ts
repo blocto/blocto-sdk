@@ -424,7 +424,9 @@ export default class EthereumProvider
     })
       .then((response) =>
         responseSessionGuard<T>(response, sessionKey, () => {
-          this.eventListeners?.disconnect.forEach((listener) => listener(null));
+          this.eventListeners?.disconnect.forEach((listener) =>
+            listener(ethErrors.provider.disconnected())
+          );
         })
       )
       .catch((e) => {
@@ -697,7 +699,9 @@ export default class EthereumProvider
     }
     const { sessionKey, blockchainName } = await this.#getBloctoProperties();
     removeChainAddress(sessionKey, blockchainName);
-    this.eventListeners?.disconnect.forEach((listener) => listener(null));
+    this.eventListeners?.disconnect.forEach((listener) =>
+      listener(ethErrors.provider.disconnected())
+    );
   }
 
   async loadSwitchableNetwork(
