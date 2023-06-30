@@ -1,5 +1,17 @@
 # @blocto/sdk
 
+## 0.5.0-beta.8
+
+### Patch Changes
+
+- c3485b6: fix: ethereum provider should emits ProviderRpcError when disconnect
+
+## 0.5.0-beta.7
+
+### Patch Changes
+
+- a83376b: Fix session id not updated when set storage
+
 ## 0.5.0-beta.6
 
 ### Patch Changes
