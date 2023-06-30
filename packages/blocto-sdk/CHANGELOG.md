@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.7
+
+### Patch Changes
+
+- a83376b: Fix session id not updated when set storage
+
 ## 0.5.0-beta.6
 
 ### Patch Changes
