@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.8
+
+### Patch Changes
+
+- c3485b6: fix: ethereum provider should emits ProviderRpcError when disconnect
+
 ## 0.5.0-beta.7
 
 ### Patch Changes
