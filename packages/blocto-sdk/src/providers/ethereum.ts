@@ -296,6 +296,17 @@ export default class EthereumProvider
   async request(payload: EIP1193RequestPayload): Promise<any> {
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
+      if (payload.method === 'wallet_switchEthereumChain') {
+        if (!payload?.params?.[0]?.chainId) {
+          throw ethErrors.rpc.invalidParams();
+        }
+        existedSDK.request(payload).then(() => {
+          this.networkVersion = `${parseChainId(payload?.params?.[0].chainId)}`;
+          this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
+          this.rpc = switchableNetwork?.[this.networkVersion]?.rpc_url;
+          return null;
+        });
+      }
       return existedSDK.request(payload);
     }
 
