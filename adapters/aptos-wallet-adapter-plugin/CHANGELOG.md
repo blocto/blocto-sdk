@@ -4,6 +4,35 @@
 
 ### Patch Changes
 
+- 2f87cbf: Update dependencies
+- c8a3b32: Fix eth_sendTransaction function
+- cd1f781: Move session id to session storage
+- Updated dependencies [68e1e82]
+- Updated dependencies [2f87cbf]
+- Updated dependencies [a83376b]
+- Updated dependencies [448c667]
+- Updated dependencies [d495e61]
+- Updated dependencies [a4d99b1]
+- Updated dependencies [652eefb]
+- Updated dependencies [17340c0]
+- Updated dependencies [c8a3b32]
+- Updated dependencies [5ea9bdd]
+- Updated dependencies [f078a5f]
+- Updated dependencies [e180c58]
+- Updated dependencies [c3485b6]
+- Updated dependencies [9c2d4bc]
+- Updated dependencies [a94fdba]
+- Updated dependencies [26cc3e9]
+- Updated dependencies [9630860]
+- Updated dependencies [cd1f781]
+- Updated dependencies [7830573]
+- Updated dependencies [17cf594]
+  - @blocto/sdk@0.5.0
+
+## 0.1.9
+
+### Patch Changes
+
 - 17ead9c: aptos login condition
 - Updated dependencies [17ead9c]
   - @blocto/sdk@0.4.9
