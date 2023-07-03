@@ -63,6 +63,12 @@
 - cd1f781: Move session id to session storage
 - 7830573: Help convert eth_sign and personal_sign msg to hex if is string
 
+## 0.4.9
+
+### Patch Changes
+
+- 17ead9c: aptos login condition
+
 ## 0.4.8
 
 ### Patch Changes

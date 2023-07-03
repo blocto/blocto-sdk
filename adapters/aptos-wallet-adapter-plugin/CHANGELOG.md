@@ -20,6 +20,14 @@
 - Updated dependencies [7830573]
   - @blocto/sdk@0.5.0-beta.0
 
+## 0.1.9
+
+### Patch Changes
+
+- 17ead9c: aptos login condition
+- Updated dependencies [17ead9c]
+  - @blocto/sdk@0.4.9
+
 ## 0.1.8
 
 ### Patch Changes
