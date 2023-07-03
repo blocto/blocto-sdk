@@ -297,8 +297,11 @@ export default class EthereumProvider
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
       if (payload.method === 'wallet_switchEthereumChain') {
-        existedSDK.request(payload).then((chainId: string) => {
-          this.networkVersion = `${parseChainId(chainId)}`;
+        if (!payload?.params?.[0]?.chainId) {
+          throw ethErrors.rpc.invalidParams();
+        }
+        existedSDK.request(payload).then(() => {
+          this.networkVersion = `${parseChainId(payload?.params?.[0].chainId)}`;
           this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
           this.rpc = switchableNetwork?.[this.networkVersion]?.rpc_url;
           return this.chainId;
