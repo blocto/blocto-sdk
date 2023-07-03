@@ -300,7 +300,7 @@ export default class EthereumProvider
         if (!payload?.params?.[0]?.chainId) {
           throw ethErrors.rpc.invalidParams();
         }
-        existedSDK.request(payload).then(() => {
+        return existedSDK.request(payload).then(() => {
           this.networkVersion = `${parseChainId(payload?.params?.[0].chainId)}`;
           this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
           this.rpc = switchableNetwork?.[this.networkVersion]?.rpc_url;
