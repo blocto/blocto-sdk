@@ -304,7 +304,7 @@ export default class EthereumProvider
           this.networkVersion = `${parseChainId(payload?.params?.[0].chainId)}`;
           this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
           this.rpc = switchableNetwork?.[this.networkVersion]?.rpc_url;
-          return this.chainId;
+          return null;
         });
       }
       return existedSDK.request(payload);
