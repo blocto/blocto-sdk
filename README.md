@@ -1,9 +1,8 @@
 <p align="center">
    <a href="https://github.com/portto/blocto-sdk">
-    <img src="https://github.com/portto/blocto-sdk/assets/4176802/dc181640-6d85-4cd5-88f6-6bfb729c1113" alt="Blocto logo" width="500" />
+    <img src="https://github.com/portto/blocto-sdk/assets/4176802/0de20f6e-4733-4970-b442-3344e44cc6a2" alt="Blocto logo" />
    </a>
 </p>
-
 
 # Blocto JavaScript SDK
 
@@ -111,5 +110,3 @@ Changesets are designed to stack, so there's no problem with adding multiple. Yo
 
 - You want to release multiple packages with different changelog entries
 - You have made multiple changes to a package that should each be called out separately
-
-

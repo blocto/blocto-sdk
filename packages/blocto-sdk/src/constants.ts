@@ -1,3 +1,4 @@
+import { KEY_SESSION } from './lib/storage';
 type Mapping = Record<number | string, string>;
 
 export interface BaseConfig {
@@ -6,7 +7,10 @@ export interface BaseConfig {
 
 /* eth series constants begin */
 
-export const ETH_CHAIN_ID_RPC_MAPPING: Mapping = {
+export const ETH_RPC_LIST: Mapping = {
+  // This is the list of public RPC endpoints that we known to be working
+  // Used to help developers did not set up their own RPC endpoints
+
   // BSC mainnet
   56: 'https://bsc-dataseed1.binance.org',
   // BSC testnet
@@ -33,94 +37,51 @@ export const ETH_CHAIN_ID_RPC_MAPPING: Mapping = {
   420: 'https://goerli.optimism.io',
 };
 
-export const ETH_CHAIN_ID_CHAIN_MAPPING: Mapping = {
-  // Ethereum
-  1: 'ethereum',
-  5: 'ethereum',
-
-  // BSC
-  56: 'bsc',
-  97: 'bsc',
-
-  // Polygon
-  137: 'polygon',
-  80001: 'polygon',
-
-  // Avalanche
-  43114: 'avalanche',
-  43113: 'avalanche',
-
-  // Arbitrum
-  42161: 'arbitrum',
-  421613: 'arbitrum',
-
-  // Optimism
-  10: 'optimism',
-  420: 'optimism',
-};
-
-export const ETH_CHAIN_ID_NET_MAPPING: Mapping = {
-  // Ethereum
-  1: 'mainnet',
-  5: 'testnet',
-
-  // BSC
-  56: 'mainnet',
-  97: 'testnet',
-
-  // Polygon
-  137: 'mainnet',
-  80001: 'testnet',
-
-  // Avalanche
-  43114: 'mainnet',
-  43113: 'testnet',
-
-  // Arbitrum
-  42161: 'mainnet',
-  421613: 'testnet',
-
-  // Optimism
-  10: 'mainnet',
-  420: 'testnet',
-};
-
-export const ETH_CHAIN_ID_SERVER_MAPPING: Mapping = {
-  1: 'https://wallet-v2.blocto.app',
-  5: 'https://wallet-v2-dev.blocto.app',
-  56: 'https://wallet-v2.blocto.app',
-  97: 'https://wallet-v2-dev.blocto.app',
-  137: 'https://wallet-v2.blocto.app',
-  80001: 'https://wallet-v2-dev.blocto.app',
-  43114: 'https://wallet-v2.blocto.app',
-  43113: 'https://wallet-v2-dev.blocto.app',
-  42161: 'https://wallet-v2.blocto.app',
-  421613: 'https://wallet-v2-dev.blocto.app',
-  10: 'https://wallet-v2.blocto.app',
-  420: 'https://wallet-v2-dev.blocto.app',
-};
-
 export const ETH_ENV_WALLET_SERVER_MAPPING: Mapping = {
   prod: 'https://wallet-v2.blocto.app',
   staging: 'https://wallet-v2-staging.blocto.app',
   dev: 'https://wallet-v2-dev.blocto.app',
 };
 
+export const ETH_SESSION_KEY_MAPPING: Record<string, KEY_SESSION> = {
+  prod: KEY_SESSION.prod,
+  staging: KEY_SESSION.staging,
+  dev: KEY_SESSION.dev,
+};
+
 /* eth series constants end */
 
 /* sol constants begin */
 
-export const SOL_NET_SERVER_MAPPING: Mapping = {
-  devnet: 'https://wallet-v2-dev.blocto.app',
-  testnet: 'https://wallet-v2-dev.blocto.app',
-  'mainnet-beta': 'https://wallet-v2.blocto.app',
+export const SOL_NET = {
+  MainnetBeta: 'mainnet-beta',
+  Testnet: 'testnet',
+  Devnet: 'devnet',
 };
 
-export const SOL_NET = ['devnet', 'testnet', 'mainnet-beta'];
+export const SOL_NET_SERVER_MAPPING: Mapping = {
+  [SOL_NET.MainnetBeta]: 'https://wallet-v2.blocto.app',
+  [SOL_NET.Devnet]: 'https://wallet-v2-dev.blocto.app',
+  [SOL_NET.Testnet]: 'https://wallet-v2-dev.blocto.app',
+};
+
+export const SOL_SESSION_KEY_MAPPING: Record<number | string, KEY_SESSION> = {
+  [SOL_NET.MainnetBeta]: KEY_SESSION.prod,
+  [SOL_NET.Devnet]: KEY_SESSION.dev,
+  [SOL_NET.Testnet]: KEY_SESSION.dev,
+};
 
 /* sol constants end */
 
 /* aptos constants begin */
+
+export const APT_SESSION_KEY_MAPPING: Record<number | string, KEY_SESSION> = {
+  1: KEY_SESSION.prod,
+  2: KEY_SESSION.dev,
+  3: KEY_SESSION.dev,
+  4: KEY_SESSION.dev,
+  5: KEY_SESSION.staging,
+};
 
 export const APT_CHAIN_ID_SERVER_MAPPING: Mapping = {
   // MAINNET
@@ -172,3 +133,6 @@ export const EIP1193_EVENTS: Array<string> = [
 // Preserve login for 1 day
 export const LOGIN_PERSISTING_TIME = 86400 * 1000;
 export const DEFAULT_APP_ID = '00000000-0000-0000-0000-000000000000';
+
+// Will inject the version of the SDK by rollup versionInjector during build time
+export const SDK_VERSION = '[VI]{version}[/VI]';

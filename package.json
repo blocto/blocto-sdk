@@ -2,7 +2,7 @@
   "name": "blocto-sdk",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "yarn@1.22.19",
+  "packageManager": "yarn@1.19.0",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
@@ -11,21 +11,21 @@
     "test": "turbo run test",
     "beta-ver": "changeset pre enter beta && changeset version && changeset pre exit",
     "ver": "changeset version",
-    "beta-release": "turbo run build && changeset pre enter beta && changeset version && changeset publish && changeset pre exit",
+    "beta-release": "turbo run test && changeset pre enter beta && changeset version && changeset publish && changeset pre exit",
     "release": "turbo run build && changeset publish && git push origin --tags",
     "postinstall": "husky install",
     "prepare": "husky install"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
-    "@commitlint/cli": "^17.6.1",
-    "@commitlint/config-angular": "^17.6.1",
-    "@commitlint/config-conventional": "^17.6.1",
-    "eslint": "^8.40.0",
+    "@commitlint/cli": "^17.6.5",
+    "@commitlint/config-angular": "^17.6.5",
+    "@commitlint/config-conventional": "^17.6.5",
+    "eslint": "^8.42.0",
     "eslint-config-custom": "*",
     "husky": "^8.0.0",
     "prettier": "^2.8.8",
-    "turbo": "^1.9.6"
+    "turbo": "^1.10.1"
   },
   "workspaces": [
     "packages/*",
