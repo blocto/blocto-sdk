@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.9
+
+### Patch Changes
+
+- 9c2d4bc: fix: handle switchEthereumChain with existedSDK
+
 ## 0.5.0-beta.8
 
 ### Patch Changes
