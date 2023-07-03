@@ -1,5 +1,11 @@
 # @blocto/web3-react-connector
 
+## 0.5.0-beta.1
+
+### Minor Changes
+
+- Update core SDK dependency
+
 ## 0.4.4-beta.0
 
 ### Patch Changes

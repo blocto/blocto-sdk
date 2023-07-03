@@ -1,5 +1,11 @@
 # @blocto/wagmi-connector
 
+## 0.3.0-beta.1
+
+### Minor Changes
+
+- Update core SDK dependency
+
 ## 0.2.4-beta.0
 
 ### Patch Changes
