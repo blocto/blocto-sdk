@@ -2,10 +2,10 @@
   "mode": "exit",
   "tag": "beta",
   "initialVersions": {
-    "@blocto/aptos-wallet-adapter-plugin": "0.1.9-beta.0",
-    "@blocto/rainbowkit-connector": "0.1.3-beta.0",
-    "@blocto/wagmi-connector": "0.2.4-beta.0",
-    "@blocto/web3-react-connector": "0.4.4-beta.0",
+    "@blocto/aptos-wallet-adapter-plugin": "0.2.0-beta.1",
+    "@blocto/rainbowkit-connector": "0.2.0-beta.1",
+    "@blocto/wagmi-connector": "0.3.0-beta.1",
+    "@blocto/web3-react-connector": "0.5.0-beta.1",
     "@blocto/sdk": "0.5.0-beta.9",
     "eslint-config-custom": "0.0.0",
     "tsconfig": "0.0.0"
@@ -17,6 +17,7 @@
     "famous-toes-burn",
     "fluffy-cougars-deny",
     "good-flowers-fetch",
+    "good-walls-kiss",
     "great-buttons-invite",
     "happy-plums-shake",
     "healthy-lizards-chew",

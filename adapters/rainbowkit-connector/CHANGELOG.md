@@ -1,5 +1,13 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.0-beta.2
+
+### Patch Changes
+
+- Add support for native ES6 import
+- Updated dependencies
+  - @blocto/sdk@0.5.0-beta.10
+
 ## 0.2.0-beta.1
 
 ### Minor Changes

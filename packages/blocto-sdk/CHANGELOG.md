@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.10
+
+### Patch Changes
+
+- Add support for native ES6 import
+
 ## 0.5.0-beta.9
 
 ### Patch Changes
