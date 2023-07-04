@@ -1,5 +1,13 @@
 # @blocto/wagmi-connector
 
+## 0.3.0-beta.4
+
+### Patch Changes
+
+- 8a5b40b: fix: wrong chainId after switch chain
+- Updated dependencies [8a5b40b]
+  - @blocto/sdk@0.5.0-beta.12
+
 ## 0.3.0-beta.3
 
 ### Patch Changes

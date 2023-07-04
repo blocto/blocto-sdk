@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.12
+
+### Patch Changes
+
+- 8a5b40b: fix: wrong chainId after switch chain
+
 ## 0.5.0-beta.11
 
 ### Patch Changes
