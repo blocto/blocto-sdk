@@ -9,6 +9,11 @@
   "browser": "dist/blocto-sdk.umd.js",
   "types": "dist/blocto-sdk.d.ts",
   "type": "module",
+  "exports": {
+    "require": "./dist/blocto-sdk.js",
+    "import": "./dist/blocto-sdk.module.js",
+    "types": "./dist/blocto-sdk.d.ts"
+  },
   "files": [
     "/dist/**/!(*.html)"
   ],

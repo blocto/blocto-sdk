@@ -53,6 +53,7 @@ export default [
       file: 'dist/blocto-sdk.module.js',
       format: 'es',
       name: 'BloctoSDK',
+      intro: 'const global = window;',
     },
     plugins: [
       versionInjector(),
