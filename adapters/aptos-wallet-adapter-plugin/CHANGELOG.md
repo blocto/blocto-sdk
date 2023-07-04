@@ -1,5 +1,13 @@
 # @blocto/aptos-wallet-adapter-plugin
 
+## 0.2.0-beta.3
+
+### Patch Changes
+
+- Replace rollup polyfill plugin with rollup-plugin-polyfill-node
+- Updated dependencies
+  - @blocto/sdk@0.5.0-beta.11
+
 ## 0.2.0-beta.2
 
 ### Patch Changes

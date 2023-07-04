@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.11
+
+### Patch Changes
+
+- Replace rollup polyfill plugin with rollup-plugin-polyfill-node
+
 ## 0.5.0-beta.10
 
 ### Patch Changes
