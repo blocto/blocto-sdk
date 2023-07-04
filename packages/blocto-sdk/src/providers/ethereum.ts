@@ -302,7 +302,9 @@ export default class EthereumProvider
         }
         return existedSDK.request(payload).then(() => {
           this.networkVersion = `${parseChainId(payload?.params?.[0].chainId)}`;
-          this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
+          this.chainId = `0x${parseChainId(
+            payload?.params?.[0].chainId
+          ).toString(16)}`;
           this.rpc = switchableNetwork?.[this.networkVersion]?.rpc_url;
           return null;
         });
@@ -387,7 +389,9 @@ export default class EthereumProvider
             });
           }
           this.networkVersion = `${parseChainId(payload.params[0].chainId)}`;
-          this.chainId = `0x${parseInt(this.networkVersion, 16)}`;
+          this.chainId = `0x${parseChainId(
+            parseChainId(payload.params[0].chainId)
+          ).toString(16)}`;
           this.rpc = switchableNetwork[this.networkVersion].rpc_url;
           await this.enable();
           this.eventListeners.chainChanged.forEach((listener) =>
