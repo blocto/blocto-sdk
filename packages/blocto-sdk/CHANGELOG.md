@@ -1,5 +1,23 @@
 # @blocto/sdk
 
+## 0.5.0-beta.12
+
+### Patch Changes
+
+- 8a5b40b: fix: wrong chainId after switch chain
+
+## 0.5.0-beta.11
+
+### Patch Changes
+
+- Replace rollup polyfill plugin with rollup-plugin-polyfill-node
+
+## 0.5.0-beta.10
+
+### Patch Changes
+
+- Add support for native ES6 import
+
 ## 0.5.0-beta.9
 
 ### Patch Changes

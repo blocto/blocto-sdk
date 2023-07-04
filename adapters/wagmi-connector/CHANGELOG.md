@@ -1,5 +1,35 @@
 # @blocto/wagmi-connector
 
+## 0.3.0-beta.4
+
+### Patch Changes
+
+- 8a5b40b: fix: wrong chainId after switch chain
+- Updated dependencies [8a5b40b]
+  - @blocto/sdk@0.5.0-beta.12
+
+## 0.3.0-beta.3
+
+### Patch Changes
+
+- Replace rollup polyfill plugin with rollup-plugin-polyfill-node
+- Updated dependencies
+  - @blocto/sdk@0.5.0-beta.11
+
+## 0.3.0-beta.2
+
+### Patch Changes
+
+- Add support for native ES6 import
+- Updated dependencies
+  - @blocto/sdk@0.5.0-beta.10
+
+## 0.3.0-beta.1
+
+### Minor Changes
+
+- Update core SDK dependency
+
 ## 0.2.4-beta.0
 
 ### Patch Changes
