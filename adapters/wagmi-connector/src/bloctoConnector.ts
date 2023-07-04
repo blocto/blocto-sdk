@@ -43,6 +43,7 @@ class BloctoConnector extends Connector<
     config?: { chainId?: number | undefined } | undefined
   ): Promise<Required<ConnectorData<BloctoProvider>>> {
     const provider = await this.getProvider();
+    this.#setupListeners();
     await provider?.enable();
     const account = await this.getAccount();
     const id = await this.getChainId();
@@ -57,8 +58,8 @@ class BloctoConnector extends Connector<
 
   async disconnect(): Promise<void> {
     const provider = await this.getProvider();
+    this.#removeListeners();
     await provider?.request({ method: 'wallet_disconnect' });
-    this.onDisconnect();
   }
 
   async getAccount(): Promise<`0x${string}`> {
@@ -108,7 +109,6 @@ class BloctoConnector extends Connector<
         params: [{ chainId: id }],
       });
 
-      this.onChainChanged(id);
       return (
         chain ?? {
           id: chainId,
@@ -123,7 +123,7 @@ class BloctoConnector extends Connector<
     }
   }
 
-  protected onAccountsChanged(accounts: `0x${string}`[]): void {
+  protected onAccountsChanged(accounts: string[]): void {
     // not supported yet
   }
 
@@ -134,6 +134,22 @@ class BloctoConnector extends Connector<
   }
   protected onDisconnect(): void {
     this.emit('disconnect');
+  }
+
+  async #setupListeners(): Promise<void> {
+    const provider = await this.getProvider();
+
+    provider.on("accountsChanged", this.onAccountsChanged);
+    provider.on("chainChanged", this.onChainChanged);
+    provider.on("disconnect", this.onDisconnect);
+  }
+
+  async #removeListeners(): Promise<void> {
+    const provider = await this.getProvider();
+
+    provider.off("accountsChanged", this.onAccountsChanged);
+    provider.off("chainChanged", this.onChainChanged);
+    provider.off("disconnect", this.onDisconnect);
   }
 }
 
