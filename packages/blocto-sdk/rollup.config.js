@@ -4,7 +4,7 @@ import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import json from 'rollup-plugin-json';
-import polyfills from 'rollup-plugin-node-polyfills';
+import polyfills from 'rollup-plugin-polyfill-node';
 import alias from '@rollup/plugin-alias';
 import { babel } from '@rollup/plugin-babel';
 import dts from 'rollup-plugin-dts';
@@ -53,7 +53,6 @@ export default [
       file: 'dist/blocto-sdk.module.js',
       format: 'es',
       name: 'BloctoSDK',
-      intro: 'const global = window;',
     },
     plugins: [
       versionInjector(),
