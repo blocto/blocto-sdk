@@ -1,5 +1,11 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.0-beta.4
+
+### Patch Changes
+
+- c6154b1: Update rainbowkit switchChain function to support core sdk ^0.5.0
+
 ## 0.2.0-beta.3
 
 ### Patch Changes
