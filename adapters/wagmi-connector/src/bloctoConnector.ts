@@ -8,6 +8,7 @@ import BloctoSDK from '@blocto/sdk';
 import { providers } from 'ethers';
 import { ConnectorNotFoundError } from 'wagmi';
 import { hexValue } from 'ethers/lib/utils.js';
+import { normalizeChainId } from './util/normalizeChainId';
 
 type BloctoWalletSigner = providers.JsonRpcSigner;
 
@@ -57,6 +58,7 @@ class BloctoConnector extends Connector<
   async disconnect(): Promise<void> {
     const provider = await this.getProvider();
     await provider?.request({ method: 'wallet_disconnect' });
+    this.onDisconnect();
   }
 
   async getAccount(): Promise<`0x${string}`> {
@@ -106,6 +108,7 @@ class BloctoConnector extends Connector<
         params: [{ chainId: id }],
       });
 
+      this.onChainChanged(id);
       return (
         chain ?? {
           id: chainId,
@@ -123,12 +126,16 @@ class BloctoConnector extends Connector<
   protected onAccountsChanged(accounts: `0x${string}`[]): void {
     // not supported yet
   }
-  protected onChainChanged(chain: string | number): void {
-    // not supported yet
+
+  protected onChainChanged(chainId: string | number): void {
+    const id = normalizeChainId(chainId);
+    const unsupported = this.isChainUnsupported(id);
+    this.emit('change', { chain: { id, unsupported } });
   }
-  protected onDisconnect(error: Error): void {
-    // not supported yet
+  protected onDisconnect(): void {
+    this.emit('disconnect');
   }
 }
+
 
 export default BloctoConnector;
