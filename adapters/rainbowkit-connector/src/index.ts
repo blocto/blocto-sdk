@@ -106,7 +106,8 @@ export class BloctoConnector extends InjectedConnector {
     const provider = await this.getProvider();
     if (!provider) throw new ConnectorNotFoundError();
     try {
-      const providerRpcurl = provider.switchableNetwork[chainId]?.rpc_url;
+      const providerRpcurl =
+        provider._blocto.switchableNetwork[chainId]?.rpc_url;
       const chainUrl = chain.rpcUrls?.default?.http[0];
       if (providerRpcurl !== chainUrl) {
         await provider.request({
