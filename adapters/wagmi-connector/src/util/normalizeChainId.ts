@@ -1,4 +1,4 @@
-export function normalizeChainId(chainId: string | number | bigint) {
+export function normalizeChainId(chainId: string | number | bigint): number {
   if (typeof chainId === "string") {
     return Number.parseInt(
       chainId,
