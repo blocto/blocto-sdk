@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.13
+
+### Patch Changes
+
+- 9285453: fix: remove storage if version unmet
+
 ## 0.5.0-beta.12
 
 ### Patch Changes
