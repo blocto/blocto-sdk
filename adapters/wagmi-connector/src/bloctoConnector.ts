@@ -8,6 +8,7 @@ import BloctoSDK from '@blocto/sdk';
 import { providers } from 'ethers';
 import { ConnectorNotFoundError } from 'wagmi';
 import { hexValue } from 'ethers/lib/utils.js';
+import { normalizeChainId } from './util/normalizeChainId';
 
 type BloctoWalletSigner = providers.JsonRpcSigner;
 
@@ -42,6 +43,7 @@ class BloctoConnector extends Connector<
     config?: { chainId?: number | undefined } | undefined
   ): Promise<Required<ConnectorData<BloctoProvider>>> {
     const provider = await this.getProvider();
+    this.#setupListeners();
     await provider?.enable();
     const account = await this.getAccount();
     const id = await this.getChainId();
@@ -56,6 +58,7 @@ class BloctoConnector extends Connector<
 
   async disconnect(): Promise<void> {
     const provider = await this.getProvider();
+    this.#removeListeners();
     await provider?.request({ method: 'wallet_disconnect' });
   }
 
@@ -120,15 +123,35 @@ class BloctoConnector extends Connector<
     }
   }
 
-  protected onAccountsChanged(accounts: `0x${string}`[]): void {
+  protected onAccountsChanged(accounts: string[]): void {
     // not supported yet
   }
-  protected onChainChanged(chain: string | number): void {
-    // not supported yet
+
+  protected onChainChanged(chainId: string | number): void {
+    const id = normalizeChainId(chainId);
+    const unsupported = this.isChainUnsupported(id);
+    this.emit('change', { chain: { id, unsupported } });
   }
-  protected onDisconnect(error: Error): void {
-    // not supported yet
+  protected onDisconnect(): void {
+    this.emit('disconnect');
+  }
+
+  async #setupListeners(): Promise<void> {
+    const provider = await this.getProvider();
+
+    provider.on("accountsChanged", this.onAccountsChanged);
+    provider.on("chainChanged", this.onChainChanged);
+    provider.on("disconnect", this.onDisconnect);
+  }
+
+  async #removeListeners(): Promise<void> {
+    const provider = await this.getProvider();
+
+    provider.off("accountsChanged", this.onAccountsChanged);
+    provider.off("chainChanged", this.onChainChanged);
+    provider.off("disconnect", this.onDisconnect);
   }
 }
+
 
 export default BloctoConnector;
