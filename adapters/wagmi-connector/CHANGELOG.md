@@ -1,5 +1,11 @@
 # @blocto/wagmi-connector
 
+## 0.3.0-beta.5
+
+### Patch Changes
+
+- 8ec75c9: add manual trigger onChange & onDisconnect event
+
 ## 0.3.0-beta.4
 
 ### Patch Changes
