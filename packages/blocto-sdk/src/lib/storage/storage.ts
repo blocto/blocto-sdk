@@ -94,7 +94,10 @@ export const getAccountStorage = (
   if (!rawAccountStorage) return null;
 
   // compare the expiry time of the item with the current time
-  if (new Date().getTime() > rawAccountStorage.expiry) {
+  if (
+    new Date().getTime() > rawAccountStorage.expiry ||
+    rawAccountStorage.v !== SDK_VERSION
+  ) {
     removeItem(key);
     return null;
   }
