@@ -10,10 +10,6 @@ export default defineConfig({
       name: 'index',
       fileName: 'index',
     },
-    rollupOptions: {
-      input: 'src/index.ts',
-      external: ['react', 'react-dom'],
-    },
   },
   plugins: [dts()],
 });
