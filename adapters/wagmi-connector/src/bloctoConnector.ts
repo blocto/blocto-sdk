@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Connector, Chain, ConnectorData, WalletClient } from 'wagmi';
+import { Connector, Chain, ConnectorData, WalletClient, ConnectorNotFoundError } from '@wagmi/core';
 import { SwitchChainError, Address, createWalletClient, custom } from 'viem';
 import type {
   EthereumProviderConfig as BloctoOptions,
@@ -7,7 +7,6 @@ import type {
 } from '@blocto/sdk';
 import BloctoSDK from '@blocto/sdk';
 import { providers } from 'ethers';
-import { ConnectorNotFoundError } from 'wagmi';
 import { hexValue } from 'ethers/lib/utils.js';
 import { normalizeChainId } from './util/normalizeChainId';
 
