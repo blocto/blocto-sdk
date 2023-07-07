@@ -427,6 +427,9 @@ export default class EthereumProvider
     const { walletServer, blockchainName, sessionKey } =
       await this.#getBloctoProperties();
     const sessionId = getAccountStorage(sessionKey)?.code || '';
+    if (!sessionId) {
+      throw ethErrors.provider.unauthorized();
+    }
     return fetch(`${walletServer}/api/${blockchainName}${url}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -445,8 +448,8 @@ export default class EthereumProvider
         })
       )
       .catch((e) => {
-        if (e.status === 404) {
-          throw ethErrors.rpc.methodNotFound();
+        if (e?.code === 'unsupported_method') {
+          throw ethErrors.rpc.methodNotSupported();
         } else {
           throw ethErrors.rpc.server({
             code: -32005,
