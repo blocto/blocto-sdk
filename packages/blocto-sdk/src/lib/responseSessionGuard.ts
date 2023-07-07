@@ -1,7 +1,7 @@
 import { removeItem } from './storage';
 import { KEY_SESSION } from './storage/constants';
 
-interface ICustomError extends Error {
+export interface ICustomError extends Error {
   error_code?: string;
 }
 

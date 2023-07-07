@@ -21,7 +21,9 @@ import {
   setChainAddress,
   KEY_SESSION,
 } from '../lib/storage';
-import responseSessionGuard from '../lib/responseSessionGuard';
+import responseSessionGuard, {
+  ICustomError,
+} from '../lib/responseSessionGuard';
 import {
   ETH_RPC_LIST,
   ETH_ENV_WALLET_SERVER_MAPPING,
@@ -447,8 +449,8 @@ export default class EthereumProvider
           );
         })
       )
-      .catch((e) => {
-        if (e?.code === 'unsupported_method') {
+      .catch((e: ICustomError) => {
+        if (e?.error_code === 'unsupported_method') {
           throw ethErrors.rpc.methodNotSupported();
         } else {
           throw ethErrors.rpc.server({
