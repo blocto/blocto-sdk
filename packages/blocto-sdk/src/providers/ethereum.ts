@@ -287,7 +287,7 @@ export default class EthereumProvider
    * @returns {Promise<string>} - userOperation hash
    */
   async sendUserOperation(userOp: IUserOperation): Promise<string> {
-    return this.handleSendUserOperation({
+    return this.request({
       method: 'eth_sendUserOperation',
       params: [userOp],
     });
