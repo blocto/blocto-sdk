@@ -136,20 +136,24 @@ class BloctoConnector extends Connector<
     this.emit('disconnect');
   }
 
+  #onAccountsChangedBind: typeof this.onAccountsChanged = this.onAccountsChanged.bind(this);
+  #onChainChangedBind: typeof this.onChainChanged = this.onChainChanged.bind(this);
+  #onDisconnectBind: typeof this.onDisconnect = this.onDisconnect.bind(this);
+  
   async #setupListeners(): Promise<void> {
     const provider = await this.getProvider();
 
-    provider.on("accountsChanged", this.onAccountsChanged);
-    provider.on("chainChanged", this.onChainChanged);
-    provider.on("disconnect", this.onDisconnect);
+    provider.on("accountsChanged", this.#onAccountsChangedBind);
+    provider.on("chainChanged", this.#onChainChangedBind);
+    provider.on("disconnect", this.#onDisconnectBind);
   }
 
   async #removeListeners(): Promise<void> {
     const provider = await this.getProvider();
 
-    provider.off("accountsChanged", this.onAccountsChanged);
-    provider.off("chainChanged", this.onChainChanged);
-    provider.off("disconnect", this.onDisconnect);
+    provider.off("accountsChanged", this.#onAccountsChangedBind);
+    provider.off("chainChanged", this.#onChainChangedBind);
+    provider.off("disconnect", this.#onDisconnectBind);
   }
 }
 
