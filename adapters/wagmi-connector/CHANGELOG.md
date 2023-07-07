@@ -1,5 +1,13 @@
 # @blocto/wagmi-connector
 
+## 1.0.0-beta.7
+
+### Patch Changes
+
+- 22ed496: fix: handle if sendUserOp call before enable
+- Updated dependencies [22ed496]
+  - @blocto/sdk@0.5.0-beta.14
+
 ## 1.0.0-beta.6
 
 ### Major Changes

@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.0-beta.14
+
+### Patch Changes
+
+- 22ed496: fix: handle if sendUserOp call before enable
+
 ## 0.5.0-beta.13
 
 ### Patch Changes
