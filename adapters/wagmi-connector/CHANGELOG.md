@@ -1,5 +1,15 @@
 # @blocto/wagmi-connector
 
+## 1.0.0-beta.6
+
+### Major Changes
+
+- bafe237: update @blocto/wagmi-connector wagmi's dependance & implement
+
+### Patch Changes
+
+- 4a1d259: fix the error where this is undefined with the callback function
+
 ## 0.3.0-beta.5
 
 ### Patch Changes
