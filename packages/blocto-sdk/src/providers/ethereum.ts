@@ -21,7 +21,9 @@ import {
   setChainAddress,
   KEY_SESSION,
 } from '../lib/storage';
-import responseSessionGuard from '../lib/responseSessionGuard';
+import responseSessionGuard, {
+  ICustomError,
+} from '../lib/responseSessionGuard';
 import {
   ETH_RPC_LIST,
   ETH_ENV_WALLET_SERVER_MAPPING,
@@ -287,7 +289,7 @@ export default class EthereumProvider
    * @returns {Promise<string>} - userOperation hash
    */
   async sendUserOperation(userOp: IUserOperation): Promise<string> {
-    return this.handleSendUserOperation({
+    return this.request({
       method: 'eth_sendUserOperation',
       params: [userOp],
     });
@@ -427,6 +429,9 @@ export default class EthereumProvider
     const { walletServer, blockchainName, sessionKey } =
       await this.#getBloctoProperties();
     const sessionId = getAccountStorage(sessionKey)?.code || '';
+    if (!sessionId) {
+      throw ethErrors.provider.unauthorized();
+    }
     return fetch(`${walletServer}/api/${blockchainName}${url}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -444,9 +449,9 @@ export default class EthereumProvider
           );
         })
       )
-      .catch((e) => {
-        if (e.status === 404) {
-          throw ethErrors.rpc.methodNotFound();
+      .catch((e: ICustomError) => {
+        if (e?.error_code === 'unsupported_method') {
+          throw ethErrors.rpc.methodNotSupported();
         } else {
           throw ethErrors.rpc.server({
             code: -32005,
