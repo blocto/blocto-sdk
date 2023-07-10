@@ -1,5 +1,53 @@
 # @blocto/wagmi-connector
 
+## 1.0.0
+
+### Major Changes
+
+- bafe237: update @blocto/wagmi-connector wagmi's dependance & implement
+
+### Minor Changes
+
+- 9329e0a: Update core SDK dependency
+
+### Patch Changes
+
+- 4a1d259: fix the error where this is undefined with the callback function
+- 22ed496: fix: handle if sendUserOp call before enable
+- 2f87cbf: Update dependencies
+- 37e7db3: Add support for native ES6 import
+- c8a3b32: Fix eth_sendTransaction function
+- 8a5b40b: fix: wrong chainId after switch chain
+- 8ec75c9: add manual trigger onChange & onDisconnect event
+- cd1f781: Move session id to session storage
+- 05848f8: Replace rollup polyfill plugin with rollup-plugin-polyfill-node
+- Updated dependencies [22ed496]
+- Updated dependencies [68e1e82]
+- Updated dependencies [2f87cbf]
+- Updated dependencies [a83376b]
+- Updated dependencies [448c667]
+- Updated dependencies [9285453]
+- Updated dependencies [d495e61]
+- Updated dependencies [a4d99b1]
+- Updated dependencies [37e7db3]
+- Updated dependencies [652eefb]
+- Updated dependencies [17340c0]
+- Updated dependencies [c8a3b32]
+- Updated dependencies [5ea9bdd]
+- Updated dependencies [f078a5f]
+- Updated dependencies [e180c58]
+- Updated dependencies [c3485b6]
+- Updated dependencies [9c2d4bc]
+- Updated dependencies [a94fdba]
+- Updated dependencies [26cc3e9]
+- Updated dependencies [8a5b40b]
+- Updated dependencies [9630860]
+- Updated dependencies [cd1f781]
+- Updated dependencies [7830573]
+- Updated dependencies [17cf594]
+- Updated dependencies [05848f8]
+  - @blocto/sdk@0.5.0
+
 ## 1.0.0-beta.7
 
 ### Patch Changes
