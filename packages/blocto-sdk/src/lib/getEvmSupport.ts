@@ -1,5 +1,5 @@
 export interface EvmSupportMapping {
-  [id: string | number]: {
+  [id: `${number}`]: {
     chain_id: number;
     name: string; // backend defined chain name: ethereum, bsc, …
     display_name: string; // human readable name: Ethereum, Polygon, …

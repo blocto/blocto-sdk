@@ -17,13 +17,15 @@ import {
   RainbowKitProvider,
   ConnectButton
 } from "@rainbow-me/rainbowkit";
-import { configureChains, createClient, WagmiConfig, useAccount } from "wagmi";
-import { mainnet, polygon, optimism, arbitrum } from "wagmi/chains";
+import { configureChains, createConfig, WagmiConfig } from "wagmi";
+import { polygon, optimism, arbitrum, bsc, mainnet } from "wagmi/chains";
+import { publicProvider } from 'wagmi/providers/public';
+import { alchemyProvider } from 'wagmi/providers/alchemy';
 import { bloctoWallet } from '@blocto/rainbowkit-connector';
 
-const { chains, provider } = configureChains(
-  [mainnet, polygon, optimism, arbitrum],
-  [alchemyProvider({ apiKey: process.env.ALCHEMY_ID }), publicProvider()]
+const { chains, publicClient, webSocketPublicClient } = configureChains(
+  [polygon, optimism, arbitrum, bsc, mainnet],
+  [alchemyProvider({ apiKey: process.env.ALCHEMY_ID || "" }), publicProvider()]
 );
 
 const { wallets } = getDefaultWallets({
@@ -42,15 +44,16 @@ const connectors = connectorsForWallets([
   }
 ]);
 
-const wagmiClient = createClient({
+const wagmiConfig = createConfig({
   autoConnect: true,
   connectors,
-  provider
+  publicClient,
+  webSocketPublicClient,
 });
 
 export const App = () => {
   return (
-    <WagmiConfig client={wagmiClient}>
+    <WagmiConfig client={wagmiConfig}>
       <RainbowKitProvider chains={chains}>
         <ConnectButton />
       </RainbowKitProvider>

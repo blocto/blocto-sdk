@@ -14,9 +14,9 @@ import {
   AptosProviderConfig,
   AptosProviderInterface,
 } from './providers/types/aptos.d';
-import * as AptosTypes from './providers/types/aptos.d'
-import * as SolanaTypes from './providers/types/solana.d'
-import * as EthereumTypes from './providers/types/ethereum.d'
+import * as AptosTypes from './providers/types/aptos.d';
+import * as SolanaTypes from './providers/types/solana.d';
+import * as EthereumTypes from './providers/types/ethereum.d';
 
 export * from './providers/types/blocto.d';
 export {
@@ -33,9 +33,9 @@ export {
   EthereumTypes,
 };
 export declare interface BloctoSDKConfig extends BaseConfig {
-  ethereum?: Omit<EthereumProviderConfig, 'appId' | 'session'>;
-  solana?: Omit<SolanaProviderConfig, 'appId' | 'session'>;
-  aptos?: Omit<AptosProviderConfig, 'session'>;
+  ethereum?: Omit<EthereumProviderConfig, 'appId'>;
+  solana?: Omit<SolanaProviderConfig, 'appId'>;
+  aptos?: Omit<AptosProviderConfig>;
 }
 declare class BloctoSDK {
   ethereum?: EthereumProviderInterface;

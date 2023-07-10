@@ -4,18 +4,12 @@ import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import json from 'rollup-plugin-json';
-import polyfills from 'rollup-plugin-node-polyfills';
+import polyfills from 'rollup-plugin-polyfill-node';
 import alias from '@rollup/plugin-alias';
 import { babel } from '@rollup/plugin-babel';
 import dts from 'rollup-plugin-dts';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
-
-import pkg from './package.json';
-
-const babelRuntimeVersion = pkg.devDependencies['@babel/runtime'].replace(
-  /^[^0-9]*/,
-  ''
-);
+import versionInjector from 'rollup-plugin-version-injector';
 
 export default [
   // CommonJS
@@ -28,6 +22,7 @@ export default [
       exports: 'auto',
     },
     plugins: [
+      versionInjector(),
       alias({
         entries: {
           'readable-stream': 'stream',
@@ -44,9 +39,7 @@ export default [
       babel({
         babelHelpers: 'runtime',
         exclude: 'node_modules/**',
-        plugins: [
-          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
-        ],
+        plugins: [['@babel/plugin-transform-runtime']],
         presets: [['@babel/preset-env']],
       }),
       polyfills(),
@@ -62,6 +55,7 @@ export default [
       name: 'BloctoSDK',
     },
     plugins: [
+      versionInjector(),
       alias({
         entries: {
           'readable-stream': 'stream',
@@ -78,9 +72,7 @@ export default [
       babel({
         babelHelpers: 'runtime',
         exclude: 'node_modules/**',
-        plugins: [
-          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
-        ],
+        plugins: [['@babel/plugin-transform-runtime']],
         presets: [['@babel/preset-env']],
       }),
       polyfills(),
@@ -96,6 +88,7 @@ export default [
       name: 'BloctoSDK',
     },
     plugins: [
+      versionInjector(),
       alias({
         entries: {
           'readable-stream': 'stream',

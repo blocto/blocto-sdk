@@ -1,13 +1,12 @@
 import type { Connection, Transaction } from '@solana/web3.js';
 import { RequestArguments } from 'eip1193-provider';
 import { BaseConfig } from '../../constants';
-import BloctoProviderInterface, { ProviderSession } from './blocto.d';
+import BloctoProviderInterface from './blocto.d';
 
 export declare interface SolanaProviderConfig extends BaseConfig {
   net: string;
   server?: string;
   rpc?: string;
-  session: ProviderSession;
 }
 
 export declare interface SolanaProviderInterface
@@ -15,6 +14,7 @@ export declare interface SolanaProviderInterface
   net: string;
   rpc: string;
   server: string;
+  appId: string;
 
   connect(): Promise<void>;
   disconnect(): Promise<void>;

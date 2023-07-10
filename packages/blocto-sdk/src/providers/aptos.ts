@@ -13,14 +13,23 @@ import {
 } from './types/aptos.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
-import { setItemWithExpiry } from '../lib/localStorage';
+import {
+  setAccountStorage,
+  getAccountStorage,
+  removeChainAddress,
+  getChainAddress,
+  setChainAddress,
+  KEY_SESSION,
+  CHAIN,
+} from '../lib/storage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
   APT_CHAIN_ID_SERVER_MAPPING,
   APT_CHAIN_ID_NAME_MAPPING,
   APT_CHAIN_ID_RPC_MAPPING,
-  LOGIN_PERSISTING_TIME,
   DEFAULT_APP_ID,
+  APT_SESSION_KEY_MAPPING,
+  SDK_VERSION,
 } from '../constants';
 
 const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
@@ -55,9 +64,10 @@ export default class AptosProvider
   chainId: number;
   networkName: WalletAdapterNetwork;
   api?: string;
+  sessionKey: KEY_SESSION;
 
-  constructor({ chainId, server, appId, session }: AptosProviderConfig) {
-    super(session);
+  constructor({ chainId, server, appId }: AptosProviderConfig) {
+    super();
 
     invariant(chainId, "'chainId' is required");
     invariant(
@@ -68,6 +78,7 @@ export default class AptosProvider
     this.chainId = chainId;
     this.networkName = APT_CHAIN_ID_NAME_MAPPING[chainId];
     this.api = APT_CHAIN_ID_RPC_MAPPING[chainId];
+    this.sessionKey = APT_SESSION_KEY_MAPPING[chainId];
 
     const defaultServer = APT_CHAIN_ID_SERVER_MAPPING[chainId];
 
@@ -77,7 +88,7 @@ export default class AptosProvider
 
   get publicAccount(): PublicAccount {
     return {
-      address: this.session.accounts.aptos[0] || null,
+      address: getChainAddress(this.sessionKey, CHAIN.APTOS)?.[0] || null,
       publicKey: this.publicKey.length ? this.publicKey : null,
       // @todo: provide authkey
       authKey: null,
@@ -94,7 +105,7 @@ export default class AptosProvider
   }
 
   async isConnected(): Promise<boolean> {
-    return this.session.connected;
+    return !!getAccountStorage(this.sessionKey)?.code;
   }
 
   async signTransaction(
@@ -109,7 +120,7 @@ export default class AptosProvider
     if (!hasConnected) {
       await this.connect();
     }
-    if (!this.session.accounts.aptos.length) {
+    if (!getChainAddress(this.sessionKey, CHAIN.APTOS)?.length) {
       throw new Error('Fail to get account');
     }
     throw new Error('signTransaction method not supported.');
@@ -121,9 +132,7 @@ export default class AptosProvider
       await existedSDK.disconnect();
       return;
     }
-    this.session.code = null;
-    this.session.accounts = {};
-    this.session.connected = false;
+    removeChainAddress(this.sessionKey, CHAIN.APTOS);
   }
 
   async signAndSubmitTransaction(
@@ -140,10 +149,10 @@ export default class AptosProvider
     if (!hasConnected) {
       await this.connect();
     }
-    if (!this.session.accounts.aptos.length) {
+    if (!getChainAddress(this.sessionKey, CHAIN.APTOS)?.length) {
       throw new Error('Fail to get account');
     }
-
+    const sessionId = getAccountStorage(this.sessionKey)?.code || '';
     const { authorizationId } = await fetch(`${this.server}/api/aptos/authz`, {
       method: 'POST',
       headers: {
@@ -151,12 +160,14 @@ export default class AptosProvider
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.session.code!,
+        'Blocto-Session-Identifier': sessionId,
       },
       body: JSON.stringify({ ...transaction, ...txOptions }),
     }).then((response) =>
-      responseSessionGuard<{ authorizationId: string }>(response, this)
+      responseSessionGuard<{ authorizationId: string }>(
+        response,
+        this.sessionKey
+      )
     );
 
     if (typeof window === 'undefined') {
@@ -208,14 +219,14 @@ export default class AptosProvider
     if (!hasConnected) {
       await this.connect();
     }
-    if (!this.session.accounts.aptos.length) {
+    if (!getChainAddress(this.sessionKey, CHAIN.APTOS)?.length) {
       throw new Error('Fail to get account');
     }
 
     if (typeof window === 'undefined') {
       throw new Error('Currently only supported in browser');
     }
-
+    const sessionId = getAccountStorage(this.sessionKey)?.code || '';
     const { signatureId } = await fetch(
       `${this.server}/api/aptos/user-signature`,
       {
@@ -225,13 +236,12 @@ export default class AptosProvider
           // We already check the existence in the constructor
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           'Blocto-Application-Identifier': this.appId!,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          'Blocto-Session-Identifier': this.session.code!,
+          'Blocto-Session-Identifier': sessionId,
         },
         body: JSON.stringify(formattedPayload),
       }
     ).then((response) =>
-      responseSessionGuard<{ signatureId: string }>(response, this)
+      responseSessionGuard<{ signatureId: string }>(response, this.sessionKey)
     );
 
     const url = `${this.server}/${this.appId}/aptos/user-signature/${signatureId}`;
@@ -274,15 +284,14 @@ export default class AptosProvider
       );
     }
 
-
     return new Promise((resolve, reject) => {
       if (typeof window === 'undefined') {
         return reject('Currently only supported in browser');
       }
 
-      if (this.session.connected && this.session.accounts.aptos.length) {
+      if (getChainAddress(this.sessionKey, CHAIN.APTOS)?.length) {
         return resolve({
-          address: this.session.accounts.aptos[0],
+          address: getChainAddress(this.sessionKey, CHAIN.APTOS)?.[0] || null,
           publicKey: this.publicKey,
           authKey: null,
           minKeysRequired: 2,
@@ -291,7 +300,7 @@ export default class AptosProvider
 
       const location = encodeURIComponent(window.location.origin);
       const loginFrame = createFrame(
-        `${this.server}/${this.appId}/aptos/authn?l6n=${location}`
+        `${this.server}/${this.appId}/aptos/authn?l6n=${location}&v=${SDK_VERSION}}`
       );
 
       attachFrame(loginFrame);
@@ -304,31 +313,30 @@ export default class AptosProvider
             if (e.data.type === 'APTOS:FRAME:RESPONSE') {
               removeListener();
               detatchFrame(loginFrame);
-
-              this.session.code = e.data.code;
-              this.session.connected = true;
-
-              const address = e.data.address;
-              this.formatAndSetSessionAccount(address);
-
-              setItemWithExpiry(
+              setAccountStorage(
                 this.sessionKey,
                 {
-                  code: this.session.code,
-                  address,
+                  code: e.data.code,
+                  connected: true,
+                  accounts: {
+                    [CHAIN.APTOS]: [e.data.addr],
+                  },
                 },
-                LOGIN_PERSISTING_TIME
+                e.data.exp
               );
 
-              if (this.session.accounts.aptos.length) {
+              if (getChainAddress(this.sessionKey, CHAIN.APTOS)?.length) {
                 try {
                   const { public_keys: publicKeys } = await fetch(
-                    `${this.server}/blocto/aptos/accounts/${this.session.accounts.aptos[0]}`
+                    `${this.server}/blocto/aptos/accounts/${
+                      getChainAddress(this.sessionKey, CHAIN.APTOS)?.[0]
+                    }`
                   ).then((response) => response.json());
                   this.publicKey = publicKeys || [];
 
                   resolve({
-                    address: this.session.accounts.aptos[0] || '',
+                    address:
+                      getChainAddress(this.sessionKey, CHAIN.APTOS)?.[0] || '',
                     publicKey: this.publicKey,
                     authKey: null,
                     minKeysRequired: 2,
@@ -354,18 +362,18 @@ export default class AptosProvider
   }
 
   async fetchAddress(): Promise<string> {
+    const sessionId = getAccountStorage(this.sessionKey)?.code || '';
     const { accounts } = await fetch(`${this.server}/api/aptos/accounts`, {
       headers: {
         // We already check the existence in the constructor
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         'Blocto-Application-Identifier': this.appId!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        'Blocto-Session-Identifier': this.session.code!,
+        'Blocto-Session-Identifier': sessionId,
       },
     }).then((response) =>
-      responseSessionGuard<{ accounts: string[] }>(response, this)
+      responseSessionGuard<{ accounts: string[] }>(response, this.sessionKey)
     );
-    this.session.accounts.aptos = accounts || [];
-    return this.session.accounts.aptos[0];
+    setChainAddress(this.sessionKey, CHAIN.APTOS, accounts);
+    return accounts?.[0] || '';
   }
 }
