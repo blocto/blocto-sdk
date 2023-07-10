@@ -1,5 +1,38 @@
 # @blocto/sdk
 
+## 0.5.0
+
+### Minor Changes
+
+- e180c58: Refactor ethereum provider to support EIP4337
+- 9630860: Migrate this.session to sessionStorage
+
+### Patch Changes
+
+- 22ed496: fix: handle if sendUserOp call before enable
+- 68e1e82: Add a helper function ethereum.sendUserOperation with type-safe parameters
+- 2f87cbf: Update dependencies
+- a83376b: Fix session id not updated when set storage
+- 448c667: Send sdk version to authn url params
+- 9285453: fix: remove storage if version unmet
+- d495e61: Fix: clean session storage in aptos and solana when disconnect
+- a4d99b1: Throw error if response not ok in responseSessionGuard
+- 37e7db3: Add support for native ES6 import
+- 652eefb: Throw error when user-operation api fail
+- 17340c0: Fix internal rpc error code
+- c8a3b32: Fix eth_sendTransaction function
+- 5ea9bdd: Add ethereum chainChanged and disconnect event listener
+- f078a5f: Change @metamask/rpc-errors to eth-rpc-errors
+- c3485b6: fix: ethereum provider should emits ProviderRpcError when disconnect
+- 9c2d4bc: fix: handle switchEthereumChain with existedSDK
+- a94fdba: Support multiple params of wallet_addEthereumChain method
+- 26cc3e9: blocto_batchTransaction support web3 sendTx type
+- 8a5b40b: fix: wrong chainId after switch chain
+- cd1f781: Move session id to session storage
+- 7830573: Help convert eth_sign and personal_sign msg to hex if is string
+- 17cf594: Fix unstandard errors in ethereum provider
+- 05848f8: Replace rollup polyfill plugin with rollup-plugin-polyfill-node
+
 ## 0.5.0-beta.14
 
 ### Patch Changes
