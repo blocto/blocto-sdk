@@ -419,6 +419,9 @@ export default class SolanaProvider
             if (e.data.status === 'DECLINED') {
               removeEventListener();
               detatchFrame(authzFrame);
+              if (e.data.errorCode === 'incorrect_session_id') {
+                this.disconnect();
+              }
               reject(new Error(e.data.errorMessage));
             }
           }

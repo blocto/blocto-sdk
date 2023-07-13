@@ -198,6 +198,9 @@ export default class AptosProvider
             if (e.data.status === 'DECLINED') {
               removeEventListener();
               detatchFrame(authzFrame);
+              if (e.data.errorCode === 'incorrect_session_id') {
+                this.disconnect();
+              }
               reject(new Error(e.data.errorMessage));
             }
           }
@@ -267,6 +270,9 @@ export default class AptosProvider
             if (e.data.status === 'DECLINED') {
               removeEventListener();
               detatchFrame(signFrame);
+              if (e.data.errorCode === 'incorrect_session_id') {
+                this.disconnect();
+              }
               reject(new Error(e.data.errorMessage));
             }
           }

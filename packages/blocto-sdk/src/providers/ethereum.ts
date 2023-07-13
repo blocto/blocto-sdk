@@ -484,6 +484,9 @@ export default class EthereumProvider
             if (e.data.status === 'DECLINED') {
               removeEventListener();
               detatchFrame(frame);
+              if (e.data.errorCode === 'incorrect_session_id') {
+                this.handleDisconnect();
+              }
               reject(
                 ethErrors.provider.userRejectedRequest(e.data.errorMessage)
               );
