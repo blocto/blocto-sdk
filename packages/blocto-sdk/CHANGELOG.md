@@ -1,5 +1,13 @@
 # @blocto/sdk
 
+## 0.5.1
+
+### Patch Changes
+
+- f019a52: feat: help disconnect providers when get "incorrect_session_id" event
+- 80590d9: Emit accountChanged event if switch chain return different account
+- 2c598f5: adjust iframe style
+
 ## 0.5.0
 
 ### Minor Changes
