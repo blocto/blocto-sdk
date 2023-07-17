@@ -378,11 +378,13 @@ export default class EthereumProvider
           await this.loadSwitchableNetwork(payload?.params || []);
           result = null;
           break;
-        case 'wallet_switchEthereumChain':
+        case 'wallet_switchEthereumChain': {
           if (!payload?.params?.[0]?.chainId) {
             throw ethErrors.rpc.invalidParams();
           }
-          if (!switchableNetwork[parseChainId(payload.params[0].chainId)]) {
+          const oldAccount = getChainAddress(sessionKey, blockchainName)?.[0];
+          const chainId = payload.params[0].chainId;
+          if (!switchableNetwork[parseChainId(chainId)]) {
             throw ethErrors.provider.custom({
               code: 4902, // To-be-standardized "unrecognized chain ID" error
               message: `Unrecognized chain ID "${parseChainId(
@@ -390,17 +392,22 @@ export default class EthereumProvider
               )}". Try adding the chain using wallet_addEthereumChain first.`,
             });
           }
-          this.networkVersion = `${parseChainId(payload.params[0].chainId)}`;
-          this.chainId = `0x${parseChainId(
-            parseChainId(payload.params[0].chainId)
-          ).toString(16)}`;
+          this.networkVersion = `${parseChainId(chainId)}`;
+          this.chainId = `0x${parseChainId(chainId).toString(16)}`;
           this.rpc = switchableNetwork[this.networkVersion].rpc_url;
-          await this.enable();
+          await this.enable().then(([newAccount]) => {
+            if (newAccount !== oldAccount) {
+              this.eventListeners?.accountsChanged.forEach((listener) =>
+                listener([newAccount])
+              );
+            }
+          });
           this.eventListeners.chainChanged.forEach((listener) =>
             listener(this.chainId)
           );
           result = null;
           break;
+        }
         case 'eth_estimateUserOperationGas':
         case 'eth_getUserOperationByHash':
         case 'eth_getUserOperationReceipt':
@@ -484,6 +491,9 @@ export default class EthereumProvider
             if (e.data.status === 'DECLINED') {
               removeEventListener();
               detatchFrame(frame);
+              if (e.data.errorCode === 'incorrect_session_id') {
+                this.handleDisconnect();
+              }
               reject(
                 ethErrors.provider.userRejectedRequest(e.data.errorMessage)
               );

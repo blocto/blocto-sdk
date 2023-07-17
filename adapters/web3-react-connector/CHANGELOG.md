@@ -1,5 +1,16 @@
 # @blocto/web3-react-connector
 
+## 0.5.1
+
+### Patch Changes
+
+- f019a52: feat: help disconnect providers when get "incorrect_session_id" event
+- 80590d9: Emit accountChanged event if switch chain return different account
+- Updated dependencies [f019a52]
+- Updated dependencies [80590d9]
+- Updated dependencies [2c598f5]
+  - @blocto/sdk@0.5.1
+
 ## 0.5.0
 
 ### Minor Changes
