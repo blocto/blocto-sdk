@@ -1,5 +1,13 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.2
+
+### Patch Changes
+
+- 7d24f77: fix: handle if switch chain rejected
+- Updated dependencies [7d24f77]
+  - @blocto/sdk@0.5.2
+
 ## 0.2.1
 
 ### Patch Changes
