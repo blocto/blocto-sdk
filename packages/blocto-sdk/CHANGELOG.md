@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.3
+
+### Patch Changes
+
+- dcc764b: hotfix: add jsonrpc in body when handling 4337 bundler request
+
 ## 0.5.2
 
 ### Patch Changes
