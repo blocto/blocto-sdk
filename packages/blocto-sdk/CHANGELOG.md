@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.2
+
+### Patch Changes
+
+- 7d24f77: fix: handle if switch chain rejected
+
 ## 0.5.1
 
 ### Patch Changes
