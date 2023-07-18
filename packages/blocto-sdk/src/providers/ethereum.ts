@@ -726,7 +726,10 @@ export default class EthereumProvider
     this.#checkNetworkMatched();
     return this.bloctoApi<JSON>(`/rpc/bundler`, {
       method: 'POST',
-      body: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: 1, jsonrpc: '2.0', ...payload }),
     });
   }
 
