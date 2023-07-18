@@ -74,7 +74,7 @@ export default class EthereumProvider
     this.chainId = `0x${parseChainId(chainId).toString(16)}`;
     // setup rpc
     this.rpc = rpc || ETH_RPC_LIST[this.networkVersion];
-    invariant(rpc, "'rpc' is required");
+    invariant(this.rpc, "'rpc' is required");
     // setup injectedWalletServer
     this.injectedWalletServer = walletServer;
     // NOTE: _blocto is not fully initialized yet at this point
@@ -383,8 +383,9 @@ export default class EthereumProvider
             throw ethErrors.rpc.invalidParams();
           }
           const oldAccount = getChainAddress(sessionKey, blockchainName)?.[0];
-          const chainId = payload.params[0].chainId;
-          if (!switchableNetwork[parseChainId(chainId)]) {
+          const oldChainId = this.chainId;
+          const newChainId = payload.params[0].chainId;
+          if (!switchableNetwork[parseChainId(newChainId)]) {
             throw ethErrors.provider.custom({
               code: 4902, // To-be-standardized "unrecognized chain ID" error
               message: `Unrecognized chain ID "${parseChainId(
@@ -392,20 +393,27 @@ export default class EthereumProvider
               )}". Try adding the chain using wallet_addEthereumChain first.`,
             });
           }
-          this.networkVersion = `${parseChainId(chainId)}`;
-          this.chainId = `0x${parseChainId(chainId).toString(16)}`;
+          this.networkVersion = `${parseChainId(newChainId)}`;
+          this.chainId = `0x${parseChainId(newChainId).toString(16)}`;
           this.rpc = switchableNetwork[this.networkVersion].rpc_url;
-          await this.enable().then(([newAccount]) => {
-            if (newAccount !== oldAccount) {
-              this.eventListeners?.accountsChanged.forEach((listener) =>
-                listener([newAccount])
+          await this.enable()
+            .then(([newAccount]) => {
+              if (newAccount !== oldAccount) {
+                this.eventListeners?.accountsChanged.forEach((listener) =>
+                  listener([newAccount])
+                );
+              }
+              this.eventListeners.chainChanged.forEach((listener) =>
+                listener(this.chainId)
               );
-            }
-          });
-          this.eventListeners.chainChanged.forEach((listener) =>
-            listener(this.chainId)
-          );
-          result = null;
+              result = null;
+            })
+            .catch((error) => {
+              this.networkVersion = `${parseChainId(oldChainId)}`;
+              this.chainId = `0x${parseChainId(oldChainId).toString(16)}`;
+              this.rpc = switchableNetwork[this.networkVersion].rpc_url;
+              throw error;
+            });
           break;
         }
         case 'eth_estimateUserOperationGas':
