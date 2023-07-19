@@ -639,7 +639,7 @@ export default class EthereumProvider
   }
 
   async handleSign({ method, params }: EIP1193RequestPayload): Promise<string> {
-    let message: any = '';
+    let message = '';
     if (Array.isArray(params)) {
       if (method === 'eth_sign') {
         message = isHexString(params[1])
@@ -658,20 +658,21 @@ export default class EthereumProvider
       ) {
         message = params[1];
         try {
-          message = JSON.parse(message);
-          if (!message?.domain || !message?.domain?.chainId) {
+          const msgObject = JSON.parse(message);
+          if (!msgObject?.domain || !msgObject?.domain?.chainId) {
             throw ethErrors.rpc.invalidParams(
               'Invalid Param: domain.chainId are required in signTypedData'
             );
           }
-          message.domain.chainId = parseChainId(message.domain.chainId);
-          if (message.domain.chainId !== parseChainId(this.chainId)) {
+          msgObject.domain.chainId = parseChainId(msgObject.domain.chainId);
+          if (msgObject.domain.chainId !== parseChainId(this.chainId)) {
             throw ethErrors.rpc.invalidParams(
               `Provided chainId "${
-                message.domain.chainId
+                msgObject.domain.chainId
               }" must match the active chainId "${parseChainId(this.chainId)}"`
             );
           }
+          message = JSON.stringify(msgObject);
         } catch (e: any) {
           throw ethErrors.rpc.invalidParams(`Invalid Param: ${e.message}`);
         }
