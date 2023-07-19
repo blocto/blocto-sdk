@@ -21,9 +21,15 @@ class BloctoConnector extends Connector<
   readonly ready = true;
 
   #provider?: BloctoProvider;
+  #onAccountsChangedBind: typeof this.onAccountsChanged;
+  #onChainChangedBind: typeof this.onChainChanged;
+  #onDisconnectBind: typeof this.onDisconnect;
 
   constructor(config: { chains?: Chain[]; options: BloctoOptions }) {
     super(config);
+    this.#onAccountsChangedBind = this.onAccountsChanged.bind(this);
+    this.#onChainChangedBind = this.onChainChanged.bind(this);
+    this.#onDisconnectBind = this.onDisconnect.bind(this);
   }
 
   getProvider(): Promise<BloctoProvider> {
@@ -139,19 +145,17 @@ class BloctoConnector extends Connector<
     // not supported yet
   }
 
-  protected onChainChanged(chainId: string | number): void {
+  protected async onChainChanged(chainId: string | number): Promise<void> {
     const id = normalizeChainId(chainId);
     const unsupported = this.isChainUnsupported(id);
-    this.emit('change', { chain: { id, unsupported } });
+    const account = await this.getAccount();
+    this.emit('change', { chain: { id, unsupported }, account });
+    
   }
   protected onDisconnect(): void {
     this.emit('disconnect');
   }
 
-  #onAccountsChangedBind: typeof this.onAccountsChanged = this.onAccountsChanged.bind(this);
-  #onChainChangedBind: typeof this.onChainChanged = this.onChainChanged.bind(this);
-  #onDisconnectBind: typeof this.onDisconnect = this.onDisconnect.bind(this);
-  
   async #setupListeners(): Promise<void> {
     const provider = await this.getProvider();
 
