@@ -466,7 +466,9 @@ export default class EthereumProvider
       )
       .catch((e: ICustomError) => {
         if (e?.error_code === 'unsupported_method') {
-          throw ethErrors.rpc.methodNotSupported();
+          throw ethErrors.rpc.methodNotSupported(
+            'Method Not Supported: ' + e.message
+          );
         } else {
           throw ethErrors.rpc.server({
             code: -32005,
@@ -637,7 +639,7 @@ export default class EthereumProvider
   }
 
   async handleSign({ method, params }: EIP1193RequestPayload): Promise<string> {
-    let message = '';
+    let message: any = '';
     if (Array.isArray(params)) {
       if (method === 'eth_sign') {
         message = isHexString(params[1])
@@ -655,11 +657,23 @@ export default class EthereumProvider
         ].includes(method)
       ) {
         message = params[1];
-        const { domain } = JSON.parse(message);
-        if (parseChainId(domain.chainId) !== parseChainId(this.chainId)) {
-          throw ethErrors.rpc.invalidParams(
-            `Provided chainId "${domain.chainId}" must match the active chainId "${this.chainId}"`
-          );
+        try {
+          message = JSON.parse(message);
+          if (!message?.domain || !message?.domain?.chainId) {
+            throw ethErrors.rpc.invalidParams(
+              'Invalid Param: domain.chainId are required in signTypedData'
+            );
+          }
+          message.domain.chainId = parseChainId(message.domain.chainId);
+          if (message.domain.chainId !== parseChainId(this.chainId)) {
+            throw ethErrors.rpc.invalidParams(
+              `Provided chainId "${
+                message.domain.chainId
+              }" must match the active chainId "${parseChainId(this.chainId)}"`
+            );
+          }
+        } catch (e: any) {
+          throw ethErrors.rpc.invalidParams(`Invalid Param: ${e.message}`);
         }
       }
     }
