@@ -657,24 +657,18 @@ export default class EthereumProvider
         ].includes(method)
       ) {
         message = params[1];
-        try {
-          const msgObject = JSON.parse(message);
-          if (!msgObject?.domain || !msgObject?.domain?.chainId) {
-            throw ethErrors.rpc.invalidParams(
-              'Invalid Param: domain.chainId are required in signTypedData'
-            );
-          }
-          msgObject.domain.chainId = parseChainId(msgObject.domain.chainId);
-          if (msgObject.domain.chainId !== parseChainId(this.chainId)) {
-            throw ethErrors.rpc.invalidParams(
-              `Provided chainId "${
-                msgObject.domain.chainId
-              }" must match the active chainId "${parseChainId(this.chainId)}"`
-            );
-          }
-          message = JSON.stringify(msgObject);
-        } catch (e: any) {
-          throw ethErrors.rpc.invalidParams(`Invalid Param: ${e.message}`);
+        const { domain } = JSON.parse(message);
+        if (isHexString(domain.chainId)) {
+          throw ethErrors.rpc.invalidParams(
+            `Provided chainId "${domain.chainId}" must be a number`
+          );
+        }
+        if (parseChainId(domain.chainId) !== parseChainId(this.chainId)) {
+          throw ethErrors.rpc.invalidParams(
+            `Provided chainId "${
+              domain.chainId
+            }" must match the active chainId "${parseChainId(this.chainId)}"`
+          );
         }
       }
     }
