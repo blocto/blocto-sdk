@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Connector, Chain, ConnectorData, WalletClient, ConnectorNotFoundError } from '@wagmi/core';
 import { SwitchChainError, Address, createWalletClient, custom } from 'viem';
 import type {
-  EthereumProviderConfig as BloctoOptions,
+  EthereumProviderConfig,
   EthereumProviderInterface as BloctoProvider,
 } from '@blocto/sdk';
 import BloctoSDK from '@blocto/sdk';
@@ -11,6 +10,7 @@ import { hexValue } from 'ethers/lib/utils.js';
 import { normalizeChainId } from './util/normalizeChainId';
 
 type BloctoWalletSigner = providers.JsonRpcSigner;
+type BloctoOptions = Omit<EthereumProviderConfig, 'walletServer'>;
 
 class BloctoConnector extends Connector<
   BloctoProvider,
@@ -175,3 +175,4 @@ class BloctoConnector extends Connector<
 
 
 export default BloctoConnector;
+export type { BloctoOptions };
