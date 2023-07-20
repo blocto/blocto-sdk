@@ -466,7 +466,9 @@ export default class EthereumProvider
       )
       .catch((e: ICustomError) => {
         if (e?.error_code === 'unsupported_method') {
-          throw ethErrors.rpc.methodNotSupported();
+          throw ethErrors.rpc.methodNotSupported(
+            'Method Not Supported: ' + e.message
+          );
         } else {
           throw ethErrors.rpc.server({
             code: -32005,
@@ -656,9 +658,16 @@ export default class EthereumProvider
       ) {
         message = params[1];
         const { domain } = JSON.parse(message);
+        if (isHexString(domain.chainId)) {
+          throw ethErrors.rpc.invalidParams(
+            `Provided chainId "${domain.chainId}" must be a number`
+          );
+        }
         if (parseChainId(domain.chainId) !== parseChainId(this.chainId)) {
           throw ethErrors.rpc.invalidParams(
-            `Provided chainId "${domain.chainId}" must match the active chainId "${this.chainId}"`
+            `Provided chainId "${
+              domain.chainId
+            }" must match the active chainId "${parseChainId(this.chainId)}"`
           );
         }
       }
