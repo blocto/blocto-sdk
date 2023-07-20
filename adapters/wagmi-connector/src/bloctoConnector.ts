@@ -34,7 +34,8 @@ class BloctoConnector extends Connector<
 
   getProvider(): Promise<BloctoProvider> {
     if (!this.#provider) {
-      this.#provider = new BloctoSDK({ ethereum: this.options })?.ethereum;
+      const { appId, ...options } = this.options;
+      this.#provider = new BloctoSDK({ ethereum: options, appId })?.ethereum;
     }
 
     if (!this.#provider) {
