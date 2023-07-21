@@ -1,5 +1,5 @@
 import { Connector, Chain, ConnectorData, WalletClient, ConnectorNotFoundError } from '@wagmi/core';
-import { SwitchChainError, Address, createWalletClient, custom } from 'viem';
+import { SwitchChainError, Address, createWalletClient, custom, UserRejectedRequestError } from 'viem';
 import type {
   EthereumProviderConfig,
   EthereumProviderInterface as BloctoProvider,
@@ -32,10 +32,12 @@ class BloctoConnector extends Connector<
     this.#onDisconnectBind = this.onDisconnect.bind(this);
   }
 
-  getProvider(): Promise<BloctoProvider> {
+  getProvider({ chainId }: { chainId?: number } = {}): Promise<BloctoProvider> {
     if (!this.#provider) {
-      const { appId, ...options } = this.options;
-      this.#provider = new BloctoSDK({ ethereum: options, appId })?.ethereum;
+      // TODO: valid constructor options.chainId is equal to options.chainId
+      const { appId, ...rests } = this.options;
+      const config = { ...rests, chainId: chainId ?? rests.chainId };
+      this.#provider = new BloctoSDK({ ethereum: config, appId })?.ethereum;
     }
 
     if (!this.#provider) {
@@ -48,17 +50,22 @@ class BloctoConnector extends Connector<
   async connect(
     config?: { chainId?: number }
   ): Promise<Required<ConnectorData>> {
-    const provider = await this.getProvider();
-    this.#setupListeners();
-    await provider?.enable();
-    const account = await this.getAccount();
-    const id = await this.getChainId();
-    const unsupported = this.isChainUnsupported(id);
+    try {
+      const provider = await this.getProvider(config);
+      this.#setupListeners();
+      await provider?.enable();
+      const account = await this.getAccount();
+      const id = await this.getChainId();
+      const unsupported = this.isChainUnsupported(id);
 
-    return {
-      account,
-      chain: { id, unsupported },
-    };
+      return {
+        account,
+        chain: { id, unsupported },
+      };
+    } catch (error: unknown) {
+      this.#handleConnectReset();
+      throw error;
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -171,6 +178,10 @@ class BloctoConnector extends Connector<
     provider.off("accountsChanged", this.#onAccountsChangedBind);
     provider.off("chainChanged", this.#onChainChangedBind);
     provider.off("disconnect", this.#onDisconnectBind);
+  }
+
+  #handleConnectReset() {
+    this.#provider = undefined;
   }
 }
 
