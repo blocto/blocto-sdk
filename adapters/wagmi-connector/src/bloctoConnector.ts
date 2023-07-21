@@ -1,5 +1,5 @@
 import { Connector, Chain, ConnectorData, WalletClient, ConnectorNotFoundError } from '@wagmi/core';
-import { SwitchChainError, Address, createWalletClient, custom, UserRejectedRequestError } from 'viem';
+import { SwitchChainError, Address, createWalletClient, custom } from 'viem';
 import type {
   EthereumProviderConfig,
   EthereumProviderInterface as BloctoProvider,
@@ -34,7 +34,6 @@ class BloctoConnector extends Connector<
 
   getProvider({ chainId }: { chainId?: number } = {}): Promise<BloctoProvider> {
     if (!this.#provider) {
-      // TODO: valid constructor options.chainId is equal to options.chainId
       const { appId, ...rests } = this.options;
       const config = { ...rests, chainId: chainId ?? rests.chainId };
       this.#provider = new BloctoSDK({ ethereum: config, appId })?.ethereum;
@@ -52,8 +51,14 @@ class BloctoConnector extends Connector<
   ): Promise<Required<ConnectorData>> {
     try {
       const provider = await this.getProvider(config);
+
       this.#setupListeners();
-      await provider?.enable();
+      this.emit("message", { type: "connecting" });
+
+      await provider.request({
+        method: "eth_requestAccounts",
+      });
+      
       const account = await this.getAccount();
       const id = await this.getChainId();
       const unsupported = this.isChainUnsupported(id);
@@ -71,32 +76,40 @@ class BloctoConnector extends Connector<
   async disconnect(): Promise<void> {
     const provider = await this.getProvider();
     this.#removeListeners();
-    await provider?.request({ method: 'wallet_disconnect' });
+    await provider.request({ method: 'wallet_disconnect' });
+    this.#handleConnectReset();
   }
 
   async getAccount(): Promise<Address> {
     const provider = await this.getProvider();
+    const accounts = await provider.request({
+      method: "eth_accounts",
+    });
+    const [address] = accounts || [];
 
-    return provider
-      .request({ method: 'eth_requestAccounts' })
-      .then((accounts): `0x${string}` => accounts[0]);
+    if (!address) {
+      throw new Error("No accounts found");
+    }
+
+    return address;
   }
 
   async getChainId(): Promise<number> {
     const provider = await this.getProvider();
+    const chainId = await provider.request({ method: "eth_chainId" });
 
-    return provider
-      .request({ method: 'eth_chainId' })
-      .then((chainId): number => parseInt(chainId));
+    return normalizeChainId(chainId);
   }
 
   async getSigner(
-    config?: { chainId?: number | undefined } | undefined
+    { chainId }: { chainId?: number | undefined } = {}
   ): Promise<BloctoWalletSigner> {
-    const provider = await this.getProvider();
-    const account = await this.getAccount();
+    const [provider, account] = await Promise.all([
+      this.getProvider(),
+      this.getAccount(),
+    ]);
 
-    return new providers.Web3Provider(provider).getSigner(account);
+    return new providers.Web3Provider(provider, chainId).getSigner(account);
   }
 
   async isAuthorized(): Promise<boolean> {
@@ -108,6 +121,12 @@ class BloctoConnector extends Connector<
     const provider = await this.getProvider();
     const id = hexValue(chainId);
     const chain = this.chains.find((x) => x.id === chainId);
+    const isBloctoSupportChain =
+    provider._blocto.supportNetworkList[`${chainId}`];
+
+    if (!chain || !isBloctoSupportChain) {
+      throw new SwitchChainError(new Error(`Blocto unsupported chain: ${id}`));
+    }
     
     try {
       await provider.request({
@@ -121,16 +140,11 @@ class BloctoConnector extends Connector<
         params: [{ chainId: id }],
       });
 
-      return (
-        chain ?? {
-          id: chainId,
-          name: `Chain ${id}`,
-          network: `${id}`,
-          nativeCurrency: { name: 'Ether', decimals: 18, symbol: 'ETH' },
-          rpcUrls: { default: { http: [''] }, public: { http: [''] } },
-        }
-      );
+      return chain;
     } catch (error: unknown) {
+      if (this.#isUserRejectedRequestError(error)) {
+        throw error;
+      }
       throw new SwitchChainError(error as Error);
     }
   }
@@ -149,7 +163,7 @@ class BloctoConnector extends Connector<
     })
   }
 
-  protected onAccountsChanged(accounts: string[]): void {
+  protected onAccountsChanged(): void {
     // not supported yet
   }
 
@@ -180,8 +194,12 @@ class BloctoConnector extends Connector<
     provider.off("disconnect", this.#onDisconnectBind);
   }
 
-  #handleConnectReset() {
+  #handleConnectReset(): void {
     this.#provider = undefined;
+  }
+
+  #isUserRejectedRequestError(error: unknown): boolean {
+    return /(user rejected)/i.test((error as Error).message);
   }
 }
 
