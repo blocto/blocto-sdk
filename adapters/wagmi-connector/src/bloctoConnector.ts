@@ -10,7 +10,7 @@ import { hexValue } from 'ethers/lib/utils.js';
 import { normalizeChainId } from './util/normalizeChainId';
 
 type BloctoWalletSigner = providers.JsonRpcSigner;
-type BloctoOptions = Omit<EthereumProviderConfig, 'walletServer'>;
+type BloctoOptions = Partial<Omit<EthereumProviderConfig, 'walletServer'>>;
 
 class BloctoConnector extends Connector<
   BloctoProvider,
@@ -25,8 +25,8 @@ class BloctoConnector extends Connector<
   #onChainChangedBind: typeof this.onChainChanged;
   #onDisconnectBind: typeof this.onDisconnect;
 
-  constructor(config: { chains?: Chain[]; options: BloctoOptions }) {
-    super(config);
+  constructor({ chains, options = {} }: { chains?: Chain[]; options?: BloctoOptions }) {
+    super({ chains, options });
     this.#onAccountsChangedBind = this.onAccountsChanged.bind(this);
     this.#onChainChangedBind = this.onChainChanged.bind(this);
     this.#onDisconnectBind = this.onDisconnect.bind(this);
@@ -35,7 +35,11 @@ class BloctoConnector extends Connector<
   getProvider({ chainId }: { chainId?: number } = {}): Promise<BloctoProvider> {
     if (!this.#provider) {
       const { appId, ...rests } = this.options;
-      const config = { ...rests, chainId: chainId ?? rests.chainId };
+      const _chainId = chainId ?? rests?.chainId ?? this.chains[0]?.id;
+      const config: EthereumProviderConfig = {
+        chainId: _chainId,
+        rpc: rests?.rpc ?? this.chains.find((x) => x.id === _chainId)?.rpcUrls.infura?.http[0] ?? '',
+      };
       this.#provider = new BloctoSDK({ ethereum: config, appId })?.ethereum;
     }
 
