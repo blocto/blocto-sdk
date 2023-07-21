@@ -91,9 +91,8 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
 
   async disconnect(): Promise<void> {
     const provider = await this.getProvider();
-    this.#removeListeners();
     await provider.request({ method: 'wallet_disconnect' });
-    this.#handleConnectReset();
+    this.#removeListeners();
   }
 
   async getAccount(): Promise<Address> {
@@ -194,6 +193,7 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
     this.emit('change', { chain: { id, unsupported }, account });
   }
   protected onDisconnect(): void {
+    this.#handleConnectReset();
     this.emit('disconnect');
   }
 
