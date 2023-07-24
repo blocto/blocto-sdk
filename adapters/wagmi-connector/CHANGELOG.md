@@ -1,5 +1,19 @@
 # @blocto/wagmi-connector
 
+## 1.1.0-beta.0
+
+### Minor Changes
+
+- 6ae5c63: blocto wagmi connector enhancements
+
+### Patch Changes
+
+- 6c2af5c: fix switchchain won't update address bug on web3modal
+- Updated dependencies [6ae5c63]
+- Updated dependencies [438b66e]
+- Updated dependencies [a21d79b]
+  - @blocto/sdk@0.5.4-beta.0
+
 ## 1.0.2
 
 ### Patch Changes
