@@ -1,0 +1,34 @@
+body {
+  font-family: sans-serif;
+}
+main {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-items: center;
+  text-align: center;
+  height: 100vh;
+  color: #eaeaea;
+  font-size: 14px;
+}
+
+.hidden {
+  display: none;
+}
+
+button {
+  background-color: #0070f3;
+  color: #eaeaea;
+  padding: 15px;
+  border-radius: 0.5rem;
+  font-size: 14px;
+  border: none;
+  margin-top: 2rem;
+  cursor: pointer;
+}
+
+span,
+.address,
+.label {
+  color: #0070f3;
+}
