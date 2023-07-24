@@ -1,5 +1,14 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.3-beta.0
+
+### Patch Changes
+
+- Updated dependencies [6ae5c63]
+- Updated dependencies [438b66e]
+- Updated dependencies [a21d79b]
+  - @blocto/sdk@0.5.4-beta.0
+
 ## 0.2.2
 
 ### Patch Changes

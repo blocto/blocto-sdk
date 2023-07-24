@@ -1,5 +1,13 @@
 # @blocto/sdk
 
+## 0.5.4-beta.0
+
+### Patch Changes
+
+- 6ae5c63: blocto wagmi connector enhancements
+- 438b66e: feat: enhance detail error for evm provider
+- a21d79b: Fix handleBundler send header without session id
+
 ## 0.5.3
 
 ### Patch Changes
