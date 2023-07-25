@@ -1,5 +1,11 @@
 # @blocto/wagmi-connector
 
+## 1.1.0-beta.1
+
+### Patch Changes
+
+- 76948ee: enhance bloctoConnector's BloctoOptions Description
+
 ## 1.1.0-beta.0
 
 ### Minor Changes
