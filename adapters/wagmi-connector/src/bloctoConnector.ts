@@ -16,7 +16,28 @@ import { hexValue } from 'ethers/lib/utils.js';
 import { normalizeChainId } from './util/normalizeChainId';
 
 type BloctoWalletSigner = providers.JsonRpcSigner;
-type BloctoOptions = Partial<Omit<EthereumProviderConfig, 'walletServer'>>;
+
+type BloctoOptions = {
+    /**
+   * Your app’s unique identifier that can be obtained at https://developers.blocto.app,
+   * To get advanced features and support with Blocto.
+   *
+   * https://docs.blocto.app/blocto-sdk/register-app-id
+   */
+  appId?: string;
+
+  /**
+   * @deprecated Use `Web3Modal.defaultChain` instead.
+   * 
+   * The chain ID of the chain to connect to.
+   */
+  chainId?: number;
+
+  /**
+   * Custom RPC endpoint.
+   */
+  rpc?: string;
+}
 
 class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
   readonly id = 'bloctoWallet';
@@ -93,6 +114,7 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
     const provider = await this.getProvider();
     await provider.request({ method: 'wallet_disconnect' });
     this.#removeListeners();
+    this.#handleConnectReset();
   }
 
   async getAccount(): Promise<Address> {
@@ -193,7 +215,6 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
     this.emit('change', { chain: { id, unsupported }, account });
   }
   protected onDisconnect(): void {
-    this.#handleConnectReset();
     this.emit('disconnect');
   }
 
