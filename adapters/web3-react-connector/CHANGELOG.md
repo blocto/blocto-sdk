@@ -1,5 +1,23 @@
 # @blocto/web3-react-connector
 
+## 0.5.3
+
+### Patch Changes
+
+- Updated dependencies [6ae5c63]
+- Updated dependencies [438b66e]
+- Updated dependencies [a21d79b]
+  - @blocto/sdk@0.5.4
+
+## 0.5.3-beta.0
+
+### Patch Changes
+
+- Updated dependencies [6ae5c63]
+- Updated dependencies [438b66e]
+- Updated dependencies [a21d79b]
+  - @blocto/sdk@0.5.4-beta.0
+
 ## 0.5.2
 
 ### Patch Changes
