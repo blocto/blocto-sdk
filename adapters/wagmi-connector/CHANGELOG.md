@@ -1,5 +1,13 @@
 # @blocto/wagmi-connector
 
+## 1.1.1-beta.0
+
+### Patch Changes
+
+- fec7693: Seperate EVM provider read-only methods
+- Updated dependencies [fec7693]
+  - @blocto/sdk@0.5.5-beta.0
+
 ## 1.1.0
 
 ### Minor Changes

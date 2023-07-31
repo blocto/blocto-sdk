@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.5-beta.0
+
+### Patch Changes
+
+- fec7693: Seperate EVM provider read-only methods
+
 ## 0.5.4
 
 ### Patch Changes
