@@ -317,6 +317,30 @@ export default class EthereumProvider
     const { blockchainName, switchableNetwork, sessionKey } =
       await this.#getBloctoProperties();
 
+    // method that doesn't require user to be connected
+    switch (payload.method) {
+      case 'eth_chainId': {
+        return this.chainId;
+      }
+      case 'net_version': {
+        return this.networkVersion;
+      }
+      case 'wallet_addEthereumChain': {
+        return this.loadSwitchableNetwork(payload?.params || []);
+      }
+      case 'eth_call': {
+        const response = await this.handleReadRequests(payload);
+        if (response && !response.result && response.error) {
+          const errorMessage = response.error.message
+            ? response.error.message
+            : 'Request failed';
+          throw ethErrors.rpc.server(errorMessage);
+        }
+        if (response) return response.result;
+      }
+    }
+
+    // Method that requires user to be connected
     if (!getChainAddress(sessionKey, blockchainName)) {
       const email = payload?.params?.[0];
       if (payload.method === 'eth_requestAccounts' && isEmail(email)) {
@@ -325,7 +349,6 @@ export default class EthereumProvider
         await this.enable();
       }
     }
-
     try {
       let response = null;
       let result = null;
@@ -338,14 +361,6 @@ export default class EthereumProvider
           break;
         case 'eth_coinbase': {
           result = getChainAddress(sessionKey, blockchainName)?.[0];
-          break;
-        }
-        case 'eth_chainId': {
-          result = this.chainId;
-          break;
-        }
-        case 'net_version': {
-          result = this.networkVersion;
           break;
         }
         case 'eth_signTypedData_v3':
@@ -368,15 +383,13 @@ export default class EthereumProvider
           result = await this.handleSendBatchTransaction(payload);
           break;
         case 'eth_signTransaction':
-        case 'eth_sendRawTransaction':
-          result = null;
-          break;
+        case 'eth_sendRawTransaction': {
+          throw ethErrors.rpc.methodNotSupported(
+            'Method Not Supported: ' + payload.method
+          );
+        }
         case 'eth_sendUserOperation':
           result = await this.handleSendUserOperation(payload);
-          break;
-        case 'wallet_addEthereumChain':
-          await this.loadSwitchableNetwork(payload?.params || []);
-          result = null;
           break;
         case 'wallet_switchEthereumChain': {
           if (!payload?.params?.[0]?.chainId) {
@@ -769,7 +782,8 @@ export default class EthereumProvider
         });
       });
       return Promise.all(listToAdd).then(() => null);
+    } else {
+      throw ethErrors.rpc.invalidParams('Empty networkList');
     }
-    return null;
   }
 }
