@@ -1,5 +1,13 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.4-beta.0
+
+### Patch Changes
+
+- fec7693: Seperate EVM provider read-only methods
+- Updated dependencies [fec7693]
+  - @blocto/sdk@0.5.5-beta.0
+
 ## 0.2.3
 
 ### Patch Changes
