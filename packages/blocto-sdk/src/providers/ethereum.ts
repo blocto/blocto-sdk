@@ -296,6 +296,8 @@ export default class EthereumProvider
   }
 
   async request(payload: EIP1193RequestPayload): Promise<any> {
+    if (!payload?.method) throw ethErrors.rpc.invalidRequest();
+
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
       if (payload.method === 'wallet_switchEthereumChain') {
@@ -330,13 +332,36 @@ export default class EthereumProvider
       }
       case 'eth_call': {
         const response = await this.handleReadRequests(payload);
-        if (response && !response.result && response.error) {
-          const errorMessage = response.error.message
+        if (!response || (response && !response.result && response.error)) {
+          const errorMessage = response?.error?.message
             ? response.error.message
             : 'Request failed';
-          throw ethErrors.rpc.server(errorMessage);
+          throw ethErrors.rpc.internal(errorMessage);
         }
-        if (response) return response.result;
+        return response.result;
+      }
+      case 'wallet_switchEthereumChain': {
+        if (!payload?.params?.[0]?.chainId) throw ethErrors.rpc.invalidParams();
+        const newChainId = payload.params[0].chainId;
+        if (!getChainAddress(sessionKey, blockchainName)) {
+          // directly switch network if user is not connected
+          // TODO: add a confirm switch network dialog
+          const phasedChainId = parseChainId(newChainId);
+          if (!switchableNetwork[phasedChainId]) {
+            throw ethErrors.provider.custom({
+              code: 4902, // To-be-standardized "unrecognized chain ID" error
+              message: `Unrecognized chain ID "${newChainId}". Try adding the chain using wallet_addEthereumChain first.`,
+            });
+          }
+          this.networkVersion = `${phasedChainId}`;
+          this.chainId = `0x${phasedChainId.toString(16)}`;
+          this.rpc = switchableNetwork[phasedChainId].rpc_url;
+          this.eventListeners.chainChanged.forEach((listener) =>
+            listener(this.chainId)
+          );
+          return null;
+        }
+        break;
       }
     }
 
@@ -647,7 +672,7 @@ export default class EthereumProvider
     })
       .then((response) => response.json())
       .catch((e) => {
-        throw ethErrors.rpc.server(e);
+        throw ethErrors.rpc.internal(e);
       });
   }
 
