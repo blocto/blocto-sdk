@@ -1,5 +1,13 @@
 # @blocto/wagmi-connector
 
+## 1.1.1-beta.1
+
+### Patch Changes
+
+- Handle EVM switch chain if not connected.
+- Updated dependencies
+  - @blocto/sdk@0.5.5-beta.1
+
 ## 1.1.1-beta.0
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.5-beta.1
+
+### Patch Changes
+
+- Handle EVM switch chain if not connected.
+
 ## 0.5.5-beta.0
 
 ### Patch Changes
