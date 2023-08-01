@@ -1,5 +1,13 @@
 # @blocto/web3-react-connector
 
+## 0.5.4-beta.2
+
+### Patch Changes
+
+- Fix evm switch chain is connected logic
+- Updated dependencies
+  - @blocto/sdk@0.5.5-beta.2
+
 ## 0.5.4-beta.1
 
 ### Patch Changes

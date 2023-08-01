@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.5-beta.2
+
+### Patch Changes
+
+- Fix evm switch chain is connected logic
+
 ## 0.5.5-beta.1
 
 ### Patch Changes

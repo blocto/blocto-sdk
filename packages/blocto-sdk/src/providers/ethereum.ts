@@ -343,7 +343,7 @@ export default class EthereumProvider
       case 'wallet_switchEthereumChain': {
         if (!payload?.params?.[0]?.chainId) throw ethErrors.rpc.invalidParams();
         const newChainId = payload.params[0].chainId;
-        if (!getAccountStorage(sessionKey)) {
+        if (!getChainAddress(sessionKey, blockchainName)) {
           // directly switch network if user is not connected
           // TODO: add a confirm switch network dialog
           const phasedChainId = parseChainId(newChainId);
