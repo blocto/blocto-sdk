@@ -336,7 +336,7 @@ export default class EthereumProvider
           const errorMessage = response?.error?.message
             ? response.error.message
             : 'Request failed';
-          throw ethErrors.rpc.server(errorMessage);
+          throw ethErrors.rpc.internal(errorMessage);
         }
         return response.result;
       }
@@ -672,7 +672,7 @@ export default class EthereumProvider
     })
       .then((response) => response.json())
       .catch((e) => {
-        throw ethErrors.rpc.server(e);
+        throw ethErrors.rpc.internal(e);
       });
   }
 
