@@ -5,22 +5,24 @@ import reportWebVitals from './reportWebVitals';
 import {
   ThirdwebProvider,
   bloctoWallet,
-  metamaskWallet,
 } from '@thirdweb-dev/react';
+import {
+  Ethereum, Polygon, Arbitrum, Optimism, Avalanche, Binance, // Mainnets 
+  Goerli,Mumbai,ArbitrumGoerli,OptimismGoerli,AvalancheFuji,BinanceTestnet // Testnets
+} from "@thirdweb-dev/chains";
 import './styles/globals.css';
 
-// This is the chain your dApp will work on.
-// Change this to the chain your app is built for.
-// You can also import additional chains from `@thirdweb-dev/chains` and pass them directly.
-const activeChain = 'ethereum';
+const BLOCTO_SUPPORTED_MAINNET_CHAIN = [Ethereum, Polygon, Arbitrum, Optimism, Avalanche, Binance];
+const BLOCTO_SUPPORTED_TESTNET_CHAIN = [Goerli, Mumbai, ArbitrumGoerli, OptimismGoerli, AvalancheFuji, BinanceTestnet];
 
 const container = document.getElementById('root');
 const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <ThirdwebProvider
-      activeChain={activeChain}
-      supportedWallets={[bloctoWallet(), metamaskWallet()]}
+      activeChain={Mumbai}
+      supportedChains={BLOCTO_SUPPORTED_TESTNET_CHAIN}
+      supportedWallets={[bloctoWallet()]}
     >
       <App />
     </ThirdwebProvider>
