@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.5-beta.3
+
+### Patch Changes
+
+- Update aptos dependency to 1.15.0
+
 ## 0.5.5-beta.2
 
 ### Patch Changes
