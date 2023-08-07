@@ -1,0 +1,22 @@
+{
+  "name": "with-evm-web3modal-next",
+  "private": true,
+  "version": "2.6.2",
+  "scripts": {
+    "dev": "next dev"
+  },
+  "dependencies": {
+    "@blocto/wagmi-connector": "^1.1.0",
+    "wagmi": "1.3.3",
+    "@web3modal/ethereum": "2.6.2",
+    "@web3modal/react": "2.6.2",
+    "@blocto/dappauth": "2.1.0",
+    "ethers": "^5.7.1",
+    "use-debounce": "^9.0.4",
+    "viem": "1.2.5",
+    "web3": "~1.8.0",
+    "next": "13.4.7",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  }
+}
