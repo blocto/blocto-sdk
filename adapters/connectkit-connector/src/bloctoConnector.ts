@@ -25,18 +25,6 @@ type BloctoOptions = {
    * https://docs.blocto.app/blocto-sdk/register-app-id
    */
   appId?: string;
-
-  /**
-   * @deprecated Use `Web3Modal.defaultChain` instead.
-   *
-   * The chain ID of the chain to connect to.
-   */
-  chainId?: number;
-
-  /**
-   * Custom RPC endpoint.
-   */
-  rpc?: string;
 };
 
 class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {

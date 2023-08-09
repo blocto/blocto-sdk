@@ -11,7 +11,7 @@ type Options = {
    * The sorting order of Blocto in the connectkit UI.
    */
   order?: number;
-} & Pick<BloctoOptions, 'appId'>;
+} & BloctoOptions;
 
 type IntegrateBloctoConfig = (
   config: Config,
