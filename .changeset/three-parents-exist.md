@@ -1,5 +1,5 @@
 ---
-'@blocto/connectkit-connector': patch
+'@blocto/connectkit-connector': minor
 ---
 
 add connectkit support
