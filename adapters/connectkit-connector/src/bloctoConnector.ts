@@ -52,14 +52,11 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
 
   getProvider({ chainId }: { chainId?: number } = {}): Promise<BloctoProvider> {
     if (!this.#provider) {
-      const { appId, ...rests } = this.options;
-      const _chainId = chainId ?? rests?.chainId ?? this.chains[0]?.id;
+      const { appId } = this.options;
+      const _chainId = chainId ?? this.chains[0]?.id;
       const config: EthereumProviderConfig = {
         chainId: _chainId,
-        rpc:
-          rests?.rpc ??
-          this.chains.find((x) => x.id === _chainId)?.rpcUrls.infura?.http[0] ??
-          '',
+        rpc: this.chains.find((x) => x.id === _chainId)?.rpcUrls.infura?.http[0] ?? '',
       };
       this.#provider = new BloctoSDK({ ethereum: config, appId })?.ethereum;
     }
