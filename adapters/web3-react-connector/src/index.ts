@@ -94,6 +94,7 @@ export class BloctoConnector extends Connector {
   }
 
   public deactivate(): void {
-    this.provider?.disconnect();
+    this.provider?.handleDisconnect();
+    this.actions.resetState();
   }
 }

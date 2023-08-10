@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.5.5-beta.4
+
+### Patch Changes
+
+- dca87b8: Fix 'connect' event handler payload type
+
 ## 0.5.5-beta.3
 
 ### Patch Changes
