@@ -1,4 +1,4 @@
-import React from 'react';
+import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 
@@ -6,7 +6,7 @@ import './index.css';
 import App from './App';
 
 import { WagmiConfig, createConfig } from 'wagmi';
-import { mainnet, polygon, optimism, arbitrum } from 'wagmi/chains';
+import { arbitrumGoerli } from 'wagmi/chains';
 import {
   ConnectKitProvider,
   getDefaultConfig,
@@ -19,7 +19,7 @@ const config = integrateBloctoConfig(
     getDefaultConfig({
       appName: 'ConnectKit CRA demo',
       autoConnect: false,
-      chains: [mainnet, polygon, optimism, arbitrum],
+      chains: [arbitrumGoerli],
       walletConnectProjectId: 'c1642a0a861332fe7ac8b5820f347dd4',
     })
   ),
@@ -31,13 +31,13 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
+  <StrictMode>
     <WagmiConfig config={config}>
       <ConnectKitProvider debugMode>
         <App />
       </ConnectKitProvider>
     </WagmiConfig>
-  </React.StrictMode>
+  </StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
