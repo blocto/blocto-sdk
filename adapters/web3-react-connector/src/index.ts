@@ -29,7 +29,6 @@ export interface BloctoConstructorArgs {
 export class BloctoConnector extends Connector {
   public provider: any;
   private bloctoSDK: BloctoSDK;
-  private eagerConnection?: Promise<void>;
 
   constructor({ actions, options, onError }: BloctoConstructorArgs) {
     super(actions, onError);
@@ -92,30 +91,6 @@ export class BloctoConnector extends Connector {
         });
       this.activate(desiredChainId);
     }
-  }
-
-  public async connectEagerly(): Promise<void> {
-    await this.isomorphicInitialize();
-    if (!this.provider) throw new Error('No provider');
-
-    return Promise.all([
-      this.provider.request({ method: 'eth_chainId' }) as Promise<string>,
-      this.provider.request({ method: 'eth_accounts' }) as Promise<string[]>,
-    ])
-      .then(([chainId, accounts]) => {
-        if (accounts.length) {
-          this.actions.update({
-            chainId: parseChainId(chainId),
-            accounts,
-          });
-        } else {
-          throw new Error('No accounts returned');
-        }
-      })
-      .catch((error) => {
-        console.debug('Could not connect eagerly', error);
-        this.actions.resetState();
-      });
   }
 
   public deactivate(): void {

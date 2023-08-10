@@ -2,18 +2,20 @@
   "mode": "exit",
   "tag": "beta",
   "initialVersions": {
-    "@blocto/aptos-wallet-adapter-plugin": "0.2.3-beta.0",
+    "@blocto/aptos-wallet-adapter-plugin": "0.2.3-beta.1",
     "@blocto/rainbowkit-connector": "0.2.4-beta.2",
     "@blocto/wagmi-connector": "1.1.1-beta.2",
-    "@blocto/web3-react-connector": "0.5.4-beta.2",
-    "@blocto/sdk": "0.5.5-beta.2",
+    "@blocto/web3-react-connector": "1.0.0-beta.3",
+    "@blocto/sdk": "0.5.5-beta.3",
     "eslint-config-custom": "0.0.0",
     "tsconfig": "0.0.0"
   },
   "changesets": [
     "fair-worms-impress",
     "famous-coats-move",
+    "hungry-sheep-begin",
     "nasty-pumpkins-wave",
-    "real-pumas-mate"
+    "real-pumas-mate",
+    "two-phones-hug"
   ]
 }
