@@ -697,11 +697,17 @@ export default class EthereumProvider
               removeListener();
               detatchFrame(switchChainFrame);
               if (e.data?.addr && oldAccount) {
-                setAccountStorage(sessionKey, {
-                  accounts: {
-                    [blockchainName]: [e.data.addr],
+                setAccountStorage(
+                  sessionKey,
+                  {
+                    code: e.data?.code,
+                    connected: true,
+                    accounts: {
+                      [switchableNetwork[newChainId].name]: [e.data.addr],
+                    },
                   },
-                });
+                  e.data?.exp
+                );
                 if (e.data.addr !== oldAccount) {
                   this.eventListeners?.accountsChanged.forEach((listener) =>
                     listener([e.data.addr])
@@ -711,6 +717,7 @@ export default class EthereumProvider
               this.eventListeners?.chainChanged.forEach((listener) =>
                 listener(this.chainId)
               );
+              this.#getBloctoProperties();
               resolve(null);
             }
 
@@ -718,6 +725,10 @@ export default class EthereumProvider
               removeListener();
               detatchFrame(switchChainFrame);
               if (e.data?.hasApprovedSwitchChain) {
+                this.eventListeners?.chainChanged.forEach((listener) =>
+                  listener(this.chainId)
+                );
+                this.#getBloctoProperties();
                 resolve(null);
               }
               this.networkVersion = `${oldChainId}`;
