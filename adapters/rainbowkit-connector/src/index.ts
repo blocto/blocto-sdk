@@ -3,9 +3,13 @@ import { BloctoConnector } from '@blocto/wagmi-connector';
 
 export interface BloctoWalletOptions {
   chains: Chain[];
+  appId?: string;
 }
 
-export const bloctoWallet = ({ chains }: BloctoWalletOptions): Wallet => ({
+export const bloctoWallet = ({
+  chains,
+  appId,
+}: BloctoWalletOptions): Wallet => ({
   id: 'blocto',
   name: 'Blocto',
   iconBackground: '#ffffff',
@@ -17,7 +21,7 @@ export const bloctoWallet = ({ chains }: BloctoWalletOptions): Wallet => ({
   },
   installed: true,
   createConnector: (): any => {
-    const connector = new BloctoConnector({ chains });
+    const connector = new BloctoConnector({ chains, appId });
     return {
       connector,
     };
