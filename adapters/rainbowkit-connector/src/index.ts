@@ -21,7 +21,7 @@ export const bloctoWallet = ({
   },
   installed: true,
   createConnector: (): any => {
-    const connector = new BloctoConnector({ chains, appId });
+    const connector = new BloctoConnector({ chains, options: { appId } });
     return {
       connector,
     };
