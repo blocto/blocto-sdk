@@ -1,5 +1,17 @@
 # @blocto/web3-react-connector
 
+## 1.0.0-beta.4
+
+### Patch Changes
+
+- Change building tool to tsup
+
+## 1.0.0-beta.3
+
+### Major Changes
+
+- 36c10c5: Update web3-react-connector to support web3-react v8
+
 ## 0.5.4-beta.2
 
 ### Patch Changes

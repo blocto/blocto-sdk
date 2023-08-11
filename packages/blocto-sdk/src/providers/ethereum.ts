@@ -626,7 +626,7 @@ export default class EthereumProvider
               removeListener();
               detatchFrame(loginFrame);
               this.eventListeners?.connect.forEach((listener) =>
-                listener(this.chainId)
+                listener({ chainId: this.chainId })
               );
               setAccountStorage(
                 sessionKey,
