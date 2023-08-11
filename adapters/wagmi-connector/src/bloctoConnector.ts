@@ -18,7 +18,7 @@ import { normalizeChainId } from './util/normalizeChainId';
 type BloctoWalletSigner = providers.JsonRpcSigner;
 
 type BloctoOptions = {
-    /**
+  /**
    * Your app’s unique identifier that can be obtained at https://developers.blocto.app,
    * To get advanced features and support with Blocto.
    *
@@ -28,7 +28,7 @@ type BloctoOptions = {
 
   /**
    * @deprecated Use `Web3Modal.defaultChain` instead.
-   * 
+   *
    * The chain ID of the chain to connect to.
    */
   chainId?: number;
@@ -37,13 +37,12 @@ type BloctoOptions = {
    * Custom RPC endpoint.
    */
   rpc?: string;
-}
+};
 
 class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
-  readonly id = 'bloctoWallet';
-  readonly name = 'Blocto Wallet';
+  readonly id = 'blocto';
+  readonly name = 'Blocto';
   readonly ready = true;
-
   #provider?: BloctoProvider;
   #onAccountsChangedBind: typeof this.onAccountsChanged;
   #onChainChangedBind: typeof this.onChainChanged;
@@ -150,8 +149,10 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
   }
 
   async isAuthorized(): Promise<boolean> {
-    const account = await this.getAccount();
-    return Promise.resolve(!!account);
+    const walletName = this.storage?.getItem('wallet');
+    const connected = Boolean(this.storage?.getItem('connected'));
+    const isConnect = walletName === 'blocto' && connected;
+    return Promise.resolve(isConnect);
   }
 
   async switchChain(chainId: number): Promise<Chain> {
