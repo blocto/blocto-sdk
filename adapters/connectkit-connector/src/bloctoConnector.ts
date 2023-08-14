@@ -56,7 +56,9 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
       const _chainId = chainId ?? this.chains[0]?.id;
       const config: EthereumProviderConfig = {
         chainId: _chainId,
-        rpc: this.chains.find((x) => x.id === _chainId)?.rpcUrls.infura?.http[0] ?? '',
+        rpc:
+          this.chains.find((x) => x.id === _chainId)?.rpcUrls.infura?.http[0] ??
+          '',
       };
       this.#provider = new BloctoSDK({ ethereum: config, appId })?.ethereum;
     }
@@ -186,7 +188,7 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
       account,
       chain,
       transport: custom(provider),
-    });
+    }) as WalletClient;
   }
 
   protected onAccountsChanged(): void {
