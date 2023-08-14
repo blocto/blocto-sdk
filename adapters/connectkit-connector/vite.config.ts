@@ -10,6 +10,11 @@ export default defineConfig({
       name: 'index',
       fileName: 'index',
     },
+    rollupOptions: {
+      treeshake: {
+        moduleSideEffects: false,
+      },
+    },
   },
   plugins: [dts()],
 });
