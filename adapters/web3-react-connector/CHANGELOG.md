@@ -1,5 +1,61 @@
 # @blocto/web3-react-connector
 
+## 1.0.0
+
+### Major Changes
+
+- 36c10c5: Update web3-react-connector to support web3-react v8
+
+### Patch Changes
+
+- fec7693: Seperate EVM provider read-only methods
+- dca87b8: Fix 'connect' event handler payload type
+- 5e67333: Change building tool to tsup
+- b9f1eca: Handle EVM switch chain if not connected.
+- 2cacc63: Fix evm switch chain is connected logic
+- Updated dependencies [abd96b2]
+- Updated dependencies [fec7693]
+- Updated dependencies [dca87b8]
+- Updated dependencies [b9f1eca]
+- Updated dependencies [2cacc63]
+  - @blocto/sdk@0.5.5
+
+## 1.0.0-beta.4
+
+### Patch Changes
+
+- Change building tool to tsup
+
+## 1.0.0-beta.3
+
+### Major Changes
+
+- 36c10c5: Update web3-react-connector to support web3-react v8
+
+## 0.5.4-beta.2
+
+### Patch Changes
+
+- Fix evm switch chain is connected logic
+- Updated dependencies
+  - @blocto/sdk@0.5.5-beta.2
+
+## 0.5.4-beta.1
+
+### Patch Changes
+
+- Handle EVM switch chain if not connected.
+- Updated dependencies
+  - @blocto/sdk@0.5.5-beta.1
+
+## 0.5.4-beta.0
+
+### Patch Changes
+
+- fec7693: Seperate EVM provider read-only methods
+- Updated dependencies [fec7693]
+  - @blocto/sdk@0.5.5-beta.0
+
 ## 0.5.3
 
 ### Patch Changes

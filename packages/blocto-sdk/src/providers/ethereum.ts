@@ -296,6 +296,8 @@ export default class EthereumProvider
   }
 
   async request(payload: EIP1193RequestPayload): Promise<any> {
+    if (!payload?.method) throw ethErrors.rpc.invalidRequest();
+
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
       if (payload.method === 'wallet_switchEthereumChain') {
@@ -317,6 +319,53 @@ export default class EthereumProvider
     const { blockchainName, switchableNetwork, sessionKey } =
       await this.#getBloctoProperties();
 
+    // method that doesn't require user to be connected
+    switch (payload.method) {
+      case 'eth_chainId': {
+        return this.chainId;
+      }
+      case 'net_version': {
+        return this.networkVersion;
+      }
+      case 'wallet_addEthereumChain': {
+        return this.loadSwitchableNetwork(payload?.params || []);
+      }
+      case 'eth_call': {
+        const response = await this.handleReadRequests(payload);
+        if (!response || (response && !response.result && response.error)) {
+          const errorMessage = response?.error?.message
+            ? response.error.message
+            : 'Request failed';
+          throw ethErrors.rpc.internal(errorMessage);
+        }
+        return response.result;
+      }
+      case 'wallet_switchEthereumChain': {
+        if (!payload?.params?.[0]?.chainId) throw ethErrors.rpc.invalidParams();
+        const newChainId = payload.params[0].chainId;
+        if (!getChainAddress(sessionKey, blockchainName)) {
+          // directly switch network if user is not connected
+          // TODO: add a confirm switch network dialog
+          const phasedChainId = parseChainId(newChainId);
+          if (!switchableNetwork[phasedChainId]) {
+            throw ethErrors.provider.custom({
+              code: 4902, // To-be-standardized "unrecognized chain ID" error
+              message: `Unrecognized chain ID "${newChainId}". Try adding the chain using wallet_addEthereumChain first.`,
+            });
+          }
+          this.networkVersion = `${phasedChainId}`;
+          this.chainId = `0x${phasedChainId.toString(16)}`;
+          this.rpc = switchableNetwork[phasedChainId].rpc_url;
+          this.eventListeners.chainChanged.forEach((listener) =>
+            listener(this.chainId)
+          );
+          return null;
+        }
+        break;
+      }
+    }
+
+    // Method that requires user to be connected
     if (!getChainAddress(sessionKey, blockchainName)) {
       const email = payload?.params?.[0];
       if (payload.method === 'eth_requestAccounts' && isEmail(email)) {
@@ -325,7 +374,6 @@ export default class EthereumProvider
         await this.enable();
       }
     }
-
     try {
       let response = null;
       let result = null;
@@ -338,14 +386,6 @@ export default class EthereumProvider
           break;
         case 'eth_coinbase': {
           result = getChainAddress(sessionKey, blockchainName)?.[0];
-          break;
-        }
-        case 'eth_chainId': {
-          result = this.chainId;
-          break;
-        }
-        case 'net_version': {
-          result = this.networkVersion;
           break;
         }
         case 'eth_signTypedData_v3':
@@ -368,15 +408,13 @@ export default class EthereumProvider
           result = await this.handleSendBatchTransaction(payload);
           break;
         case 'eth_signTransaction':
-        case 'eth_sendRawTransaction':
-          result = null;
-          break;
+        case 'eth_sendRawTransaction': {
+          throw ethErrors.rpc.methodNotSupported(
+            'Method Not Supported: ' + payload.method
+          );
+        }
         case 'eth_sendUserOperation':
           result = await this.handleSendUserOperation(payload);
-          break;
-        case 'wallet_addEthereumChain':
-          await this.loadSwitchableNetwork(payload?.params || []);
-          result = null;
           break;
         case 'wallet_switchEthereumChain': {
           if (!payload?.params?.[0]?.chainId) {
@@ -588,7 +626,7 @@ export default class EthereumProvider
               removeListener();
               detatchFrame(loginFrame);
               this.eventListeners?.connect.forEach((listener) =>
-                listener(this.chainId)
+                listener({ chainId: this.chainId })
               );
               setAccountStorage(
                 sessionKey,
@@ -634,7 +672,7 @@ export default class EthereumProvider
     })
       .then((response) => response.json())
       .catch((e) => {
-        throw ethErrors.rpc.server(e);
+        throw ethErrors.rpc.internal(e);
       });
   }
 
@@ -769,7 +807,8 @@ export default class EthereumProvider
         });
       });
       return Promise.all(listToAdd).then(() => null);
+    } else {
+      throw ethErrors.rpc.invalidParams('Empty networkList');
     }
-    return null;
   }
 }

@@ -1,53 +1,100 @@
-import { ConnectorUpdate } from '@web3-react/types';
-import { AbstractConnector } from '@web3-react/abstract-connector';
+import type {
+  Actions,
+  AddEthereumChainParameter,
+  ProviderConnectInfo,
+  ProviderRpcError,
+} from '@web3-react/types';
+import { Connector } from '@web3-react/types';
 import BloctoSDK from '@blocto/sdk';
 
-interface BloctoConnectorArguments {
-  chainId: number;
-  rpc: string;
+function parseChainId(chainId: string | number): number {
+  return typeof chainId === 'number'
+    ? chainId
+    : Number.parseInt(chainId, chainId.startsWith('0x') ? 16 : 10);
 }
 
-export class BloctoConnector extends AbstractConnector {
-  private readonly chainId: number;
-  private readonly rpc: string;
-  public blocto: any;
+/**
+ * @param options - Options to pass to Blocto SDK.
+ * @param onError - Handler to report errors thrown from eventListeners.
+ */
+export interface BloctoConstructorArgs {
+  actions: Actions;
+  options: {
+    chainId: number;
+    rpc: string;
+  };
+  onError?: (error: Error) => void;
+}
 
-  constructor({ chainId, rpc }: BloctoConnectorArguments) {
-    super({ supportedChainIds: [chainId] });
-    this.chainId = chainId;
-    this.rpc = rpc;
-  }
+export class BloctoConnector extends Connector {
+  public provider: any;
+  private bloctoSDK: BloctoSDK;
 
-  public async activate(): Promise<ConnectorUpdate> {
-    const bloctoSDK = new BloctoSDK({
+  constructor({ actions, options, onError }: BloctoConstructorArgs) {
+    super(actions, onError);
+    this.bloctoSDK = new BloctoSDK({
       ethereum: {
-        chainId: this.chainId,
-        rpc: this.rpc,
+        chainId: options.chainId,
+        rpc: options.rpc,
       },
     });
-
-    this.blocto = bloctoSDK.ethereum;
-
-    const [account] = await this.blocto.enable();
-
-    return { provider: this.blocto, chainId: this.chainId, account: account };
+    this.provider = this.bloctoSDK.ethereum;
   }
 
-  public async getProvider(): Promise<any> {
-    return this.blocto;
+  private async isomorphicInitialize(): Promise<void> {
+    this.provider.on('connect', ({ chainId }: ProviderConnectInfo): void => {
+      this.actions.update({ chainId: parseChainId(chainId) });
+    });
+    this.provider.on('disconnect', (error: ProviderRpcError): void => {
+      this.actions.resetState();
+      this.onError?.(error);
+    });
+    this.provider.on('chainChanged', (chainId: string): void => {
+      this.actions.update({ chainId: parseChainId(chainId) });
+    });
+    this.provider.on('accountsChanged', (accounts: string[]): void => {
+      if (accounts.length === 0) this.actions.resetState();
+      else this.actions.update({ accounts });
+    });
   }
 
-  public async getChainId(): Promise<number | string> {
-    return this.chainId;
-  }
-
-  public async getAccount(): Promise<null | string> {
-    return this.blocto
-      .request({ method: 'eth_accounts' })
-      .then((accounts: string[]): string => accounts[0]);
+  public async activate(
+    desiredChainIdOrChainParameters?: number | AddEthereumChainParameter
+  ): Promise<void> {
+    const desiredChainId =
+      typeof desiredChainIdOrChainParameters === 'number'
+        ? desiredChainIdOrChainParameters
+        : desiredChainIdOrChainParameters?.chainId;
+    await this.isomorphicInitialize();
+    if (!this.provider) throw new Error('No provider');
+    if (
+      !desiredChainId ||
+      parseChainId(desiredChainId) === parseChainId(this.provider.chainId)
+    ) {
+      const accounts = await this.provider.request({ method: 'eth_accounts' });
+      return this.actions.update({
+        chainId: parseChainId(this.provider.chainId),
+        accounts,
+      });
+    } else {
+      // Try to switch chain
+      await this.provider
+        .request({
+          method: 'wallet_addEthereumChain',
+          params: [desiredChainIdOrChainParameters],
+        })
+        .then(() => {
+          this.provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: desiredChainId }],
+          });
+        });
+      this.activate(desiredChainId);
+    }
   }
 
   public deactivate(): void {
-    return;
+    this.provider?.handleDisconnect();
+    this.actions.resetState();
   }
 }

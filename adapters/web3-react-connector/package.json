@@ -1,10 +1,10 @@
 {
   "name": "@blocto/web3-react-connector",
-  "version": "0.5.3",
+  "version": "1.0.0",
   "description": "A Blocto SDK connector for web3-react",
-  "main": "dist/index.js",
-  "module": "dist/web3-react-connector.esm.js",
-  "typings": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "license": "MIT",
   "files": [
     "/dist"
@@ -12,10 +12,13 @@
   "publishConfig": {
     "access": "public"
   },
+  "exports": {
+    "require": "./dist/index.js",
+    "import": "./dist/index.mjs",
+    "types": "./dist/index.d.ts"
+  },
   "scripts": {
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "prepublishOnly": "npm run build",
+    "build": "tsup src/index.ts --format esm,cjs --dts",
     "lint": "eslint src --ext .ts"
   },
   "keywords": [
@@ -40,11 +43,11 @@
     "url": "git://github.com/portto/blocto-sdk.git"
   },
   "dependencies": {
-    "@blocto/sdk": "^0.5.4",
-    "@web3-react/abstract-connector": "^6.0.7",
-    "@web3-react/types": "^6.0.7"
+    "@blocto/sdk": "^0.5.5",
+    "@web3-react/types": "^8.1.2-beta.0"
   },
   "devDependencies": {
-    "tsdx": "^0.14.1"
+    "tsup": "^7.2.0",
+    "typescript": "^5.1.3"
   }
 }
