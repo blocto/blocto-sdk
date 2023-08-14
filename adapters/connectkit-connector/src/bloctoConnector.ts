@@ -5,17 +5,19 @@ import {
   WalletClient,
   ConnectorNotFoundError,
 } from '@wagmi/core';
-import { SwitchChainError, Address, createWalletClient, custom } from 'viem';
+import {
+  SwitchChainError,
+  Address,
+  createWalletClient,
+  custom,
+  numberToHex,
+} from 'viem';
 import type {
   EthereumProviderConfig,
   EthereumProviderInterface as BloctoProvider,
 } from '@blocto/sdk';
 import BloctoSDK from '@blocto/sdk';
-import { providers } from 'ethers';
-import { hexValue } from 'ethers/lib/utils.js';
 import { normalizeChainId } from './util/normalizeChainId';
-
-type BloctoWalletSigner = providers.JsonRpcSigner;
 
 type BloctoOptions = {
   /**
@@ -125,17 +127,6 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
     return normalizeChainId(chainId);
   }
 
-  async getSigner({
-    chainId,
-  }: { chainId?: number | undefined } = {}): Promise<BloctoWalletSigner> {
-    const [provider, account] = await Promise.all([
-      this.getProvider(),
-      this.getAccount(),
-    ]);
-
-    return new providers.Web3Provider(provider, chainId).getSigner(account);
-  }
-
   async isAuthorized(): Promise<boolean> {
     const account = await this.getAccount();
     return Promise.resolve(!!account);
@@ -143,7 +134,7 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
 
   async switchChain(chainId: number): Promise<Chain> {
     const provider = await this.getProvider();
-    const id = hexValue(chainId);
+    const id = numberToHex(chainId);
     const chain = this.chains.find((x) => x.id === chainId);
     const isBloctoSupportChain =
       provider._blocto.supportNetworkList[`${chainId}`];
