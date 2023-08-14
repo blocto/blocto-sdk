@@ -1,5 +1,21 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.4
+
+### Patch Changes
+
+- fec7693: Seperate EVM provider read-only methods
+- dca87b8: Fix 'connect' event handler payload type
+- b9f1eca: Handle EVM switch chain if not connected.
+- ac63830: wagmi three-shake config and rainbowkit use wagmi-connector
+- 2cacc63: Fix evm switch chain is connected logic
+- Updated dependencies [fec7693]
+- Updated dependencies [dca87b8]
+- Updated dependencies [b9f1eca]
+- Updated dependencies [ac63830]
+- Updated dependencies [2cacc63]
+  - @blocto/wagmi-connector@1.1.1
+
 ## 0.2.4-beta.2
 
 ### Patch Changes
