@@ -1,5 +1,15 @@
 # @blocto/sdk
 
+## 0.5.5
+
+### Patch Changes
+
+- abd96b2: Update aptos dependency to 1.15.0
+- fec7693: Seperate EVM provider read-only methods
+- dca87b8: Fix 'connect' event handler payload type
+- b9f1eca: Handle EVM switch chain if not connected.
+- 2cacc63: Fix evm switch chain is connected logic
+
 ## 0.5.5-beta.4
 
 ### Patch Changes

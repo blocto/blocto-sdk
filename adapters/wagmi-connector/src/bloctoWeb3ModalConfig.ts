@@ -3,7 +3,7 @@ const BLOCTO_LOGO =
 
 const bloctoWeb3ModalConfig = {
   walletImages: {
-    bloctoWallet: BLOCTO_LOGO,
+    blocto: BLOCTO_LOGO,
   },
 };
 
