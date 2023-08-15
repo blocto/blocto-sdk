@@ -682,11 +682,17 @@ export default class EthereumProvider
     this.networkVersion = `${newChainId}`;
     this.chainId = `0x${newChainId.toString(16)}`;
     this.rpc = switchableNetwork[newChainId].rpc_url;
+    if (!getChainAddress(sessionKey, blockchainName)) {
+      this.eventListeners?.chainChanged.forEach((listener) =>
+        listener(this.chainId)
+      );
+      this.#getBloctoProperties();
+      return null;
+    }
 
     const switchChainFrame = await this.setIframe(
       `/switch-chain?to=${switchableNetwork[newChainId].name}`
     );
-
     return new Promise((resolve, reject) => {
       addSelfRemovableHandler(
         'message',
@@ -730,11 +736,12 @@ export default class EthereumProvider
                 );
                 this.#getBloctoProperties();
                 resolve(null);
+              } else {
+                this.networkVersion = `${oldChainId}`;
+                this.chainId = `0x${oldChainId.toString(16)}`;
+                this.rpc = switchableNetwork[oldChainId].rpc_url;
+                reject(ethErrors.provider.userRejectedRequest());
               }
-              this.networkVersion = `${oldChainId}`;
-              this.chainId = `0x${oldChainId.toString(16)}`;
-              this.rpc = switchableNetwork[oldChainId].rpc_url;
-              reject(ethErrors.provider.userRejectedRequest());
             }
           }
         }
