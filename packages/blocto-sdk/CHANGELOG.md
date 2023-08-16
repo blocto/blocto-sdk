@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.6.0-beta.0
+
+### Minor Changes
+
+- e0e8fb7: Add switch chain hint ui for evm-provider
+
 ## 0.5.5
 
 ### Patch Changes

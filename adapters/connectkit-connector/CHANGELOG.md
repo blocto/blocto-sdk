@@ -1,5 +1,12 @@
 # @blocto/connectkit-connector
 
+## 0.1.1-beta.0
+
+### Patch Changes
+
+- Updated dependencies [e0e8fb7]
+  - @blocto/sdk@0.6.0-beta.0
+
 ## 0.1.0
 
 ### Minor Changes

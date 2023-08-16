@@ -1,5 +1,13 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.5-beta.0
+
+### Patch Changes
+
+- e0e8fb7: Add switch chain hint ui for evm-provider
+- Updated dependencies [e0e8fb7]
+  - @blocto/wagmi-connector@1.1.2-beta.0
+
 ## 0.2.4
 
 ### Patch Changes
