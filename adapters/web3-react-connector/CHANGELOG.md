@@ -1,5 +1,13 @@
 # @blocto/web3-react-connector
 
+## 1.0.1-beta.1
+
+### Patch Changes
+
+- 0d5bfd5: Fix wrong switch chain url
+- Updated dependencies [0d5bfd5]
+  - @blocto/sdk@0.6.0-beta.1
+
 ## 1.0.1-beta.0
 
 ### Patch Changes

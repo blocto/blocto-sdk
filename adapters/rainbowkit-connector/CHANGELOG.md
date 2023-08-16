@@ -1,5 +1,13 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.5-beta.1
+
+### Patch Changes
+
+- 0d5bfd5: Fix wrong switch chain url
+- Updated dependencies [0d5bfd5]
+  - @blocto/wagmi-connector@1.1.2-beta.1
+
 ## 0.2.5-beta.0
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.6.0-beta.1
+
+### Patch Changes
+
+- 0d5bfd5: Fix wrong switch chain url
+
 ## 0.6.0-beta.0
 
 ### Minor Changes

@@ -12,6 +12,7 @@
     "tsconfig": "0.0.0"
   },
   "changesets": [
-    "chilled-guests-applaud"
+    "chilled-guests-applaud",
+    "purple-queens-refuse"
   ]
 }
