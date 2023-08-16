@@ -685,7 +685,7 @@ export default class EthereumProvider
     this.networkVersion = `${newChainId}`;
     this.chainId = `0x${newChainId.toString(16)}`;
     this.rpc = switchableNetwork[newChainId].rpc_url;
-    if (!getChainAddress(sessionKey, blockchainName)) {
+    if (!getAccountStorage(sessionKey)?.code) {
       this.eventListeners?.chainChanged.forEach((listener) =>
         listener(this.chainId)
       );
@@ -694,7 +694,7 @@ export default class EthereumProvider
     }
 
     const switchChainFrame = await this.setIframe(
-      `/switch-chain?to=${blockchainName}`,
+      `/switch-chain?to=${switchableNetwork[newChainId].name}`,
       switchableNetwork[oldChainId].name
     );
     return new Promise((resolve, reject) => {
