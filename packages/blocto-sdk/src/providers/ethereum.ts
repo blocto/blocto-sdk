@@ -671,8 +671,13 @@ export default class EthereumProvider
     if (!targetChainId) {
       throw ethErrors.rpc.invalidParams();
     }
-    const { walletServer, blockchainName, sessionKey, switchableNetwork } =
-      await this.#getBloctoProperties();
+    const {
+      walletServer,
+      blockchainName,
+      sessionKey,
+      switchableNetwork,
+      supportNetworkList,
+    } = await this.#getBloctoProperties();
     const oldAccount = getChainAddress(sessionKey, blockchainName)?.[0];
     const oldChainId = parseChainId(this.chainId);
     const newChainId = parseChainId(targetChainId);
@@ -737,6 +742,16 @@ export default class EthereumProvider
               if (e.data?.hasApprovedSwitchChain) {
                 this.eventListeners?.chainChanged.forEach((listener) =>
                   listener(this.chainId)
+                );
+                Object.values(supportNetworkList).map(
+                  ({ name, blocto_service_environment }) => {
+                    if (
+                      sessionKey ===
+                      ETH_SESSION_KEY_MAPPING[blocto_service_environment]
+                    ) {
+                      removeChainAddress(sessionKey, name);
+                    }
+                  }
                 );
                 this.eventListeners?.disconnect.forEach((listener) =>
                   listener(ethErrors.provider.disconnected())
@@ -818,8 +833,17 @@ export default class EthereumProvider
     if (existedSDK && existedSDK.isBlocto) {
       return existedSDK.disconnect();
     }
-    const { sessionKey, blockchainName } = await this.#getBloctoProperties();
-    removeChainAddress(sessionKey, blockchainName);
+    const { sessionKey, supportNetworkList } =
+      await this.#getBloctoProperties();
+    Object.values(supportNetworkList).map(
+      ({ name, blocto_service_environment }) => {
+        if (
+          sessionKey === ETH_SESSION_KEY_MAPPING[blocto_service_environment]
+        ) {
+          removeChainAddress(sessionKey, name);
+        }
+      }
+    );
     this.eventListeners?.disconnect.forEach((listener) =>
       listener(ethErrors.provider.disconnected())
     );
