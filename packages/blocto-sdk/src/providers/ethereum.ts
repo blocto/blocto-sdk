@@ -685,7 +685,7 @@ export default class EthereumProvider
     this.networkVersion = `${newChainId}`;
     this.chainId = `0x${newChainId.toString(16)}`;
     this.rpc = switchableNetwork[newChainId].rpc_url;
-    if (!getAccountStorage(sessionKey)?.code) {
+    if (!oldAccount) {
       this.eventListeners?.chainChanged.forEach((listener) =>
         listener(this.chainId)
       );
