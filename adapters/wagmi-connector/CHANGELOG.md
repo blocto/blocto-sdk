@@ -1,5 +1,29 @@
 # @blocto/wagmi-connector
 
+## 1.1.2-beta.4
+
+### Patch Changes
+
+- 6acf18d: Fix switch chain is connected logic
+- Updated dependencies [6acf18d]
+  - @blocto/sdk@0.6.0-beta.4
+
+## 1.1.2-beta.3
+
+### Patch Changes
+
+- 84d6727: Fix emit disconnect event when switch chain approved but failed
+- Updated dependencies [84d6727]
+  - @blocto/sdk@0.6.0-beta.3
+
+## 1.1.2-beta.2
+
+### Patch Changes
+
+- a0cc54c: Fix switch chain login logic
+- Updated dependencies [a0cc54c]
+  - @blocto/sdk@0.6.0-beta.2
+
 ## 1.1.2-beta.1
 
 ### Patch Changes

@@ -1,5 +1,29 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.5-beta.4
+
+### Patch Changes
+
+- 6acf18d: Fix switch chain is connected logic
+- Updated dependencies [6acf18d]
+  - @blocto/wagmi-connector@1.1.2-beta.4
+
+## 0.2.5-beta.3
+
+### Patch Changes
+
+- 84d6727: Fix emit disconnect event when switch chain approved but failed
+- Updated dependencies [84d6727]
+  - @blocto/wagmi-connector@1.1.2-beta.3
+
+## 0.2.5-beta.2
+
+### Patch Changes
+
+- a0cc54c: Fix switch chain login logic
+- Updated dependencies [a0cc54c]
+  - @blocto/wagmi-connector@1.1.2-beta.2
+
 ## 0.2.5-beta.1
 
 ### Patch Changes
