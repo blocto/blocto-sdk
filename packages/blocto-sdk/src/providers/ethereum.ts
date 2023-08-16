@@ -503,7 +503,10 @@ export default class EthereumProvider
     );
   }
 
-  async setIframe(url: string): Promise<HTMLIFrameElement> {
+  async setIframe(
+    url: string,
+    blockchain?: string
+  ): Promise<HTMLIFrameElement> {
     if (typeof window === 'undefined') {
       throw ethErrors.provider.custom({
         code: 1001,
@@ -512,7 +515,7 @@ export default class EthereumProvider
     }
     const { walletServer, blockchainName } = await this.#getBloctoProperties();
     const frame = createFrame(
-      `${walletServer}/${this.appId}/${blockchainName}${url}`
+      `${walletServer}/${this.appId}/${blockchain || blockchainName}${url}`
     );
     attachFrame(frame);
     return frame;
@@ -691,7 +694,8 @@ export default class EthereumProvider
     }
 
     const switchChainFrame = await this.setIframe(
-      `/switch-chain?to=${switchableNetwork[newChainId].name}`
+      `/switch-chain?to=${blockchainName}`,
+      switchableNetwork[oldChainId].name
     );
     return new Promise((resolve, reject) => {
       addSelfRemovableHandler(
