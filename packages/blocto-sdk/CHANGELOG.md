@@ -1,5 +1,41 @@
 # @blocto/sdk
 
+## 0.6.0-beta.5
+
+### Patch Changes
+
+- 39754e5: Fix disconnect all evm chains when disconnect
+
+## 0.6.0-beta.4
+
+### Patch Changes
+
+- 6acf18d: Fix switch chain is connected logic
+
+## 0.6.0-beta.3
+
+### Patch Changes
+
+- 84d6727: Fix emit disconnect event when switch chain approved but failed
+
+## 0.6.0-beta.2
+
+### Patch Changes
+
+- a0cc54c: Fix switch chain login logic
+
+## 0.6.0-beta.1
+
+### Patch Changes
+
+- 0d5bfd5: Fix wrong switch chain url
+
+## 0.6.0-beta.0
+
+### Minor Changes
+
+- e0e8fb7: Add switch chain hint ui for evm-provider
+
 ## 0.5.5
 
 ### Patch Changes

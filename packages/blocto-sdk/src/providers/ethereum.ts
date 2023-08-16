@@ -503,7 +503,10 @@ export default class EthereumProvider
     );
   }
 
-  async setIframe(url: string): Promise<HTMLIFrameElement> {
+  async setIframe(
+    url: string,
+    blockchain?: string
+  ): Promise<HTMLIFrameElement> {
     if (typeof window === 'undefined') {
       throw ethErrors.provider.custom({
         code: 1001,
@@ -512,7 +515,7 @@ export default class EthereumProvider
     }
     const { walletServer, blockchainName } = await this.#getBloctoProperties();
     const frame = createFrame(
-      `${walletServer}/${this.appId}/${blockchainName}${url}`
+      `${walletServer}/${this.appId}/${blockchain || blockchainName}${url}`
     );
     attachFrame(frame);
     return frame;
@@ -668,8 +671,13 @@ export default class EthereumProvider
     if (!targetChainId) {
       throw ethErrors.rpc.invalidParams();
     }
-    const { walletServer, blockchainName, sessionKey, switchableNetwork } =
-      await this.#getBloctoProperties();
+    const {
+      walletServer,
+      blockchainName,
+      sessionKey,
+      switchableNetwork,
+      supportNetworkList,
+    } = await this.#getBloctoProperties();
     const oldAccount = getChainAddress(sessionKey, blockchainName)?.[0];
     const oldChainId = parseChainId(this.chainId);
     const newChainId = parseChainId(targetChainId);
@@ -682,7 +690,7 @@ export default class EthereumProvider
     this.networkVersion = `${newChainId}`;
     this.chainId = `0x${newChainId.toString(16)}`;
     this.rpc = switchableNetwork[newChainId].rpc_url;
-    if (!getChainAddress(sessionKey, blockchainName)) {
+    if (!oldAccount) {
       this.eventListeners?.chainChanged.forEach((listener) =>
         listener(this.chainId)
       );
@@ -691,7 +699,8 @@ export default class EthereumProvider
     }
 
     const switchChainFrame = await this.setIframe(
-      `/switch-chain?to=${switchableNetwork[newChainId].name}`
+      `/switch-chain?to=${switchableNetwork[newChainId].name}`,
+      switchableNetwork[oldChainId].name
     );
     return new Promise((resolve, reject) => {
       addSelfRemovableHandler(
@@ -733,6 +742,19 @@ export default class EthereumProvider
               if (e.data?.hasApprovedSwitchChain) {
                 this.eventListeners?.chainChanged.forEach((listener) =>
                   listener(this.chainId)
+                );
+                Object.values(supportNetworkList).map(
+                  ({ name, blocto_service_environment }) => {
+                    if (
+                      sessionKey ===
+                      ETH_SESSION_KEY_MAPPING[blocto_service_environment]
+                    ) {
+                      removeChainAddress(sessionKey, name);
+                    }
+                  }
+                );
+                this.eventListeners?.disconnect.forEach((listener) =>
+                  listener(ethErrors.provider.disconnected())
                 );
                 this.#getBloctoProperties();
                 resolve(null);
@@ -811,8 +833,17 @@ export default class EthereumProvider
     if (existedSDK && existedSDK.isBlocto) {
       return existedSDK.disconnect();
     }
-    const { sessionKey, blockchainName } = await this.#getBloctoProperties();
-    removeChainAddress(sessionKey, blockchainName);
+    const { sessionKey, supportNetworkList } =
+      await this.#getBloctoProperties();
+    Object.values(supportNetworkList).map(
+      ({ name, blocto_service_environment }) => {
+        if (
+          sessionKey === ETH_SESSION_KEY_MAPPING[blocto_service_environment]
+        ) {
+          removeChainAddress(sessionKey, name);
+        }
+      }
+    );
     this.eventListeners?.disconnect.forEach((listener) =>
       listener(ethErrors.provider.disconnected())
     );
