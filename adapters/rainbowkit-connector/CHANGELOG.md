@@ -1,5 +1,13 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.5-beta.5
+
+### Patch Changes
+
+- 39754e5: Fix disconnect all evm chains when disconnect
+- Updated dependencies [39754e5]
+  - @blocto/wagmi-connector@1.1.2-beta.5
+
 ## 0.2.5-beta.4
 
 ### Patch Changes

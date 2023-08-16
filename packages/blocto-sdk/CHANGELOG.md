@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.6.0-beta.5
+
+### Patch Changes
+
+- 39754e5: Fix disconnect all evm chains when disconnect
+
 ## 0.6.0-beta.4
 
 ### Patch Changes

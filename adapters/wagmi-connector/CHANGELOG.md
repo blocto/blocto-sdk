@@ -1,5 +1,13 @@
 # @blocto/wagmi-connector
 
+## 1.1.2-beta.5
+
+### Patch Changes
+
+- 39754e5: Fix disconnect all evm chains when disconnect
+- Updated dependencies [39754e5]
+  - @blocto/sdk@0.6.0-beta.5
+
 ## 1.1.2-beta.4
 
 ### Patch Changes
