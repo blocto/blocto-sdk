@@ -738,6 +738,9 @@ export default class EthereumProvider
                 this.eventListeners?.chainChanged.forEach((listener) =>
                   listener(this.chainId)
                 );
+                this.eventListeners?.disconnect.forEach((listener) =>
+                  listener(ethErrors.provider.disconnected())
+                );
                 this.#getBloctoProperties();
                 resolve(null);
               } else {
