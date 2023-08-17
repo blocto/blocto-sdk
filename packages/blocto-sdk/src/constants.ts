@@ -51,28 +51,6 @@ export const ETH_SESSION_KEY_MAPPING: Record<string, KEY_SESSION> = {
 
 /* eth series constants end */
 
-/* sol constants begin */
-
-export const SOL_NET = {
-  MainnetBeta: 'mainnet-beta',
-  Testnet: 'testnet',
-  Devnet: 'devnet',
-};
-
-export const SOL_NET_SERVER_MAPPING: Mapping = {
-  [SOL_NET.MainnetBeta]: 'https://wallet-v2.blocto.app',
-  [SOL_NET.Devnet]: 'https://wallet-v2-dev.blocto.app',
-  [SOL_NET.Testnet]: 'https://wallet-v2-dev.blocto.app',
-};
-
-export const SOL_SESSION_KEY_MAPPING: Record<number | string, KEY_SESSION> = {
-  [SOL_NET.MainnetBeta]: KEY_SESSION.prod,
-  [SOL_NET.Devnet]: KEY_SESSION.dev,
-  [SOL_NET.Testnet]: KEY_SESSION.dev,
-};
-
-/* sol constants end */
-
 /* aptos constants begin */
 
 export const APT_SESSION_KEY_MAPPING: Record<number | string, KEY_SESSION> = {
