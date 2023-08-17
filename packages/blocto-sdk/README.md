@@ -24,7 +24,7 @@ Use Blocto SDK in your dApp to provide excellent user experience!
     Polygon Mainnet & Testnet  
     BNB Smart Chain Mainnet & Tetsnet  
     Avalanche Mainnet & Testnet
-  - Interact with Aptos and Solana
+  - Interact with Aptos
   - Sign messages
   - Send transactions
   - ... and a lot more
