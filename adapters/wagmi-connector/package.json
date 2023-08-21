@@ -2,7 +2,7 @@
   "name": "@blocto/wagmi-connector",
   "description": "blocto wallet connector extend from wagmi Connector to use with web3modal",
   "author": "Calvin Chang",
-  "version": "1.1.2-beta.5",
+  "version": "1.1.2-beta.6",
   "type": "module",
   "main": "./dist/index.umd.cjs",
   "module": "./dist/index.js",
@@ -28,7 +28,7 @@
     "/dist"
   ],
   "dependencies": {
-    "@blocto/sdk": "^0.6.0-beta.5"
+    "@blocto/sdk": "^0.6.0-beta.6"
   },
   "peerDependencies": {
     "@wagmi/core": ">=1",

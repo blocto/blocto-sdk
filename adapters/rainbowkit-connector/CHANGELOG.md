@@ -1,5 +1,13 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.5-beta.6
+
+### Patch Changes
+
+- 3ceb547: Fix skip switch chain if provide same id as current
+- Updated dependencies [3ceb547]
+  - @blocto/wagmi-connector@1.1.2-beta.6
+
 ## 0.2.5-beta.5
 
 ### Patch Changes

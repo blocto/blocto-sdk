@@ -1,5 +1,15 @@
 # @blocto/sdk
 
+## 0.6.0-beta.6
+
+### Minor Changes
+
+- 34a23e4: DEPRECATED: Solana provider no longer supported and removed.
+
+### Patch Changes
+
+- 3ceb547: Fix skip switch chain if provide same id as current
+
 ## 0.6.0-beta.5
 
 ### Patch Changes

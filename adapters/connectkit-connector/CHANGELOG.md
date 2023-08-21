@@ -1,5 +1,14 @@
 # @blocto/connectkit-connector
 
+## 0.1.1-beta.6
+
+### Patch Changes
+
+- 3ceb547: Fix skip switch chain if provide same id as current
+- Updated dependencies [34a23e4]
+- Updated dependencies [3ceb547]
+  - @blocto/sdk@0.6.0-beta.6
+
 ## 0.1.1-beta.5
 
 ### Patch Changes
