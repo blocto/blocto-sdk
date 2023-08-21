@@ -1,4 +1,4 @@
-This is a [wagmi](https://wagmi.sh) + [Vite](https://vitejs.dev/) project bootstrapped with [`create-wagmi`](https://github.com/wagmi-dev/wagmi/tree/main/packages/create-wagmi)
+This is a [wagmi](https://wagmi.sh) + [Vite](https://vitejs.dev/) project bootstrapped with [`create-wagmi`](https://github.com/wagmi-dev/wagmi/tree/main/packages/create-wagmi), Simultaneously Integrating [Blocto](https://blocto.io) wallet.
 
 # Getting Started
 
