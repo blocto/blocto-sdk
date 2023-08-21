@@ -681,6 +681,9 @@ export default class EthereumProvider
     const oldAccount = getChainAddress(sessionKey, blockchainName)?.[0];
     const oldChainId = parseChainId(this.chainId);
     const newChainId = parseChainId(targetChainId);
+    if (oldChainId === newChainId) {
+      return null;
+    }
     if (!switchableNetwork[newChainId]) {
       throw ethErrors.provider.custom({
         code: 4902, // To-be-standardized "unrecognized chain ID" error
