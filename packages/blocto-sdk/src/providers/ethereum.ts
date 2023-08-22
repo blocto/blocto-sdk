@@ -111,7 +111,7 @@ export default class EthereumProvider
       network_type,
       blocto_service_environment,
       display_name,
-    } = this._blocto.supportNetworkList[this.networkVersion];
+    } = this._blocto.supportNetworkList[this.networkVersion] ?? {};
     if (!chain_id)
       throw ethErrors.provider.unsupportedMethod(
         `Get support chain failed: ${this.networkVersion} might not be supported yet.`
