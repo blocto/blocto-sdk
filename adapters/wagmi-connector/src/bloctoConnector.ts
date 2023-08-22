@@ -71,8 +71,7 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
         chainId: _chainId,
         rpc:
           rests?.rpc ??
-          this.chains.find((x) => x.id === _chainId)?.rpcUrls.infura?.http[0] ??
-          '',
+          this.chains.find((x) => x.id === _chainId)?.rpcUrls.default.http?.[0],
       };
       this.#provider = new BloctoSDK({ ethereum: config, appId })?.ethereum;
     }

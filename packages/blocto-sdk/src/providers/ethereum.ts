@@ -31,7 +31,11 @@ import {
   ETH_SESSION_KEY_MAPPING,
   SDK_VERSION,
 } from '../constants';
-import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
+import { isEmail } from '../lib/isEmail';
+import {
+  isValidTransaction,
+  isValidTransactions,
+} from '../lib/isValidTransaction';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
 import { ethErrors } from 'eth-rpc-errors';
 import { isHexString, utf8ToHex } from '../lib/utf8toHex';
@@ -776,14 +780,11 @@ export default class EthereumProvider
 
   async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
     this.#checkNetworkMatched();
-    if (!isValidTransaction(payload.params?.[0])) {
-      throw ethErrors.rpc.invalidParams();
+    const { isValid, invalidMsg } = isValidTransaction(payload.params?.[0]);
+    if (!isValid) {
+      throw ethErrors.rpc.invalidParams(invalidMsg);
     }
-    const { authorizationId } = await this.bloctoApi<{
-      authorizationId: string;
-    }>(`/authz`, { method: 'POST', body: JSON.stringify(payload.params) });
-    const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
-    return this.responseListener(authzFrame, 'txHash');
+    return this.#createAuthzFrame(payload.params);
   }
 
   async handleSendBatchTransaction(
@@ -800,11 +801,20 @@ export default class EthereumProvider
     const formatParams = extractParams(payload.params as Array<any>);
     const copyPayload = { ...payload, params: formatParams };
 
-    if (!isValidTransactions(copyPayload.params)) {
-      throw ethErrors.rpc.invalidParams();
+    const { isValid, invalidMsg } = isValidTransactions(copyPayload.params);
+    if (!isValid) {
+      throw ethErrors.rpc.invalidParams(invalidMsg);
     }
 
-    return this.handleSendTransaction(copyPayload);
+    return this.#createAuthzFrame(copyPayload.params);
+  }
+
+  async #createAuthzFrame(params: EIP1193RequestPayload['params']) {
+    const { authorizationId } = await this.bloctoApi<{
+      authorizationId: string;
+    }>(`/authz`, { method: 'POST', body: JSON.stringify(params) });
+    const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
+    return this.responseListener(authzFrame, 'txHash');
   }
 
   async handleSendUserOperation(
