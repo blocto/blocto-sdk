@@ -23,7 +23,7 @@ export function App() {
 
   return (
     <>
-      <h1>wagmi + Vite</h1>
+      <h1>wagmi</h1>
 
       <Connect />
 
