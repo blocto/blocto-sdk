@@ -2,7 +2,7 @@
   "name": "@blocto/aptos-wallet-adapter-plugin",
   "version": "0.2.4-beta.0",
   "description": "Blocto Wallet plugin to use with Aptos Wallet Adapter",
-  "author": "Blcoto Wallet",
+  "author": "Blocto Wallet",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
