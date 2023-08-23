@@ -1,5 +1,25 @@
 # @blocto/wagmi-connector
 
+## 1.1.2-beta.7
+
+### Patch Changes
+
+- 83eb33d: enhance wagmi connector rpc stability
+- 55f3395: Fix go login flow when switching to a different blocto server
+- Updated dependencies [6e427b1]
+- Updated dependencies [55f3395]
+- Updated dependencies [494ded1]
+  - @blocto/sdk@0.6.0-beta.7
+
+## 1.1.2-beta.6
+
+### Patch Changes
+
+- 3ceb547: Fix skip switch chain if provide same id as current
+- Updated dependencies [34a23e4]
+- Updated dependencies [3ceb547]
+  - @blocto/sdk@0.6.0-beta.6
+
 ## 1.1.2-beta.5
 
 ### Patch Changes
