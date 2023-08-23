@@ -27,18 +27,6 @@ type BloctoOptions = {
    * https://docs.blocto.app/blocto-sdk/register-app-id
    */
   appId?: string;
-
-  /**
-   * @deprecated Use `Web3Modal.defaultChain` instead.
-   *
-   * The chain ID of the chain to connect to.
-   */
-  chainId?: number;
-
-  /**
-   * Custom RPC endpoint.
-   */
-  rpc?: string;
 };
 
 class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
@@ -65,12 +53,11 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
 
   getProvider({ chainId }: { chainId?: number } = {}): Promise<BloctoProvider> {
     if (!this.#provider) {
-      const { appId, ...rests } = this.options;
-      const _chainId = chainId ?? rests?.chainId ?? this.chains[0]?.id;
+      const { appId } = this.options;
+      const _chainId = chainId ?? this.chains[0]?.id;
       const config: EthereumProviderConfig = {
         chainId: _chainId,
         rpc:
-          rests?.rpc ??
           this.chains.find((x) => x.id === _chainId)?.rpcUrls.default.http?.[0],
       };
       this.#provider = new BloctoSDK({ ethereum: config, appId })?.ethereum;
