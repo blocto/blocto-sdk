@@ -1,5 +1,13 @@
 # @blocto/sdk
 
+## 0.6.0-beta.7
+
+### Patch Changes
+
+- 6e427b1: handle potential undefined when passing unsupported chainId into bloctoSDK
+- 55f3395: Fix go login flow when switching to a different blocto server
+- 494ded1: enhance tx params check
+
 ## 0.6.0-beta.6
 
 ### Minor Changes

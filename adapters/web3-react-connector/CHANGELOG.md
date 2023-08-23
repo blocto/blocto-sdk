@@ -1,5 +1,15 @@
 # @blocto/web3-react-connector
 
+## 1.0.1-beta.7
+
+### Patch Changes
+
+- 55f3395: Fix go login flow when switching to a different blocto server
+- Updated dependencies [6e427b1]
+- Updated dependencies [55f3395]
+- Updated dependencies [494ded1]
+  - @blocto/sdk@0.6.0-beta.7
+
 ## 1.0.1-beta.6
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.5-beta.7
+
+### Patch Changes
+
+- 55f3395: Fix go login flow when switching to a different blocto server
+- Updated dependencies [83eb33d]
+- Updated dependencies [55f3395]
+  - @blocto/wagmi-connector@1.1.2-beta.7
+
 ## 0.2.5-beta.6
 
 ### Patch Changes
