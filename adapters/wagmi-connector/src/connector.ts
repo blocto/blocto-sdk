@@ -147,7 +147,7 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
       await provider.request({
         method: 'wallet_addEthereumChain',
         params: [
-          { chainId: id, rpcUrls: [chain?.rpcUrls.infura?.http[0] ?? ''] },
+          { chainId: id, rpcUrls: chain?.rpcUrls.default.http },
         ],
       });
       await provider.request({
