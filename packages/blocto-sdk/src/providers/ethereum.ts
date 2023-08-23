@@ -111,7 +111,7 @@ export default class EthereumProvider
       network_type,
       blocto_service_environment,
       display_name,
-    } = this._blocto.supportNetworkList[this.networkVersion];
+    } = this._blocto.supportNetworkList[this.networkVersion] ?? {};
     if (!chain_id)
       throw ethErrors.provider.unsupportedMethod(
         `Get support chain failed: ${this.networkVersion} might not be supported yet.`
@@ -703,6 +703,31 @@ export default class EthereumProvider
       );
       this.#getBloctoProperties();
       return null;
+    }
+    // Go login flow when switching to a different blocto server
+    if (
+      switchableNetwork[newChainId].wallet_web_url !==
+      switchableNetwork[oldChainId].wallet_web_url
+    ) {
+      return this.enable()
+        .then(([newAccount]) => {
+          if (newAccount !== oldAccount) {
+            this.eventListeners?.accountsChanged.forEach((listener) =>
+              listener([newAccount])
+            );
+          }
+          this.eventListeners.chainChanged.forEach((listener) =>
+            listener(this.chainId)
+          );
+          return null;
+        })
+        .catch((error) => {
+          this.networkVersion = `${oldChainId}`;
+          this.chainId = `0x${oldChainId.toString(16)}`;
+          this.rpc = switchableNetwork[oldChainId].rpc_url;
+          this.#getBloctoProperties();
+          throw error;
+        });
     }
 
     const switchChainFrame = await this.setIframe(
