@@ -1,5 +1,12 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.5-beta.8
+
+### Patch Changes
+
+- Updated dependencies [bc5cc4b]
+  - @blocto/wagmi-connector@1.2.0-beta.8
+
 ## 0.2.5-beta.7
 
 ### Patch Changes
