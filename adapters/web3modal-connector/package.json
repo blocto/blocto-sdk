@@ -2,7 +2,7 @@
   "name": "@blocto/web3modal-connector",
   "description": "Blocto connector extend from wagmi Connector to use with web3modal",
   "author": "Blocto Wallet",
-  "version": "0.0.0",
+  "version": "0.1.0-beta.0",
   "type": "module",
   "main": "./dist/index.umd.cjs",
   "module": "./dist/index.js",
@@ -41,6 +41,6 @@
     "/dist"
   ],
   "dependencies": {
-    "@blocto/wagmi-connector": "^1.1.1"
+    "@blocto/wagmi-connector": "^1.2.0-beta.8"
   }
 }
