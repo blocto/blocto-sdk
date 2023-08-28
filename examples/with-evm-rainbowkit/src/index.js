@@ -10,7 +10,7 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { configureChains, createConfig, WagmiConfig } from "wagmi";
 
-import { polygonMumbai, polygon, optimism, arbitrum, bsc } from "wagmi/chains";
+import { polygonMumbai, polygon, optimism, arbitrum, bsc, bscTestnet } from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
 import { bloctoWallet } from "@blocto/rainbowkit-connector";
@@ -18,7 +18,7 @@ import { bloctoWallet } from "@blocto/rainbowkit-connector";
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [polygonMumbai, polygon, optimism, arbitrum, bsc],
+  [polygonMumbai, bscTestnet, polygon, optimism, arbitrum, bsc],
   [alchemyProvider({ apiKey: process.env.ALCHEMY_ID || "" }), publicProvider()]
 );
 
