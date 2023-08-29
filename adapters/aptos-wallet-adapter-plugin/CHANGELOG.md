@@ -1,5 +1,29 @@
 # @blocto/aptos-wallet-adapter-plugin
 
+## 0.2.4
+
+### Patch Changes
+
+- Updated dependencies [21097d9]
+- Updated dependencies [e0e8fb7]
+- Updated dependencies [6e427b1]
+- Updated dependencies [34a23e4]
+- Updated dependencies [55f3395]
+- Updated dependencies [3ceb547]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+- Updated dependencies [494ded1]
+  - @blocto/sdk@0.6.0
+
+## 0.2.4-beta.0
+
+### Patch Changes
+
+- Updated dependencies [e0e8fb7]
+  - @blocto/sdk@0.6.0-beta.0
+
 ## 0.2.3
 
 ### Patch Changes

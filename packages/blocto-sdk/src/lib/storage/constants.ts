@@ -8,6 +8,5 @@ export enum KEY_SESSION {
 }
 export enum CHAIN {
   ETHEREUM = 'ethereum',
-  SOLANA = 'solana',
   APTOS = 'aptos',
 }

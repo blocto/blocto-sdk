@@ -1,0 +1,36 @@
+# @blocto/web3modal-connector
+
+## 0.1.0
+
+### Minor Changes
+
+- df576fe: - Adding Package `@blocto/web3modal-connector` to replace Package `@blocto/wagmi-connector`'s support for web3Modal
+  - Removing `BloctoWeb3ModalConfig` exported by Package `@blocto/wagmi-connector`
+  - Removing `BloctoOptions`'s deprecate params `chainId, rpc` from `@blocto/wagmi-connector`
+
+### Patch Changes
+
+- Updated dependencies [21097d9]
+- Updated dependencies [83eb33d]
+- Updated dependencies [e0e8fb7]
+- Updated dependencies [55f3395]
+- Updated dependencies [3ceb547]
+- Updated dependencies [21097d9]
+- Updated dependencies [df576fe]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+  - @blocto/wagmi-connector@1.2.0
+
+## 0.1.0-beta.0
+
+### Minor Changes
+
+- bc5cc4b: - Adding Package `@blocto/web3modal-connector` to replace Package `@blocto/wagmi-connector`'s support for web3Modal
+  - Removing `BloctoWeb3ModalConfig` exported by Package `@blocto/wagmi-connector`
+  - Removing `BloctoOptions`'s deprecate params `chainId, rpc` from `@blocto/wagmi-connector`
+
+### Patch Changes
+
+- Updated dependencies [bc5cc4b]
+  - @blocto/wagmi-connector@1.2.0-beta.8

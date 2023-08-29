@@ -31,7 +31,11 @@ import {
   ETH_SESSION_KEY_MAPPING,
   SDK_VERSION,
 } from '../constants';
-import { isEmail, isValidTransaction, isValidTransactions } from '../lib/is';
+import { isEmail } from '../lib/isEmail';
+import {
+  isValidTransaction,
+  isValidTransactions,
+} from '../lib/isValidTransaction';
 import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
 import { ethErrors } from 'eth-rpc-errors';
 import { isHexString, utf8ToHex } from '../lib/utf8toHex';
@@ -107,7 +111,7 @@ export default class EthereumProvider
       network_type,
       blocto_service_environment,
       display_name,
-    } = this._blocto.supportNetworkList[this.networkVersion];
+    } = this._blocto.supportNetworkList[this.networkVersion] ?? {};
     if (!chain_id)
       throw ethErrors.provider.unsupportedMethod(
         `Get support chain failed: ${this.networkVersion} might not be supported yet.`
@@ -341,27 +345,7 @@ export default class EthereumProvider
         return response.result;
       }
       case 'wallet_switchEthereumChain': {
-        if (!payload?.params?.[0]?.chainId) throw ethErrors.rpc.invalidParams();
-        const newChainId = payload.params[0].chainId;
-        if (!getChainAddress(sessionKey, blockchainName)) {
-          // directly switch network if user is not connected
-          // TODO: add a confirm switch network dialog
-          const phasedChainId = parseChainId(newChainId);
-          if (!switchableNetwork[phasedChainId]) {
-            throw ethErrors.provider.custom({
-              code: 4902, // To-be-standardized "unrecognized chain ID" error
-              message: `Unrecognized chain ID "${newChainId}". Try adding the chain using wallet_addEthereumChain first.`,
-            });
-          }
-          this.networkVersion = `${phasedChainId}`;
-          this.chainId = `0x${phasedChainId.toString(16)}`;
-          this.rpc = switchableNetwork[phasedChainId].rpc_url;
-          this.eventListeners.chainChanged.forEach((listener) =>
-            listener(this.chainId)
-          );
-          return null;
-        }
-        break;
+        return this.handleSwitchChain(payload?.params?.[0]?.chainId);
       }
     }
 
@@ -416,44 +400,6 @@ export default class EthereumProvider
         case 'eth_sendUserOperation':
           result = await this.handleSendUserOperation(payload);
           break;
-        case 'wallet_switchEthereumChain': {
-          if (!payload?.params?.[0]?.chainId) {
-            throw ethErrors.rpc.invalidParams();
-          }
-          const oldAccount = getChainAddress(sessionKey, blockchainName)?.[0];
-          const oldChainId = this.chainId;
-          const newChainId = payload.params[0].chainId;
-          if (!switchableNetwork[parseChainId(newChainId)]) {
-            throw ethErrors.provider.custom({
-              code: 4902, // To-be-standardized "unrecognized chain ID" error
-              message: `Unrecognized chain ID "${parseChainId(
-                payload.params[0].chainId
-              )}". Try adding the chain using wallet_addEthereumChain first.`,
-            });
-          }
-          this.networkVersion = `${parseChainId(newChainId)}`;
-          this.chainId = `0x${parseChainId(newChainId).toString(16)}`;
-          this.rpc = switchableNetwork[this.networkVersion].rpc_url;
-          await this.enable()
-            .then(([newAccount]) => {
-              if (newAccount !== oldAccount) {
-                this.eventListeners?.accountsChanged.forEach((listener) =>
-                  listener([newAccount])
-                );
-              }
-              this.eventListeners.chainChanged.forEach((listener) =>
-                listener(this.chainId)
-              );
-              result = null;
-            })
-            .catch((error) => {
-              this.networkVersion = `${parseChainId(oldChainId)}`;
-              this.chainId = `0x${parseChainId(oldChainId).toString(16)}`;
-              this.rpc = switchableNetwork[this.networkVersion].rpc_url;
-              throw error;
-            });
-          break;
-        }
         case 'eth_estimateUserOperationGas':
         case 'eth_getUserOperationByHash':
         case 'eth_getUserOperationReceipt':
@@ -561,7 +507,10 @@ export default class EthereumProvider
     );
   }
 
-  async setIframe(url: string): Promise<HTMLIFrameElement> {
+  async setIframe(
+    url: string,
+    blockchain?: string
+  ): Promise<HTMLIFrameElement> {
     if (typeof window === 'undefined') {
       throw ethErrors.provider.custom({
         code: 1001,
@@ -570,7 +519,7 @@ export default class EthereumProvider
     }
     const { walletServer, blockchainName } = await this.#getBloctoProperties();
     const frame = createFrame(
-      `${walletServer}/${this.appId}/${blockchainName}${url}`
+      `${walletServer}/${this.appId}/${blockchain || blockchainName}${url}`
     );
     attachFrame(frame);
     return frame;
@@ -720,16 +669,147 @@ export default class EthereumProvider
     return this.responseListener(signFrame, 'signature');
   }
 
-  async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
-    this.#checkNetworkMatched();
-    if (!isValidTransaction(payload.params?.[0])) {
+  private async handleSwitchChain(
+    targetChainId: string | number
+  ): Promise<null> {
+    if (!targetChainId) {
       throw ethErrors.rpc.invalidParams();
     }
-    const { authorizationId } = await this.bloctoApi<{
-      authorizationId: string;
-    }>(`/authz`, { method: 'POST', body: JSON.stringify(payload.params) });
-    const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
-    return this.responseListener(authzFrame, 'txHash');
+    const {
+      walletServer,
+      blockchainName,
+      sessionKey,
+      switchableNetwork,
+      supportNetworkList,
+    } = await this.#getBloctoProperties();
+    const oldAccount = getChainAddress(sessionKey, blockchainName)?.[0];
+    const oldChainId = parseChainId(this.chainId);
+    const newChainId = parseChainId(targetChainId);
+    if (oldChainId === newChainId) {
+      return null;
+    }
+    if (!switchableNetwork[newChainId]) {
+      throw ethErrors.provider.custom({
+        code: 4902, // To-be-standardized "unrecognized chain ID" error
+        message: `Unrecognized chain ID "${newChainId}". Try adding the chain using wallet_addEthereumChain first.`,
+      });
+    }
+    this.networkVersion = `${newChainId}`;
+    this.chainId = `0x${newChainId.toString(16)}`;
+    this.rpc = switchableNetwork[newChainId].rpc_url;
+    if (!oldAccount) {
+      this.eventListeners?.chainChanged.forEach((listener) =>
+        listener(this.chainId)
+      );
+      this.#getBloctoProperties();
+      return null;
+    }
+    // Go login flow when switching to a different blocto server
+    if (
+      switchableNetwork[newChainId].wallet_web_url !==
+      switchableNetwork[oldChainId].wallet_web_url
+    ) {
+      return this.enable()
+        .then(([newAccount]) => {
+          if (newAccount !== oldAccount) {
+            this.eventListeners?.accountsChanged.forEach((listener) =>
+              listener([newAccount])
+            );
+          }
+          this.eventListeners.chainChanged.forEach((listener) =>
+            listener(this.chainId)
+          );
+          return null;
+        })
+        .catch((error) => {
+          this.networkVersion = `${oldChainId}`;
+          this.chainId = `0x${oldChainId.toString(16)}`;
+          this.rpc = switchableNetwork[oldChainId].rpc_url;
+          this.#getBloctoProperties();
+          throw error;
+        });
+    }
+
+    const switchChainFrame = await this.setIframe(
+      `/switch-chain?to=${switchableNetwork[newChainId].name}`,
+      switchableNetwork[oldChainId].name
+    );
+    return new Promise((resolve, reject) => {
+      addSelfRemovableHandler(
+        'message',
+        (event: Event, removeListener: () => void) => {
+          const e = event as MessageEvent;
+          if (e.origin === walletServer) {
+            if (e.data.type === 'ETH:FRAME:RESPONSE') {
+              removeListener();
+              detatchFrame(switchChainFrame);
+              if (e.data?.addr && oldAccount) {
+                setAccountStorage(
+                  sessionKey,
+                  {
+                    code: e.data?.code,
+                    connected: true,
+                    accounts: {
+                      [switchableNetwork[newChainId].name]: [e.data.addr],
+                    },
+                  },
+                  e.data?.exp
+                );
+                if (e.data.addr !== oldAccount) {
+                  this.eventListeners?.accountsChanged.forEach((listener) =>
+                    listener([e.data.addr])
+                  );
+                }
+              }
+              this.eventListeners?.chainChanged.forEach((listener) =>
+                listener(this.chainId)
+              );
+              this.#getBloctoProperties();
+              resolve(null);
+            }
+
+            if (e.data.type === 'ETH:FRAME:CLOSE') {
+              removeListener();
+              detatchFrame(switchChainFrame);
+              if (e.data?.hasApprovedSwitchChain) {
+                this.eventListeners?.chainChanged.forEach((listener) =>
+                  listener(this.chainId)
+                );
+                Object.values(supportNetworkList).map(
+                  ({ name, blocto_service_environment }) => {
+                    if (
+                      sessionKey ===
+                      ETH_SESSION_KEY_MAPPING[blocto_service_environment]
+                    ) {
+                      removeChainAddress(sessionKey, name);
+                    }
+                  }
+                );
+                this.eventListeners?.disconnect.forEach((listener) =>
+                  listener(ethErrors.provider.disconnected())
+                );
+                this.#getBloctoProperties();
+                resolve(null);
+              } else {
+                this.networkVersion = `${oldChainId}`;
+                this.chainId = `0x${oldChainId.toString(16)}`;
+                this.rpc = switchableNetwork[oldChainId].rpc_url;
+                reject(ethErrors.provider.userRejectedRequest());
+              }
+            }
+          }
+        }
+      );
+    });
+  }
+
+  async handleSendTransaction(payload: EIP1193RequestPayload): Promise<string> {
+    this.#checkNetworkMatched();
+    const { isValid, invalidMsg } = isValidTransaction(payload.params?.[0]);
+    if (!isValid) {
+      throw ethErrors.rpc.invalidParams(invalidMsg);
+    }
+    return this.#createAuthzFrame(payload.params);
   }
 
   async handleSendBatchTransaction(
@@ -746,11 +826,20 @@ export default class EthereumProvider
     const formatParams = extractParams(payload.params as Array<any>);
     const copyPayload = { ...payload, params: formatParams };
 
-    if (!isValidTransactions(copyPayload.params)) {
-      throw ethErrors.rpc.invalidParams();
+    const { isValid, invalidMsg } = isValidTransactions(copyPayload.params);
+    if (!isValid) {
+      throw ethErrors.rpc.invalidParams(invalidMsg);
     }
 
-    return this.handleSendTransaction(copyPayload);
+    return this.#createAuthzFrame(copyPayload.params);
+  }
+
+  async #createAuthzFrame(params: EIP1193RequestPayload['params']) {
+    const { authorizationId } = await this.bloctoApi<{
+      authorizationId: string;
+    }>(`/authz`, { method: 'POST', body: JSON.stringify(params) });
+    const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
+    return this.responseListener(authzFrame, 'txHash');
   }
 
   async handleSendUserOperation(
@@ -782,8 +871,17 @@ export default class EthereumProvider
     if (existedSDK && existedSDK.isBlocto) {
       return existedSDK.disconnect();
     }
-    const { sessionKey, blockchainName } = await this.#getBloctoProperties();
-    removeChainAddress(sessionKey, blockchainName);
+    const { sessionKey, supportNetworkList } =
+      await this.#getBloctoProperties();
+    Object.values(supportNetworkList).map(
+      ({ name, blocto_service_environment }) => {
+        if (
+          sessionKey === ETH_SESSION_KEY_MAPPING[blocto_service_environment]
+        ) {
+          removeChainAddress(sessionKey, name);
+        }
+      }
+    );
     this.eventListeners?.disconnect.forEach((listener) =>
       listener(ethErrors.provider.disconnected())
     );

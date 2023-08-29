@@ -23,6 +23,7 @@ There are some adapters to make it easier to integrate:
 |[@blocto/web3-react-connector](./adapters/web3-react-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/web3-react-connector/latest)](https://www.npmjs.com/package/@blocto/web3-react-connector)|
 |[@blocto/wagmi-connector](./adapters/wagmi-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/wagmi-connector/latest)](https://www.npmjs.com/package/@blocto/wagmi-connector)|
 |[@blocto/rainbowkit-connector](./adapters/rainbowkit-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/rainbowkit-connector/latest)](https://www.npmjs.com/package/@blocto/rainbowkit-connector)|
+|[@blocto/web3modal-connector](./adapters/web3modal-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/web3modal-connector/latest)](https://www.npmjs.com/package/@blocto/web3modal-connector)|
 
 ## What's inside?
 

@@ -1,5 +1,97 @@
 # @blocto/web3-react-connector
 
+## 1.0.1
+
+### Patch Changes
+
+- 21097d9: Fix switch chain is connected logic
+- e0e8fb7: Add switch chain hint ui for evm-provider
+- 55f3395: Fix go login flow when switching to a different blocto server
+- 3ceb547: Fix skip switch chain if provide same id as current
+- 21097d9: Fix disconnect all evm chains when disconnect
+- 21097d9: Fix wrong switch chain url
+- 21097d9: Fix switch chain login logic
+- 21097d9: Fix emit disconnect event when switch chain approved but failed
+- Updated dependencies [21097d9]
+- Updated dependencies [e0e8fb7]
+- Updated dependencies [6e427b1]
+- Updated dependencies [34a23e4]
+- Updated dependencies [55f3395]
+- Updated dependencies [3ceb547]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+- Updated dependencies [494ded1]
+  - @blocto/sdk@0.6.0
+
+## 1.0.1-beta.7
+
+### Patch Changes
+
+- 55f3395: Fix go login flow when switching to a different blocto server
+- Updated dependencies [6e427b1]
+- Updated dependencies [55f3395]
+- Updated dependencies [494ded1]
+  - @blocto/sdk@0.6.0-beta.7
+
+## 1.0.1-beta.6
+
+### Patch Changes
+
+- 3ceb547: Fix skip switch chain if provide same id as current
+- Updated dependencies [34a23e4]
+- Updated dependencies [3ceb547]
+  - @blocto/sdk@0.6.0-beta.6
+
+## 1.0.1-beta.5
+
+### Patch Changes
+
+- 39754e5: Fix disconnect all evm chains when disconnect
+- Updated dependencies [39754e5]
+  - @blocto/sdk@0.6.0-beta.5
+
+## 1.0.1-beta.4
+
+### Patch Changes
+
+- 6acf18d: Fix switch chain is connected logic
+- Updated dependencies [6acf18d]
+  - @blocto/sdk@0.6.0-beta.4
+
+## 1.0.1-beta.3
+
+### Patch Changes
+
+- 84d6727: Fix emit disconnect event when switch chain approved but failed
+- Updated dependencies [84d6727]
+  - @blocto/sdk@0.6.0-beta.3
+
+## 1.0.1-beta.2
+
+### Patch Changes
+
+- a0cc54c: Fix switch chain login logic
+- Updated dependencies [a0cc54c]
+  - @blocto/sdk@0.6.0-beta.2
+
+## 1.0.1-beta.1
+
+### Patch Changes
+
+- 0d5bfd5: Fix wrong switch chain url
+- Updated dependencies [0d5bfd5]
+  - @blocto/sdk@0.6.0-beta.1
+
+## 1.0.1-beta.0
+
+### Patch Changes
+
+- e0e8fb7: Add switch chain hint ui for evm-provider
+- Updated dependencies [e0e8fb7]
+  - @blocto/sdk@0.6.0-beta.0
+
 ## 1.0.0
 
 ### Major Changes
