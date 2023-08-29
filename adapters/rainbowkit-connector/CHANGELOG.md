@@ -1,5 +1,29 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.5
+
+### Patch Changes
+
+- 21097d9: Fix switch chain is connected logic
+- e0e8fb7: Add switch chain hint ui for evm-provider
+- 55f3395: Fix go login flow when switching to a different blocto server
+- 3ceb547: Fix skip switch chain if provide same id as current
+- 21097d9: Fix disconnect all evm chains when disconnect
+- 21097d9: Fix wrong switch chain url
+- 21097d9: Fix switch chain login logic
+- 21097d9: Fix emit disconnect event when switch chain approved but failed
+- Updated dependencies [21097d9]
+- Updated dependencies [83eb33d]
+- Updated dependencies [e0e8fb7]
+- Updated dependencies [55f3395]
+- Updated dependencies [3ceb547]
+- Updated dependencies [21097d9]
+- Updated dependencies [df576fe]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+- Updated dependencies [21097d9]
+  - @blocto/wagmi-connector@1.2.0
+
 ## 0.2.5-beta.8
 
 ### Patch Changes

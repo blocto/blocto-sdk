@@ -1,5 +1,24 @@
 # @blocto/sdk
 
+## 0.6.0
+
+### Minor Changes
+
+- e0e8fb7: Add switch chain hint ui for evm-provider
+- 34a23e4: DEPRECATED: Solana provider no longer supported and removed.
+
+### Patch Changes
+
+- 21097d9: Fix switch chain is connected logic
+- 6e427b1: handle potential undefined when passing unsupported chainId into bloctoSDK
+- 55f3395: Fix go login flow when switching to a different blocto server
+- 3ceb547: Fix skip switch chain if provide same id as current
+- 21097d9: Fix disconnect all evm chains when disconnect
+- 21097d9: Fix wrong switch chain url
+- 21097d9: Fix switch chain login logic
+- 21097d9: Fix emit disconnect event when switch chain approved but failed
+- 494ded1: enhance tx params check
+
 ## 0.6.0-beta.7
 
 ### Patch Changes
