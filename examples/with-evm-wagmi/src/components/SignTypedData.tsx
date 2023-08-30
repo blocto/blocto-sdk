@@ -1,6 +1,4 @@
-import { useEffect, useState } from 'react'
-import { recoverTypedDataAddress } from 'viem'
-import { type Address, useSignTypedData, useNetwork } from 'wagmi'
+import { useSignTypedData, useNetwork } from 'wagmi'
 
 const types = {
   Person: [
@@ -40,26 +38,6 @@ export function SignTypedData() {
     primaryType: 'Mail',
   })
 
-  const [recoveredAddress, setRecoveredAddress] = useState<Address>()
-  useEffect(() => {
-    if (!data) return
-    ;(async () => {
-      setRecoveredAddress(
-        await recoverTypedDataAddress({
-          domain: {
-            name: 'Ether Mail',
-            version: '1',
-            chainId: activeChain?.id,
-            verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-          },
-          types,
-          message,
-          primaryType: 'Mail',
-          signature: data,
-        }),
-      )
-    })()
-  }, [activeChain?.id, data])
 
   return (
     <>
@@ -68,10 +46,7 @@ export function SignTypedData() {
       </button>
 
       {data && (
-        <div>
-          <div>Signature: {data}</div>
-          <div>Recovered address {recoveredAddress}</div>
-        </div>
+        <div>Signature: {data}</div>
       )}
       {error && <div>Error: {error?.message}</div>}
     </>
