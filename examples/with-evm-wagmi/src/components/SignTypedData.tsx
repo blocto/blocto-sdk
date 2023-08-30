@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react'
 import { recoverTypedDataAddress } from 'viem'
-import { type Address, useSignTypedData } from 'wagmi'
-
-const domain = {
-  name: 'Ether Mail',
-  version: '1',
-  chainId: 1,
-  verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
-} as const
+import { type Address, useSignTypedData, useNetwork } from 'wagmi'
 
 const types = {
   Person: [
@@ -34,8 +27,14 @@ const message = {
 } as const
 
 export function SignTypedData() {
+  const { chain: activeChain } = useNetwork();
   const { data, error, isLoading, signTypedData } = useSignTypedData({
-    domain,
+    domain: {
+      name: 'Ether Mail',
+      version: '1',
+      chainId: activeChain?.id,
+      verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+    },
     types,
     message,
     primaryType: 'Mail',
@@ -47,7 +46,12 @@ export function SignTypedData() {
     ;(async () => {
       setRecoveredAddress(
         await recoverTypedDataAddress({
-          domain,
+          domain: {
+            name: 'Ether Mail',
+            version: '1',
+            chainId: activeChain?.id,
+            verifyingContract: '0xCcCCccccCCCCcCCCCCCcCcCccCcCCCcCcccccccC',
+          },
           types,
           message,
           primaryType: 'Mail',
@@ -55,7 +59,7 @@ export function SignTypedData() {
         }),
       )
     })()
-  }, [data])
+  }, [activeChain?.id, data])
 
   return (
     <>
