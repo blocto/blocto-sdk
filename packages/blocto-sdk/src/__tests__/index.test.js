@@ -43,8 +43,10 @@ beforeAll(() => {
   });
   setAccountStorage('BLOCTO_SDK', {
     code: '123',
-    connected: true,
     accounts: {
+      aptos: ['0x123'],
+    },
+    evm: {
       bsc: ['0x123'],
     },
   });

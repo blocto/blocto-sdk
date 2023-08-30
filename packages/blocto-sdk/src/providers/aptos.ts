@@ -19,8 +19,7 @@ import {
   removeChainAddress,
   getChainAddress,
   setChainAddress,
-  KEY_SESSION,
-  CHAIN,
+  removeAllEvmAddress,
 } from '../lib/storage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
@@ -30,6 +29,8 @@ import {
   DEFAULT_APP_ID,
   APT_SESSION_KEY_MAPPING,
   SDK_VERSION,
+  KEY_SESSION,
+  CHAIN,
 } from '../constants';
 
 const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
@@ -105,7 +106,7 @@ export default class AptosProvider
   }
 
   async isConnected(): Promise<boolean> {
-    return !!getAccountStorage(this.sessionKey)?.code;
+    return !!getChainAddress(this.sessionKey, CHAIN.APTOS)?.length;
   }
 
   async signTransaction(
@@ -323,7 +324,6 @@ export default class AptosProvider
                 this.sessionKey,
                 {
                   code: e.data.code,
-                  connected: true,
                   accounts: {
                     [CHAIN.APTOS]: [e.data.addr],
                   },

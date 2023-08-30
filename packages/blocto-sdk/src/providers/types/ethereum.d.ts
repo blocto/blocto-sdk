@@ -1,8 +1,7 @@
 import { IEthereumProvider } from 'eip1193-provider';
-import { BaseConfig } from '../../constants';
+import { BaseConfig, KEY_SESSION } from '../../constants';
 import BloctoProviderInterface from './blocto.d';
 import { EvmSupportMapping } from '../../lib/getEvmSupport';
-import { KEY_SESSION } from '../../lib/storage';
 
 export interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null;
