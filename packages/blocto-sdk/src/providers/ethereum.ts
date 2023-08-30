@@ -152,7 +152,11 @@ export default class EthereumProvider
       display_name,
       network_type,
       blocto_service_environment,
-    } = supportNetworkList[chainId];
+    } = supportNetworkList[chainId] ?? {};
+    if (!chain_id)
+      throw ethErrors.provider.unsupportedMethod(
+        `Get support chain failed: ${chainId} might not be supported yet.`
+      );
     const wallet_web_url =
       ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment];
     this._blocto.switchableNetwork[chain_id] = {
