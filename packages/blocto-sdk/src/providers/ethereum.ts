@@ -16,10 +16,10 @@ import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   setAccountStorage,
   getAccountStorage,
+  getEvmAddress,
+  setEvmAddress,
+  removeAllEvmAddress,
   removeChainAddress,
-  getChainAddress,
-  setChainAddress,
-  KEY_SESSION,
 } from '../lib/storage';
 import responseSessionGuard, {
   ICustomError,
@@ -30,6 +30,8 @@ import {
   DEFAULT_APP_ID,
   ETH_SESSION_KEY_MAPPING,
   SDK_VERSION,
+  KEY_SESSION,
+  CHAIN,
 } from '../constants';
 import { isEmail } from '../lib/isEmail';
 import {
@@ -354,7 +356,7 @@ export default class EthereumProvider
     }
 
     // Method that requires user to be connected
-    if (!getChainAddress(sessionKey, blockchainName)) {
+    if (!getEvmAddress(sessionKey, blockchainName)) {
       const email = payload?.params?.[0];
       if (payload.method === 'eth_requestAccounts' && isEmail(email)) {
         await this.enable(email);
@@ -370,10 +372,10 @@ export default class EthereumProvider
           await this.fetchAccounts();
         // eslint-disable-next-line
         case 'eth_accounts':
-          result = getChainAddress(sessionKey, blockchainName);
+          result = getEvmAddress(sessionKey, blockchainName);
           break;
         case 'eth_coinbase': {
-          result = getChainAddress(sessionKey, blockchainName)?.[0];
+          result = getEvmAddress(sessionKey, blockchainName)?.[0];
           break;
         }
         case 'eth_signTypedData_v3':
@@ -546,7 +548,7 @@ export default class EthereumProvider
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: this.chainId }],
         });
-        setChainAddress(sessionKey, blockchainName, [existedSDK.address]);
+        setEvmAddress(sessionKey, blockchainName, [existedSDK.address]);
       }
       return new Promise((resolve, reject) =>
         // add a small delay to make sure the network has been switched
@@ -554,7 +556,7 @@ export default class EthereumProvider
       );
     }
 
-    const address = getChainAddress(sessionKey, blockchainName);
+    const address = getEvmAddress(sessionKey, blockchainName);
     if (address) {
       return new Promise((resolve) => {
         resolve(address);
@@ -585,13 +587,28 @@ export default class EthereumProvider
                 sessionKey,
                 {
                   code: e.data.code,
-                  connected: true,
-                  accounts: {
+                  evm: {
                     [blockchainName]: [e.data.addr],
                   },
                 },
                 e.data.exp
               );
+              if (!e.data?.wasSameAccount) {
+                // remove all other chain address
+                removeChainAddress(sessionKey, CHAIN.APTOS);
+                postMessage({
+                  originChain: CHAIN.ETHEREUM,
+                  type: 'BLOCTO_SDK:ACCOUNT_CHANGED',
+                });
+              }
+              addEventListener('message', (event: MessageEvent) => {
+                if (
+                  event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
+                  event.data?.originChain !== CHAIN.ETHEREUM
+                ) {
+                  this.handleDisconnect();
+                }
+              });
               resolve([e.data.addr]);
             }
 
@@ -610,7 +627,7 @@ export default class EthereumProvider
     this.#checkNetworkMatched();
     const { blockchainName, sessionKey } = await this.#getBloctoProperties();
     const { accounts } = await this.bloctoApi<{ accounts: [] }>(`/accounts`);
-    setChainAddress(sessionKey, blockchainName, accounts);
+    setEvmAddress(sessionKey, blockchainName, accounts);
     return accounts;
   }
 
@@ -679,14 +696,9 @@ export default class EthereumProvider
     if (!targetChainId) {
       throw ethErrors.rpc.invalidParams();
     }
-    const {
-      walletServer,
-      blockchainName,
-      sessionKey,
-      switchableNetwork,
-      supportNetworkList,
-    } = await this.#getBloctoProperties();
-    const oldAccount = getChainAddress(sessionKey, blockchainName)?.[0];
+    const { walletServer, blockchainName, sessionKey, switchableNetwork } =
+      await this.#getBloctoProperties();
+    const oldAccount = getEvmAddress(sessionKey, blockchainName)?.[0];
     const oldChainId = parseChainId(this.chainId);
     const newChainId = parseChainId(targetChainId);
     if (oldChainId === newChainId) {
@@ -752,8 +764,7 @@ export default class EthereumProvider
                   sessionKey,
                   {
                     code: e.data?.code,
-                    connected: true,
-                    accounts: {
+                    evm: {
                       [switchableNetwork[newChainId].name]: [e.data.addr],
                     },
                   },
@@ -779,16 +790,7 @@ export default class EthereumProvider
                 this.eventListeners?.chainChanged.forEach((listener) =>
                   listener(this.chainId)
                 );
-                Object.values(supportNetworkList).map(
-                  ({ name, blocto_service_environment }) => {
-                    if (
-                      sessionKey ===
-                      ETH_SESSION_KEY_MAPPING[blocto_service_environment]
-                    ) {
-                      removeChainAddress(sessionKey, name);
-                    }
-                  }
-                );
+                removeAllEvmAddress(sessionKey);
                 this.eventListeners?.disconnect.forEach((listener) =>
                   listener(ethErrors.provider.disconnected())
                 );
@@ -875,17 +877,8 @@ export default class EthereumProvider
     if (existedSDK && existedSDK.isBlocto) {
       return existedSDK.disconnect();
     }
-    const { sessionKey, supportNetworkList } =
-      await this.#getBloctoProperties();
-    Object.values(supportNetworkList).map(
-      ({ name, blocto_service_environment }) => {
-        if (
-          sessionKey === ETH_SESSION_KEY_MAPPING[blocto_service_environment]
-        ) {
-          removeChainAddress(sessionKey, name);
-        }
-      }
-    );
+    const { sessionKey } = await this.#getBloctoProperties();
+    removeAllEvmAddress(sessionKey);
     this.eventListeners?.disconnect.forEach((listener) =>
       listener(ethErrors.provider.disconnected())
     );

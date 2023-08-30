@@ -1,11 +1,5 @@
 import { EIP1193Provider } from 'eip1193-provider';
 
-export interface ProviderSession {
-  connected?: boolean;
-  code?: string | null;
-  accounts: Record<string, string[] | undefined>;
-}
-
 declare interface BloctoProviderInterface extends EIP1193Provider {
   isBlocto: boolean;
   isConnecting: boolean;
