@@ -134,6 +134,12 @@ export default class AptosProvider
       return;
     }
     removeChainAddress(this.sessionKey, CHAIN.APTOS);
+    this.eventListeners?.disconnect.forEach((listener) =>
+      listener({
+        code: 4900,
+        message: 'Wallet disconnected',
+      })
+    );
   }
 
   async signAndSubmitTransaction(
@@ -330,6 +336,22 @@ export default class AptosProvider
                 },
                 e.data.exp
               );
+              if (!e.data?.wasSameAccount) {
+                // remove all other chain address
+                removeAllEvmAddress(this.sessionKey);
+                postMessage({
+                  originChain: CHAIN.APTOS,
+                  type: 'BLOCTO_SDK:ACCOUNT_CHANGED',
+                });
+              }
+              addEventListener('message', (event: MessageEvent) => {
+                if (
+                  event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
+                  event.data?.originChain !== CHAIN.APTOS
+                ) {
+                  this.disconnect();
+                }
+              });
 
               if (getChainAddress(this.sessionKey, CHAIN.APTOS)?.length) {
                 try {

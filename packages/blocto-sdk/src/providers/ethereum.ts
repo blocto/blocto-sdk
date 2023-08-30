@@ -593,6 +593,22 @@ export default class EthereumProvider
                 },
                 e.data.exp
               );
+              if (!e.data?.wasSameAccount) {
+                // remove all other chain address
+                removeChainAddress(sessionKey, CHAIN.APTOS);
+                postMessage({
+                  originChain: CHAIN.ETHEREUM,
+                  type: 'BLOCTO_SDK:ACCOUNT_CHANGED',
+                });
+              }
+              addEventListener('message', (event: MessageEvent) => {
+                if (
+                  event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
+                  event.data?.originChain !== CHAIN.ETHEREUM
+                ) {
+                  this.handleDisconnect();
+                }
+              });
               resolve([e.data.addr]);
             }
 
