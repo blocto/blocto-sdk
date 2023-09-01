@@ -45,19 +45,19 @@ jobs:
           commit_options: '--no-verify'
 
       - name: Create Release Pull Request to main branch
-        uses: repo-sync/pull-request@v2
+        uses: peter-evans/create-pull-request@v5
         with:
-          source_branch: ${{ github.head_ref }}
-          destination_branch: 'main'
-          pr_title: 'Release: Merge to publish new version to npm'
-          pr_body: |
+          token: ${{ secrets.DEV_GITHUB_TOKEN }} 
+          branch: 'main'
+          title: 'Release: Merge to publish new version to npm'
+          body: |
             Please review and merge this Pull Request.
             Caution: Merge to main branch will trigger publish to npm.
 
       - name: Create Release Pull Request to develop branch
-        uses: repo-sync/pull-request@v2
+        uses: peter-evans/create-pull-request@v5
         with:
-          source_branch: ${{ github.head_ref }}
-          destination_branch: 'develop'
-          pr_title: 'Release: Merge back new version to develop'
-          pr_body: 'Merge new prod release back to develop'
+          token: ${{ secrets.DEV_GITHUB_TOKEN }} 
+          branch: 'develop'
+          title: 'Release: Merge back new version to develop'
+          body: 'Merge new prod release back to develop'
