@@ -353,6 +353,9 @@ export default class EthereumProvider
       case 'wallet_switchEthereumChain': {
         return this.handleSwitchChain(payload?.params?.[0]?.chainId);
       }
+      case 'wallet_disconnect': {
+        return this.handleDisconnect();
+      }
     }
 
     // Method that requires user to be connected
@@ -384,11 +387,6 @@ export default class EthereumProvider
         case 'personal_sign':
         case 'eth_sign': {
           result = await this.handleSign(payload);
-          break;
-        }
-        case 'wallet_disconnect': {
-          this.handleDisconnect();
-          result = null;
           break;
         }
         case 'eth_sendTransaction':
