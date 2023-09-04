@@ -1,5 +1,18 @@
 # @blocto/sdk
 
+## 0.7.0-beta.0
+
+### Minor Changes
+
+- a3b0243: Disconnect other provider when receive account changed event
+
+### Patch Changes
+
+- b40fbed: Fix skip calling enable() when request wallet_disconnect method
+- 4c769f9: Clear error message when add not supported chain
+- bbf2160: Make loadSwitchableNetwork rpcUrls optional
+- 1288bd1: Seperate evm accounts from other chains in storage data structure
+
 ## 0.6.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@blocto/sdk",
-  "version": "0.6.0",
+  "version": "0.7.0-beta.0",
   "repository": "git@github.com:portto/blocto-sdk.git",
   "author": "Chiaki.C",
   "license": "MIT",
