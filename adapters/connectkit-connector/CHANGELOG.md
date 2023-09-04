@@ -1,5 +1,20 @@
 # @blocto/connectkit-connector
 
+## 0.1.2-beta.0
+
+### Patch Changes
+
+- b40fbed: Fix skip calling enable() when request wallet_disconnect method
+- 4c769f9: Clear error message when add not supported chain
+- bbf2160: Make loadSwitchableNetwork rpcUrls optional
+- a3b0243: Seperate evm accounts from other chains in storage data structure
+- Updated dependencies [b40fbed]
+- Updated dependencies [4c769f9]
+- Updated dependencies [bbf2160]
+- Updated dependencies [a3b0243]
+- Updated dependencies [1288bd1]
+  - @blocto/sdk@0.7.0-beta.0
+
 ## 0.1.1
 
 ### Patch Changes
