@@ -77,13 +77,20 @@ export class BloctoConnector extends Connector {
         accounts,
       });
     } else if (typeof desiredChainIdOrChainParameters === 'number') {
-      await this.provider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: desiredChainId }],
-      });
+      await this.provider
+        .request({
+          method: 'wallet_addEthereumChain',
+          params: [{ chainId: desiredChainId }],
+        })
+        .then(() => {
+          this.provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: desiredChainId }],
+          });
+        });
       this.activate(desiredChainId);
     } else {
-      // Try to switch chain
+      // AddEthereumChainParameter
       await this.provider
         .request({
           method: 'wallet_addEthereumChain',
