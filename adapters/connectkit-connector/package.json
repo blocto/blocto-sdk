@@ -1,8 +1,8 @@
 {
   "name": "@blocto/connectkit-connector",
   "description": "blocto wallet connector to use with connectkit",
-  "author": "Calvin Chang",
-  "version": "0.1.2-beta.1",
+  "author": "Blocto Wallet",
+  "version": "0.1.1",
   "type": "module",
   "main": "./dist/index.umd.cjs",
   "module": "./dist/index.js",
