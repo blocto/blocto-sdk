@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.7.0-beta.1
+
+### Patch Changes
+
+- 2515a8f: Fix wrongly disconnect chain when account not changed
+
 ## 0.7.0-beta.0
 
 ### Minor Changes

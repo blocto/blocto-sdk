@@ -1,5 +1,13 @@
 # @blocto/web3modal-connector
 
+## 0.1.1-beta.1
+
+### Patch Changes
+
+- 2515a8f: Fix wrongly disconnect chain when account not changed
+- Updated dependencies [2515a8f]
+  - @blocto/wagmi-connector@1.2.1-beta.1
+
 ## 0.1.1-beta.0
 
 ### Patch Changes

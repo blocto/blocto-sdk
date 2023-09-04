@@ -1,5 +1,13 @@
 # @blocto/connectkit-connector
 
+## 0.1.2-beta.1
+
+### Patch Changes
+
+- 2515a8f: Fix wrongly disconnect chain when account not changed
+- Updated dependencies [2515a8f]
+  - @blocto/sdk@0.7.0-beta.1
+
 ## 0.1.2-beta.0
 
 ### Patch Changes
