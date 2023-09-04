@@ -4,7 +4,9 @@ import { TESTNET_CHAINS } from '../../chains'
 import { bloctoSDK, hooks } from '../../connectors/bloctoSdk'
 import { Card } from '../Card'
 
-const CHAIN_IDS = Object.keys(TESTNET_CHAINS).map(Number)
+const CHAIN_IDS = Object.keys(TESTNET_CHAINS)
+  .map(Number)
+  .filter((chainId) => chainId !== 44787);
 
 const { useChainId, useAccounts, useIsActivating, useIsActive, useProvider, useENSNames } = hooks
 
