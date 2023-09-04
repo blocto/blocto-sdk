@@ -5,7 +5,7 @@ import { BloctoConnector } from '@blocto/wagmi-connector';
 import { publicProvider } from 'wagmi/providers/public'
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [arbitrumGoerli, polygonMumbai],
+  [polygonMumbai, arbitrumGoerli],
   [
     publicProvider(),
   ],
