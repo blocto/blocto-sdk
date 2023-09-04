@@ -892,11 +892,14 @@ export default class EthereumProvider
     if (networkList?.length) {
       const listToAdd = networkList.map(({ chainId, rpcUrls }) => {
         if (!chainId) throw ethErrors.rpc.invalidParams('Empty chainId');
-        if (!rpcUrls?.length)
-          throw ethErrors.rpc.invalidParams('Empty rpcUrls');
+        const parsedChainId: `${number}` = `${parseChainId(chainId)}`;
+        // skip if chainId already exists
+        if (this._blocto.switchableNetwork[parsedChainId]) return null;
+        const parsedRpc = rpcUrls?.[0] || ETH_RPC_LIST[parsedChainId];
+        if (!parsedRpc) throw ethErrors.rpc.invalidParams('rpcUrls required');
         return this.#addToSwitchable({
-          chainId: `${parseChainId(chainId)}`,
-          rpcUrls,
+          chainId: parsedChainId,
+          rpcUrls: [parsedRpc],
         });
       });
       return Promise.all(listToAdd).then(() => null);
