@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { supportedConnectors } from 'connectkit';
-import { BloctoOptions, default as BloctoConnector } from './bloctoConnector';
+export { BloctoConnector } from '@blocto/wagmi-connector';
 import { BLOCTO_CONFIG } from './constants';
 import { createConfig } from 'wagmi';
 
@@ -41,7 +41,5 @@ const integrateBloctoConfig: IntegrateBloctoConfig = (
   return config;
 };
 
-export { default as BloctoConnector } from './bloctoConnector';
-export type * from './bloctoConnector';
 export { integrateBloctoConfig };
 export type { Options };
