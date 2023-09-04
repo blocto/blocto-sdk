@@ -19,7 +19,6 @@ import {
   getEvmAddress,
   setEvmAddress,
   removeAllEvmAddress,
-  removeChainAddress,
 } from '../lib/storage';
 import responseSessionGuard, {
   ICustomError,
@@ -178,6 +177,15 @@ export default class EthereumProvider
       parseChainId(existedSDK.chainId) !== parseChainId(this.chainId)
     ) {
       throw ethErrors.provider.chainDisconnected();
+    }
+  }
+
+  #onAccountChanged(event: MessageEvent): void {
+    if (
+      event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
+      event.data?.originChain !== CHAIN.ETHEREUM
+    ) {
+      this.handleDisconnect();
     }
   }
 
@@ -591,22 +599,13 @@ export default class EthereumProvider
                 },
                 e.data.exp
               );
-              if (!e.data?.wasSameAccount) {
-                // remove all other chain address
-                removeChainAddress(sessionKey, CHAIN.APTOS);
+              if (e.data?.isAccountChanged) {
                 postMessage({
                   originChain: CHAIN.ETHEREUM,
                   type: 'BLOCTO_SDK:ACCOUNT_CHANGED',
                 });
               }
-              addEventListener('message', (event: MessageEvent) => {
-                if (
-                  event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
-                  event.data?.originChain !== CHAIN.ETHEREUM
-                ) {
-                  this.handleDisconnect();
-                }
-              });
+              addEventListener('message', this.#onAccountChanged);
               resolve([e.data.addr]);
             }
 
@@ -877,6 +876,7 @@ export default class EthereumProvider
     }
     const { sessionKey } = await this.#getBloctoProperties();
     removeAllEvmAddress(sessionKey);
+    removeEventListener('message', this.#onAccountChanged);
     this.eventListeners?.disconnect.forEach((listener) =>
       listener(ethErrors.provider.disconnected())
     );

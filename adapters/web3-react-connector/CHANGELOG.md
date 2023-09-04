@@ -1,5 +1,30 @@
 # @blocto/web3-react-connector
 
+## 1.0.2-beta.1
+
+### Patch Changes
+
+- 2515a8f: Fix wrongly disconnect chain when account not changed
+- Updated dependencies [2515a8f]
+  - @blocto/sdk@0.7.0-beta.1
+
+## 1.0.2-beta.0
+
+### Patch Changes
+
+- b40fbed: Fix skip calling enable() when request wallet_disconnect method
+- 4c769f9: Clear error message when add not supported chain
+- 0c915f5: Fix clear error if active with mismatch chainId
+- bbf2160: Make loadSwitchableNetwork rpcUrls optional
+- 9c7abcc: Fix attempt to add chain even only chain id is passed
+- a3b0243: Seperate evm accounts from other chains in storage data structure
+- Updated dependencies [b40fbed]
+- Updated dependencies [4c769f9]
+- Updated dependencies [bbf2160]
+- Updated dependencies [a3b0243]
+- Updated dependencies [1288bd1]
+  - @blocto/sdk@0.7.0-beta.0
+
 ## 1.0.1
 
 ### Patch Changes

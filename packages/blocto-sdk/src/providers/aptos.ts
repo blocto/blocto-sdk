@@ -19,7 +19,6 @@ import {
   removeChainAddress,
   getChainAddress,
   setChainAddress,
-  removeAllEvmAddress,
 } from '../lib/storage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
@@ -87,6 +86,15 @@ export default class AptosProvider
     this.server = server || defaultServer || '';
   }
 
+  #onAccountChanged(event: MessageEvent): void {
+    if (
+      event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
+      event.data?.originChain !== CHAIN.APTOS
+    ) {
+      this.disconnect();
+    }
+  }
+
   get publicAccount(): PublicAccount {
     return {
       address: getChainAddress(this.sessionKey, CHAIN.APTOS)?.[0] || null,
@@ -134,6 +142,7 @@ export default class AptosProvider
       return;
     }
     removeChainAddress(this.sessionKey, CHAIN.APTOS);
+    removeEventListener('message', this.#onAccountChanged);
     this.eventListeners?.disconnect.forEach((listener) =>
       listener({
         code: 4900,
@@ -336,22 +345,13 @@ export default class AptosProvider
                 },
                 e.data.exp
               );
-              if (!e.data?.wasSameAccount) {
-                // remove all other chain address
-                removeAllEvmAddress(this.sessionKey);
+              if (e.data?.isAccountChanged) {
                 postMessage({
                   originChain: CHAIN.APTOS,
                   type: 'BLOCTO_SDK:ACCOUNT_CHANGED',
                 });
               }
-              addEventListener('message', (event: MessageEvent) => {
-                if (
-                  event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
-                  event.data?.originChain !== CHAIN.APTOS
-                ) {
-                  this.disconnect();
-                }
-              });
+              addEventListener('message', this.#onAccountChanged);
 
               if (getChainAddress(this.sessionKey, CHAIN.APTOS)?.length) {
                 try {
