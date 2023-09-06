@@ -1,0 +1,39 @@
+{
+  "name": "@blocto/dappauth",
+  "version": "2.1.0",
+  "description": "A util to prove actionable control ('ownership') over a public Ethereum address using eth_sign",
+  "keywords": [
+    "ethereum",
+    "ownership",
+    "control",
+    "eth_sign"
+  ],
+  "repository": "github:blocto/dappauth.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run eslint && nyc mocha test/*",
+    "prettier:watch": "onchange '**/*.js' -- prettier --write {{changed}}",
+    "eslint": "eslint ./ --ext .js",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "author": "Pazams <maor@pazams.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ethereumjs-abi": "^0.6.6",
+    "ethereumjs-util": "^6.0.0",
+    "safe-buffer": "^5.1.2",
+    "web3": "^1.3.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.0.1",
+    "coveralls": "^3.0.0",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "mocha": "^10.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nyc": "^14.1.1",
+    "onchange": "^7.1.0",
+    "prettier": "^1.14.3"
+  }
+}
