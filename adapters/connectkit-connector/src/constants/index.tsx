@@ -4,8 +4,8 @@ import { BloctoLogo } from '../components/BloctoLogo';
 type Spc = typeof supportedConnectors;
 
 const BLOCTO_CONFIG: Spc[number] = {
-  id: 'bloctoWallet',
-  name: 'Blocto Wallet',
+  id: 'blocto',
+  name: 'Blocto',
   shortName: 'Blocto',
   logos: {
     default: <BloctoLogo />,
