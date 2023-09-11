@@ -1,22 +1,26 @@
 {
   "name": "with-evm-web3modal-next",
+  "version": "0.0.1",
   "private": true,
-  "version": "2.6.2",
   "scripts": {
     "dev": "next dev"
   },
   "dependencies": {
-    "@blocto/wagmi-connector": "^1.1.0",
-    "wagmi": "1.3.3",
-    "@web3modal/ethereum": "2.6.2",
-    "@web3modal/react": "2.6.2",
-    "@blocto/dappauth": "2.1.0",
-    "ethers": "^5.7.1",
-    "use-debounce": "^9.0.4",
-    "viem": "1.2.5",
-    "web3": "~1.8.0",
-    "next": "13.4.7",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "@blocto/web3modal-connector": "latest",
+    "@web3modal/ethereum": "2.4.1",
+    "@web3modal/react": "2.4.1",
+    "next": "^13.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "viem": "~0.3.36",
+    "wagmi": "^1.0.6"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.31",
+    "@types/react": "^18.0.9",
+    "@types/react-dom": "^18.0.3",
+    "eslint": "^8.15.0",
+    "eslint-config-next": "^12.1.6",
+    "typescript": "^5.0.4"
   }
 }
