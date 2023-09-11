@@ -40,7 +40,7 @@
   dependencies:
     "@blocto/sdk" "^0.6.0"
 
-"@blocto/web3modal-connector@^0.1.0":
+"@blocto/web3modal-connector@latest":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@blocto/web3modal-connector/-/web3modal-connector-0.1.0.tgz#316872c4d56ef48c3c5ba2132d794c3f6b158e45"
   integrity sha512-kBbXjDtbKGR2yGmsYVV6m04FzWIEJqoKXpN7KtDdTG1FtR0jCjPvQdCe4oZOchR/aSYhUu9ZcuWCydvAEaXY+g==
