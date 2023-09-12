@@ -11048,6 +11048,13 @@ rollup@^3.2.5, rollup@^3.23.1, rollup@^3.27.1:
   optionalDependencies:
     fsevents "~2.3.2"
 
+rollup@^3.29.1:
+  version "3.29.1"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.29.1.tgz#ba53a179d46ac3cd79e162dca6ab70d93cd26f78"
+  integrity sha512-c+ebvQz0VIH4KhhCpDsI+Bik0eT8ZFEVZEYw0cGMVqIP8zc+gnwl7iXCamTw7vzv2MeuZFZfdx5JJIq+ehzDlg==
+  optionalDependencies:
+    fsevents "~2.3.2"
+
 rpc-websockets@^7.5.1:
   version "7.6.0"
   resolved "https://registry.yarnpkg.com/rpc-websockets/-/rpc-websockets-7.6.0.tgz#d3f4c0dac108ca35566b0e31552c32e58928cd04"
@@ -12698,7 +12705,7 @@ vite-plugin-dts@^2.3.0:
     magic-string "^0.29.0"
     ts-morph "18.0.0"
 
-vite@^4.3.9, vite@^4.4.9:
+vite@^4.3.9:
   version "4.4.9"
   resolved "https://registry.yarnpkg.com/vite/-/vite-4.4.9.tgz#1402423f1a2f8d66fd8d15e351127c7236d29d3d"
   integrity sha512-2mbUn2LlUmNASWwSCNSJ/EG2HuSRTnVNaydp6vMCm5VIqJsjMfbIWtbH2kDuwUVW5mMUKKZvGPX/rqeqVvv1XA==
