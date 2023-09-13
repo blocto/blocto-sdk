@@ -1021,6 +1021,22 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@blocto/sdk@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@blocto/sdk/-/sdk-0.6.0.tgz#2e22418aa853b609c58eaf9b576b476f13314006"
+  integrity sha512-IghtgkBT5shnk0fEjrQPs1RLnUpRbtMaqO+jsnxDR2h3IowxJ+f3hIfjpJPj+77lTfN6LCyxKcX67VHp9A4uKA==
+  dependencies:
+    buffer "^6.0.3"
+    eip1193-provider "^1.0.1"
+    js-sha3 "^0.8.0"
+
+"@blocto/wagmi-connector@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@blocto/wagmi-connector/-/wagmi-connector-1.2.0.tgz#c2b716685a655193e50fa0a7c16684dd7d793c22"
+  integrity sha512-2QiFlH606j7AA2wY7cdrmgFcIasJafase+WdIhKvqw6fEgeioYqYqOOd6vvy92v1o1y3rP8Oht9NIZe4jT3dnw==
+  dependencies:
+    "@blocto/sdk" "^0.6.0"
+
 "@changesets/apply-release-plan@^6.1.4":
   version "6.1.4"
   resolved "https://registry.yarnpkg.com/@changesets/apply-release-plan/-/apply-release-plan-6.1.4.tgz#09293256090737ecd2f683842d6d732034a5e3c8"
