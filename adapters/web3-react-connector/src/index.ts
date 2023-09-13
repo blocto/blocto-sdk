@@ -67,48 +67,45 @@ export class BloctoConnector extends Connector {
         : desiredChainIdOrChainParameters?.chainId;
     await this.isomorphicInitialize();
     if (!this.provider) throw new Error('No provider');
-    try {
-      if (
-        !desiredChainId ||
-        parseChainId(desiredChainId) === parseChainId(this.provider.chainId)
-      ) {
-        const accounts = await this.provider.request({
-          method: 'eth_accounts',
-        });
-        return this.actions.update({
-          chainId: parseChainId(this.provider.chainId),
-          accounts,
-        });
-      } else if (typeof desiredChainIdOrChainParameters === 'number') {
-        await this.provider
-          .request({
-            method: 'wallet_addEthereumChain',
+    if (
+      !desiredChainId ||
+      parseChainId(desiredChainId) === parseChainId(this.provider.chainId)
+    ) {
+      await this.provider.enable();
+      const accounts = await this.provider.request({
+        method: 'eth_accounts',
+      });
+      return this.actions.update({
+        chainId: parseChainId(this.provider.chainId),
+        accounts,
+      });
+    } else if (typeof desiredChainIdOrChainParameters === 'number') {
+      await this.provider
+        .request({
+          method: 'wallet_addEthereumChain',
+          params: [{ chainId: desiredChainId }],
+        })
+        .then(() => {
+          this.provider.request({
+            method: 'wallet_switchEthereumChain',
             params: [{ chainId: desiredChainId }],
-          })
-          .then(() => {
-            this.provider.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: desiredChainId }],
-            });
           });
-        this.activate(desiredChainId);
-      } else {
-        // AddEthereumChainParameter
-        await this.provider
-          .request({
-            method: 'wallet_addEthereumChain',
-            params: [desiredChainIdOrChainParameters],
-          })
-          .then(() => {
-            this.provider.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: desiredChainId }],
-            });
+        });
+      this.activate(desiredChainId);
+    } else {
+      // AddEthereumChainParameter
+      await this.provider
+        .request({
+          method: 'wallet_addEthereumChain',
+          params: [desiredChainIdOrChainParameters],
+        })
+        .then(() => {
+          this.provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: desiredChainId }],
           });
-        this.activate(desiredChainId);
-      }
-    } catch (error: any) {
-      this.onError?.(error);
+        });
+      this.activate(desiredChainId);
     }
   }
 

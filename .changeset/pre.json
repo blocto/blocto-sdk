@@ -1,0 +1,19 @@
+{
+  "mode": "exit",
+  "tag": "beta",
+  "initialVersions": {
+    "@blocto/aptos-wallet-adapter-plugin": "0.2.5",
+    "@blocto/connectkit-connector": "0.2.0",
+    "@blocto/rainbowkit-connector": "0.2.6",
+    "@blocto/wagmi-connector": "1.2.1",
+    "@blocto/web3-react-connector": "1.0.3-beta.0",
+    "@blocto/web3modal-connector": "0.1.1",
+    "@blocto/sdk": "0.7.0",
+    "eslint-config-custom": "0.0.0",
+    "tsconfig": "0.0.0"
+  },
+  "changesets": [
+    "chilled-wasps-watch",
+    "cyan-snails-destroy"
+  ]
+}

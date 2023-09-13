@@ -1,6 +1,6 @@
 {
   "name": "@blocto/web3-react-connector",
-  "version": "1.0.2",
+  "version": "1.0.3-beta.1",
   "description": "A Blocto SDK connector for web3-react",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

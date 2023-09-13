@@ -1,5 +1,17 @@
 # @blocto/web3-react-connector
 
+## 1.0.3-beta.1
+
+### Patch Changes
+
+- Fix enable before call request account
+
+## 1.0.3-beta.0
+
+### Patch Changes
+
+- 75df4aa: Fix handle error when connecting
+
 ## 1.0.2
 
 ### Patch Changes
