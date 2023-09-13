@@ -2,6 +2,8 @@ const commonjs = require('@rollup/plugin-commonjs');
 const resolve = require('@rollup/plugin-node-resolve');
 const json = require('rollup-plugin-json');
 const polyfills = require('rollup-plugin-polyfill-node');
+const copy = require('rollup-plugin-copy');
+
 
 module.exports = [
   // CommonJS
@@ -14,11 +16,19 @@ module.exports = [
       exports: 'auto',
     },
     plugins: [
+      copy({
+        targets: [
+          { src: './ABIs', dest: 'dist' },
+          { src: './utils.js', dest: 'dist' },
+        ],
+      }),
       resolve({
         preferBuiltins: true,
         browser: true,
       }),
-      commonjs(),
+      commonjs({
+        include: 'node_modules/**',
+      }),
       json(),
       polyfills(),
     ],
@@ -35,11 +45,19 @@ module.exports = [
       name: 'DappAuth',
     },
     plugins: [
+      copy({
+        targets: [
+          { src: './ABIs', dest: 'dist' },
+          { src: './utils.js', dest: 'dist' },
+        ],
+      }),
       resolve({
         preferBuiltins: true,
         browser: true,
       }),
-      commonjs(),
+      commonjs({
+        include: 'node_modules/**',
+      }),
       json(),
       polyfills(),
     ],
@@ -53,11 +71,19 @@ module.exports = [
       name: 'DappAuth',
     },
     plugins: [
+      copy({
+        targets: [
+          { src: './ABIs', dest: 'dist' },
+          { src: './utils.js', dest: 'dist' },
+        ],
+      }),
       resolve({
         preferBuiltins: true,
         browser: true,
       }),
-      commonjs(),
+      commonjs({
+        include: 'node_modules/**',
+      }),
       json(),
       polyfills(),
     ],
