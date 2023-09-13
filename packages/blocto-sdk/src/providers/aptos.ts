@@ -19,8 +19,6 @@ import {
   removeChainAddress,
   getChainAddress,
   setChainAddress,
-  KEY_SESSION,
-  CHAIN,
 } from '../lib/storage';
 import responseSessionGuard from '../lib/responseSessionGuard';
 import {
@@ -30,6 +28,8 @@ import {
   DEFAULT_APP_ID,
   APT_SESSION_KEY_MAPPING,
   SDK_VERSION,
+  KEY_SESSION,
+  CHAIN,
 } from '../constants';
 
 const checkMessagePayloadFormat = (payload: SignMessagePayload) => {
@@ -86,6 +86,15 @@ export default class AptosProvider
     this.server = server || defaultServer || '';
   }
 
+  #onAccountChanged(event: MessageEvent): void {
+    if (
+      event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
+      event.data?.originChain !== CHAIN.APTOS
+    ) {
+      this.disconnect();
+    }
+  }
+
   get publicAccount(): PublicAccount {
     return {
       address: getChainAddress(this.sessionKey, CHAIN.APTOS)?.[0] || null,
@@ -105,7 +114,7 @@ export default class AptosProvider
   }
 
   async isConnected(): Promise<boolean> {
-    return !!getAccountStorage(this.sessionKey)?.code;
+    return !!getChainAddress(this.sessionKey, CHAIN.APTOS)?.length;
   }
 
   async signTransaction(
@@ -133,6 +142,13 @@ export default class AptosProvider
       return;
     }
     removeChainAddress(this.sessionKey, CHAIN.APTOS);
+    removeEventListener('message', this.#onAccountChanged);
+    this.eventListeners?.disconnect.forEach((listener) =>
+      listener({
+        code: 4900,
+        message: 'Wallet disconnected',
+      })
+    );
   }
 
   async signAndSubmitTransaction(
@@ -323,13 +339,19 @@ export default class AptosProvider
                 this.sessionKey,
                 {
                   code: e.data.code,
-                  connected: true,
                   accounts: {
                     [CHAIN.APTOS]: [e.data.addr],
                   },
                 },
                 e.data.exp
               );
+              if (e.data?.isAccountChanged) {
+                postMessage({
+                  originChain: CHAIN.APTOS,
+                  type: 'BLOCTO_SDK:ACCOUNT_CHANGED',
+                });
+              }
+              addEventListener('message', this.#onAccountChanged);
 
               if (getChainAddress(this.sessionKey, CHAIN.APTOS)?.length) {
                 try {

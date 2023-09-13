@@ -1,5 +1,43 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.6
+
+### Patch Changes
+
+- 2515a8f: Fix wrongly disconnect chain when account not changed
+- b40fbed: Fix skip calling enable() when request wallet_disconnect method
+- 4c769f9: Clear error message when add not supported chain
+- bbf2160: Make loadSwitchableNetwork rpcUrls optional
+- a3b0243: Seperate evm accounts from other chains in storage data structure
+- Updated dependencies [2515a8f]
+- Updated dependencies [b40fbed]
+- Updated dependencies [4c769f9]
+- Updated dependencies [bbf2160]
+- Updated dependencies [a3b0243]
+  - @blocto/wagmi-connector@1.2.1
+
+## 0.2.6-beta.1
+
+### Patch Changes
+
+- 2515a8f: Fix wrongly disconnect chain when account not changed
+- Updated dependencies [2515a8f]
+  - @blocto/wagmi-connector@1.2.1-beta.1
+
+## 0.2.6-beta.0
+
+### Patch Changes
+
+- b40fbed: Fix skip calling enable() when request wallet_disconnect method
+- 4c769f9: Clear error message when add not supported chain
+- bbf2160: Make loadSwitchableNetwork rpcUrls optional
+- a3b0243: Seperate evm accounts from other chains in storage data structure
+- Updated dependencies [b40fbed]
+- Updated dependencies [4c769f9]
+- Updated dependencies [bbf2160]
+- Updated dependencies [a3b0243]
+  - @blocto/wagmi-connector@1.2.1-beta.0
+
 ## 0.2.5
 
 ### Patch Changes

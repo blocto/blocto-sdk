@@ -44,20 +44,12 @@ jobs:
           commit_message: 'ci: bump package version'
           commit_options: '--no-verify'
 
-      - name: Create Release Pull Request to main branch
-        uses: repo-sync/pull-request@v2
-        with:
-          source_branch: ${{ github.head_ref }}
-          destination_branch: 'main'
-          pr_title: 'Release: Merge to publish new version to npm'
-          pr_body: |
-            Please review and merge this Pull Request.
-            Caution: Merge to main branch will trigger publish to npm.
-
-      - name: Create Release Pull Request to develop branch
-        uses: repo-sync/pull-request@v2
-        with:
-          source_branch: ${{ github.head_ref }}
-          destination_branch: 'develop'
-          pr_title: 'Release: Merge back new version to develop'
-          pr_body: 'Merge new prod release back to develop'
+      - name: Create Release Pull Requests
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEV_GITHUB_TOKEN }}
+          MAIN_TITLE: 'Release: Merge to publish new version to npm'
+          MAIN_BODY: 'Please review and merge this Pull Request. **Caution: Merge to main branch will trigger publish to npm.**'
+          DEV_TITLE: 'Release: Merge back new version to develop'
+          DEV_BODY: 'Merge new prod release back to develop'
+        run: |
+          gh pr create --title "$MAIN_TITLE" --body "$MAIN_BODY" --base main && gh pr create --title "$DEV_TITLE" --body "$DEV_BODY" --base develop

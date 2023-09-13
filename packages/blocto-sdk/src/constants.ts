@@ -1,9 +1,18 @@
-import { KEY_SESSION } from './lib/storage';
-type Mapping = Record<number | string, string>;
+export enum KEY_SESSION {
+  prod = 'BLOCTO_SDK',
+  dev = 'BLOCTO_SDK_DEV',
+  staging = 'BLOCTO_SDK_STAGING',
+}
+export enum CHAIN {
+  ETHEREUM = 'ethereum',
+  APTOS = 'aptos',
+}
 
 export interface BaseConfig {
   appId?: string;
 }
+
+type Mapping = Record<number | string, string>;
 
 /* eth series constants begin */
 
