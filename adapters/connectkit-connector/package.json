@@ -2,7 +2,7 @@
   "name": "@blocto/connectkit-connector",
   "description": "blocto wallet connector to use with connectkit",
   "author": "Blocto Wallet",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "type": "module",
   "main": "./dist/index.umd.cjs",
   "module": "./dist/index.js",
@@ -30,7 +30,7 @@
     "/dist"
   ],
   "dependencies": {
-    "@blocto/wagmi-connector": "^1.2.0"
+    "@blocto/wagmi-connector": "^1.2.1"
   },
   "peerDependencies": {
     "connectkit": "^1.5.3",
