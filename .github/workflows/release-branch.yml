@@ -46,9 +46,9 @@ jobs:
 
       - name: Create Release Pull Requests
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DEV_GITHUB_TOKEN }}
           MAIN_TITLE: 'Release: Merge to publish new version to npm'
-          MAIN_BODY: 'Please review and merge this Pull Request. \n**Caution: Merge to main branch will trigger publish to npm.**'
+          MAIN_BODY: 'Please review and merge this Pull Request. **Caution: Merge to main branch will trigger publish to npm.**'
           DEV_TITLE: 'Release: Merge back new version to develop'
           DEV_BODY: 'Merge new prod release back to develop'
         run: |
