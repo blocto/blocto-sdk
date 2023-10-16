@@ -388,7 +388,7 @@ export default class EthereumProvider
           break;
         }
         case 'eth_sign':
-          throw ethErrors.rpc.methodNotSupported('Method Not Supported: eth_sign has been disabled');
+          throw ethErrors.rpc.methodNotFound('Method Not Supported: eth_sign has been disabled');
         case 'eth_sendTransaction':
           result = await this.handleSendTransaction(payload);
           break;
