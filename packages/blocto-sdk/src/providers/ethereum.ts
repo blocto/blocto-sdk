@@ -71,6 +71,26 @@ export default class EthereumProvider
     switchableNetwork: SwitchableNetwork;
   };
 
+  override on(event: string, listener: (arg: any) => void): void {
+    const existedSDK = (window as any).ethereum;
+    if (existedSDK && existedSDK.isBlocto) {
+      existedSDK.on(event, listener);
+    }
+
+    super.on(event, listener);
+  }
+
+  override removeListener(event: string, listener: (arg: any) => void): void {
+    const existedSDK = (window as any).ethereum;
+    if (existedSDK && existedSDK.isBlocto) {
+      existedSDK.off(event, listener);
+    }
+
+    super.off(event, listener);
+  }
+
+  off = this.removeListener;
+  
   constructor({ chainId, rpc, walletServer, appId }: EthereumProviderConfig) {
     super();
     // setup chainId
