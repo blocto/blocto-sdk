@@ -71,25 +71,9 @@ export default class EthereumProvider
     switchableNetwork: SwitchableNetwork;
   };
 
-  override on(event: string, listener: (arg: any) => void): void {
-    const existedSDK = (window as any).ethereum;
-    if (existedSDK && existedSDK.isBlocto) {
-      existedSDK.on(event, listener);
-    }
-
-    super.on(event, listener);
+  private get existedSDK() {
+    return (window as any).ethereum;
   }
-
-  override removeListener(event: string, listener: (arg: any) => void): void {
-    const existedSDK = (window as any).ethereum;
-    if (existedSDK && existedSDK.isBlocto) {
-      existedSDK.off(event, listener);
-    }
-
-    super.off(event, listener);
-  }
-
-  off = this.removeListener;
   
   constructor({ chainId, rpc, walletServer, appId }: EthereumProviderConfig) {
     super();
@@ -928,4 +912,20 @@ export default class EthereumProvider
       throw ethErrors.rpc.invalidParams('Empty networkList');
     }
   }
+
+  override on(event: string, listener: (arg: any) => void): void {
+    if (this.existedSDK?.isBlocto)
+      this.existedSDK.on(event, listener);
+
+    super.on(event, listener);
+  }
+
+  override removeListener(event: string, listener: (arg: any) => void): void {
+    if (this.existedSDK?.isBlocto)
+      this.existedSDK.off(event, listener);
+
+    super.off(event, listener);
+  }
+
+  off = this.removeListener;
 }
