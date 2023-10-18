@@ -894,7 +894,7 @@ export default class EthereumProvider
   async handleDisconnect(): Promise<void> {
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
-      return existedSDK.disconnect();
+      return existedSDK.request({ method: 'wallet_disconnect' });
     }
     const { sessionKey } = await this.#getBloctoProperties();
     removeAllEvmAddress(sessionKey);
