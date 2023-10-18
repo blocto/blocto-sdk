@@ -307,6 +307,9 @@ export default class EthereumProvider
   async request(payload: EIP1193RequestPayload): Promise<any> {
     if (!payload?.method) throw ethErrors.rpc.invalidRequest();
 
+
+    const { blockchainName, switchableNetwork, sessionKey } =
+      await this.#getBloctoProperties();
     const existedSDK = (window as any).ethereum;
     if (existedSDK && existedSDK.isBlocto) {
       if (payload.method === 'wallet_switchEthereumChain') {
@@ -324,9 +327,6 @@ export default class EthereumProvider
       }
       return existedSDK.request(payload);
     }
-
-    const { blockchainName, switchableNetwork, sessionKey } =
-      await this.#getBloctoProperties();
 
     // method that doesn't require user to be connected
     switch (payload.method) {
