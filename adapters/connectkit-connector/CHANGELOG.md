@@ -8,6 +8,14 @@
 - Updated dependencies [4835522]
   - @blocto/wagmi-connector@1.2.2
 
+## 0.2.1-beta.0
+
+### Patch Changes
+
+- 4835522: Fix export unreconize type for old typescript
+- Updated dependencies [4835522]
+  - @blocto/wagmi-connector@1.2.2-beta.0
+
 ## 0.2.0
 
 ### Minor Changes

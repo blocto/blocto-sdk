@@ -17,6 +17,16 @@
 - Updated dependencies [e742f66]
   - @blocto/sdk@0.7.1
 
+
+## 1.2.2-beta.0
+
+### Patch Changes
+
+- 4835522: Fix export unreconize type for old typescript
+- Updated dependencies [4835522]
+- Updated dependencies [e742f66]
+  - @blocto/sdk@0.7.1-beta.0
+
 ## 1.2.1
 
 ### Patch Changes
