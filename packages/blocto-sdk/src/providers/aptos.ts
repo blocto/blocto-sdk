@@ -86,15 +86,6 @@ export default class AptosProvider
     this.server = server || defaultServer || '';
   }
 
-  #onAccountChanged(event: MessageEvent): void {
-    if (
-      event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
-      event.data?.originChain !== CHAIN.APTOS
-    ) {
-      this.disconnect();
-    }
-  }
-
   get publicAccount(): PublicAccount {
     return {
       address: getChainAddress(this.sessionKey, CHAIN.APTOS)?.[0] || null,
@@ -142,7 +133,6 @@ export default class AptosProvider
       return;
     }
     removeChainAddress(this.sessionKey, CHAIN.APTOS);
-    removeEventListener('message', this.#onAccountChanged);
     this.eventListeners?.disconnect.forEach((listener) =>
       listener({
         code: 4900,
@@ -351,8 +341,19 @@ export default class AptosProvider
                   type: 'BLOCTO_SDK:ACCOUNT_CHANGED',
                 });
               }
-              addEventListener('message', this.#onAccountChanged);
-
+              addSelfRemovableHandler(
+                'message',
+                (event: Event, removeListener: () => void) => {
+                  const messageEvent = event as MessageEvent;
+                  if (
+                    messageEvent.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
+                    messageEvent.data?.originChain !== CHAIN.APTOS
+                  ) {
+                    this.disconnect();
+                    removeListener();
+                  }
+                }
+              );
               if (getChainAddress(this.sessionKey, CHAIN.APTOS)?.length) {
                 try {
                   const { public_keys: publicKeys } = await fetch(
