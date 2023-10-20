@@ -2,4 +2,4 @@
 '@blocto/sdk': patch
 ---
 
-Supports updating data only
+AccountChange use addSelfRemovableHandler
