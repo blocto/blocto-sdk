@@ -585,7 +585,9 @@ export default class EthereumProvider
           if (e.origin === walletServer) {
             if (e.data.type === 'ETH:FRAME:RESPONSE') {
               removeListener();
-              detatchFrame(loginFrame);
+              if (!e.data?.onlyUpdateData) {
+                detatchFrame(loginFrame);
+              }
               this.eventListeners?.connect.forEach((listener) =>
                 listener({ chainId: this.chainId })
               );
