@@ -786,7 +786,7 @@ export default class EthereumProvider
             if (e.data.type === 'ETH:FRAME:CLOSE') {
               removeListener();
               detatchFrame(switchChainFrame);
-              if (e.data?.hasApprovedSwitchChain) {
+              if (e.data?.hasApprovedSwitchChain && e.data?.hasEnoughPointsToCreateWallet) {
                 this.eventListeners?.chainChanged.forEach((listener) =>
                   listener(this.chainId)
                 );
