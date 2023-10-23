@@ -355,6 +355,8 @@ export default class EthereumProvider
       case 'wallet_disconnect': {
         return this.handleDisconnect();
       }
+      case 'eth_accounts':
+        return getEvmAddress(sessionKey, blockchainName) || [];
     }
 
     // Method that requires user to be connected
@@ -369,13 +371,11 @@ export default class EthereumProvider
     try {
       let response = null;
       let result = null;
+
       switch (payload.method) {
         case 'eth_requestAccounts':
           await this.fetchAccounts();
         // eslint-disable-next-line
-        case 'eth_accounts':
-          result = getEvmAddress(sessionKey, blockchainName);
-          break;
         case 'eth_coinbase': {
           result = getEvmAddress(sessionKey, blockchainName)?.[0];
           break;
