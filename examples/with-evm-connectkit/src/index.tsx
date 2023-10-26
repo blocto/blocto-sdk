@@ -1,46 +1,19 @@
-import { StrictMode } from 'react';
-import ReactDOM from 'react-dom/client';
-import reportWebVitals from './reportWebVitals';
+import * as React from 'react'
+import * as ReactDOM from 'react-dom/client'
+import { WagmiConfig } from 'wagmi'
 
-import './index.css';
-import App from './App';
+import { ConnectKitProvider, supportedConnectors } from 'connectkit'
+import { App } from './App'
+import { config } from './wagmi'
+import { BLOCTO_CONFIG } from '@blocto/connectkit-connector'
 
-import { WagmiConfig, createConfig } from 'wagmi';
-import { arbitrumGoerli } from 'wagmi/chains';
-import {
-  ConnectKitProvider,
-  getDefaultConfig,
-  supportedConnectors,
-} from 'connectkit';
-import { integrateBloctoConfig } from '@blocto/connectkit-connector';
-
-const config = integrateBloctoConfig(
-  createConfig(
-    getDefaultConfig({
-      appName: 'ConnectKit CRA demo',
-      autoConnect: false,
-      chains: [arbitrumGoerli],
-      walletConnectProjectId: 'c1642a0a861332fe7ac8b5820f347dd4',
-    })
-  ),
-  supportedConnectors,
-  {}
-);
-
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
-  <StrictMode>
+supportedConnectors.push(BLOCTO_CONFIG)
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
     <WagmiConfig config={config}>
-      <ConnectKitProvider debugMode>
+      <ConnectKitProvider>
         <App />
       </ConnectKitProvider>
     </WagmiConfig>
-  </StrictMode>
-);
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+  </React.StrictMode>,
+)

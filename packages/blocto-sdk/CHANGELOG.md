@@ -1,5 +1,12 @@
 # @blocto/sdk
 
+## 0.7.1
+
+### Patch Changes
+
+- 4835522: Fix export unreconize type for old typescript
+- e742f66: AccountChange use addSelfRemovableHandler
+
 ## 0.7.0
 
 ### Minor Changes

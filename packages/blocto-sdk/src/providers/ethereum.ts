@@ -180,15 +180,6 @@ export default class EthereumProvider
     }
   }
 
-  #onAccountChanged(event: MessageEvent): void {
-    if (
-      event.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
-      event.data?.originChain !== CHAIN.ETHEREUM
-    ) {
-      this.handleDisconnect();
-    }
-  }
-
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#ethereum-send-deprecated
   async send(
     methodOrPayload: string | JsonRpcRequest,
@@ -605,7 +596,19 @@ export default class EthereumProvider
                   type: 'BLOCTO_SDK:ACCOUNT_CHANGED',
                 });
               }
-              addEventListener('message', this.#onAccountChanged);
+              addSelfRemovableHandler(
+                'message',
+                (event: Event, removeListener: () => void) => {
+                  const messageEvent = event as MessageEvent;
+                  if (
+                    messageEvent.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
+                    messageEvent.data?.originChain !== CHAIN.ETHEREUM
+                  ) {
+                    this.handleDisconnect();
+                    removeListener();
+                  }
+                }
+              );
               resolve([e.data.addr]);
             }
 
@@ -876,7 +879,6 @@ export default class EthereumProvider
     }
     const { sessionKey } = await this.#getBloctoProperties();
     removeAllEvmAddress(sessionKey);
-    removeEventListener('message', this.#onAccountChanged);
     this.eventListeners?.disconnect.forEach((listener) =>
       listener(ethErrors.provider.disconnected())
     );
