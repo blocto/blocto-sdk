@@ -383,11 +383,12 @@ export default class EthereumProvider
         case 'eth_signTypedData_v3':
         case 'eth_signTypedData':
         case 'eth_signTypedData_v4':
-        case 'personal_sign':
-        case 'eth_sign': {
+        case 'personal_sign': {
           result = await this.handleSign(payload);
           break;
         }
+        case 'eth_sign':
+          throw ethErrors.rpc.methodNotFound('Method Not Supported: eth_sign has been disabled');
         case 'eth_sendTransaction':
           result = await this.handleSendTransaction(payload);
           break;
@@ -649,11 +650,7 @@ export default class EthereumProvider
   async handleSign({ method, params }: EIP1193RequestPayload): Promise<string> {
     let message = '';
     if (Array.isArray(params)) {
-      if (method === 'eth_sign') {
-        message = isHexString(params[1])
-          ? params[1].slice(2)
-          : utf8ToHex(params[1]);
-      } else if (method === 'personal_sign') {
+      if (method === 'personal_sign') {
         message = isHexString(params[0])
           ? params[0].slice(2)
           : utf8ToHex(params[0]);
