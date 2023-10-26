@@ -1,5 +1,13 @@
 # @blocto/web3-react-connector
 
+## 1.0.4
+
+### Patch Changes
+
+- 1d05082: refactor: adjust web3-react-connector's activate method to comply with @blocto/sdk's changes
+- Updated dependencies [58ef7a0]
+  - @blocto/sdk@0.7.2
+
 ## 1.0.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.7.2
+
+### Patch Changes
+
+- 58ef7a0: adjust eth_accounts to not require prior enable
+
 ## 0.7.1
 
 ### Patch Changes
