@@ -179,7 +179,7 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
       account,
       chain,
       transport: custom(provider),
-    });
+    }) as WalletClient;
   }
 
   protected onAccountsChanged(): void {

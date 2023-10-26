@@ -71,7 +71,7 @@ export class BloctoConnector extends Connector {
       !desiredChainId ||
       parseChainId(desiredChainId) === parseChainId(this.provider.chainId)
     ) {
-      const accounts = await this.provider.request({ method: 'eth_accounts' });
+      const accounts = await this.provider.request({ method: 'eth_requestAccounts' });
       return this.actions.update({
         chainId: parseChainId(this.provider.chainId),
         accounts,

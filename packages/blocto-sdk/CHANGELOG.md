@@ -4,6 +4,7 @@
 
 ### Patch Changes
 
+- 58ef7a0: adjust eth_accounts to not require prior enable
 - 4835522: Fix export unreconize type for old typescript
 - e742f66: AccountChange use addSelfRemovableHandler
 

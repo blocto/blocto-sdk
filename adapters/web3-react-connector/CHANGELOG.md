@@ -5,6 +5,8 @@
 ### Patch Changes
 
 - 4835522: Fix export unreconize type for old typescript
+- 1d05082: refactor: adjust web3-react-connector's activate method to comply with @blocto/sdk's changes
+- Updated dependencies [58ef7a0]
 - Updated dependencies [4835522]
 - Updated dependencies [e742f66]
   - @blocto/sdk@0.7.1
