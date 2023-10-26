@@ -1,32 +1,38 @@
 {
-  "name": "cra",
-  "version": "0.0.0",
+  "name": "with-evm-connectkit",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "util": "^0.12.4",
+    "viem": "~0.3.36",
+    "wagmi": "^1.0.6",
+    "@blocto/connectkit-connector": "latest",
+    "connectkit": "1.5.3"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
-    "@types/node": "^16.11.59",
-    "@types/react": "^18.0.20",
-    "@types/react-dom": "^18.0.6",
-    "connectkit": "^1",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5",
-    "viem": "^1.0.0",
-    "wagmi": "^1.1.1",
-    "web-vitals": "^2.1.4",
-    "use-debounce": "^9.0.4"
+    "@types/node": "^16.18.43",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "typescript": "^4.9.5"
   },
   "scripts": {
-    "dev": "react-scripts start",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "lint": "eslint src --ext .ts"
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
   },
   "browserslist": {
     "production": [
