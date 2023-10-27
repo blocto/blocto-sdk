@@ -7,6 +7,14 @@
 - Updated dependencies [a4d3fbd]
   - @blocto/sdk@0.8.0
 
+## 0.2.6-beta.0
+
+### Patch Changes
+
+- Updated dependencies [4835522]
+- Updated dependencies [e742f66]
+  - @blocto/sdk@0.7.1-beta.0
+
 ## 0.2.5
 
 ### Patch Changes
