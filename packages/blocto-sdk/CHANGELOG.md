@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.7.2
+
+### Patch Changes
+
+- 3baa074: add missing break statement
+
 ## 0.7.1
 
 ### Patch Changes
