@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.8.0
+
+### Minor Changes
+
+- a4d3fbd: disable eth_sign method
+
 ## 0.7.2
 
 ### Patch Changes
