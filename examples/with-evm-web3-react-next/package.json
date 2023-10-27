@@ -23,7 +23,7 @@
     "@web3-react/url": "^8.2.0",
     "@web3-react/walletconnect": "^8.2.0",
     "@web3-react/walletconnect-v2": "^8.3.7",
-    "next": "^12.1.5",
+    "next": "^13.5.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
