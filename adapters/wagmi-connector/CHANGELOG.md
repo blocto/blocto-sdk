@@ -1,5 +1,12 @@
 # @blocto/wagmi-connector
 
+## 1.2.3
+
+### Patch Changes
+
+- Updated dependencies [a4d3fbd]
+  - @blocto/sdk@0.8.0
+
 ## 1.2.2
 
 ### Patch Changes

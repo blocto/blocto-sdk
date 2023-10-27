@@ -373,8 +373,10 @@ export default class EthereumProvider
       let result = null;
 
       switch (payload.method) {
-        case 'eth_requestAccounts':
-          await this.fetchAccounts();
+        case 'eth_requestAccounts': {
+          result = await this.fetchAccounts();
+          break;
+        }
         // eslint-disable-next-line
         case 'eth_coinbase': {
           result = getEvmAddress(sessionKey, blockchainName)?.[0];
