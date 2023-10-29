@@ -229,9 +229,7 @@ export default class EthereumProvider
       // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
       if (Array.isArray(payload)) {
         // collect transactions and send batch with custom method
-        const transactions = payload
-          .filter((request) => request.method === 'eth_sendTransaction')
-          .map((request) => request.params?.[0]);
+        const transactions = payload.map((request) => request.params?.[0]);
 
         const idBase = Math.floor(Math.random() * 10000);
 
@@ -243,7 +241,7 @@ export default class EthereumProvider
         const batchResponsePromise = this.request(batchedRequestPayload);
 
         const requests = payload.map(({ method, params }, index) =>
-          method === 'eth_sendTransaction'
+          transactions.length > 0
             ? batchResponsePromise
             : this.request({
                 id: idBase + index + 1,
@@ -392,7 +390,9 @@ export default class EthereumProvider
           break;
         }
         case 'eth_sign':
-          throw ethErrors.rpc.methodNotFound('Method Not Supported: eth_sign has been disabled');
+          throw ethErrors.rpc.methodNotFound(
+            'Method Not Supported: eth_sign has been disabled'
+          );
         case 'eth_sendTransaction':
           result = await this.handleSendTransaction(payload);
           break;
