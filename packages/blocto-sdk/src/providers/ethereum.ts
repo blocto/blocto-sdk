@@ -71,6 +71,10 @@ export default class EthereumProvider
     switchableNetwork: SwitchableNetwork;
   };
 
+  private get existedSDK() {
+    return (window as any).ethereum;
+  }
+  
   constructor({ chainId, rpc, walletServer, appId }: EthereumProviderConfig) {
     super();
     // setup chainId
@@ -170,11 +174,9 @@ export default class EthereumProvider
   }
 
   #checkNetworkMatched(): void {
-    const existedSDK = (window as any).ethereum;
     if (
-      existedSDK &&
-      existedSDK.isBlocto &&
-      parseChainId(existedSDK.chainId) !== parseChainId(this.chainId)
+      this.existedSDK?.isBlocto &&
+      parseChainId(this.existedSDK.chainId) !== parseChainId(this.chainId)
     ) {
       throw ethErrors.provider.chainDisconnected();
     }
@@ -307,13 +309,16 @@ export default class EthereumProvider
   async request(payload: EIP1193RequestPayload): Promise<any> {
     if (!payload?.method) throw ethErrors.rpc.invalidRequest();
 
-    const existedSDK = (window as any).ethereum;
-    if (existedSDK && existedSDK.isBlocto) {
+
+    const { blockchainName, switchableNetwork, sessionKey } =
+      await this.#getBloctoProperties();
+      
+    if (this.existedSDK?.isBlocto) {
       if (payload.method === 'wallet_switchEthereumChain') {
         if (!payload?.params?.[0]?.chainId) {
           throw ethErrors.rpc.invalidParams();
         }
-        return existedSDK.request(payload).then(() => {
+        return this.existedSDK.request(payload).then(() => {
           this.networkVersion = `${parseChainId(payload?.params?.[0].chainId)}`;
           this.chainId = `0x${parseChainId(
             payload?.params?.[0].chainId
@@ -322,11 +327,8 @@ export default class EthereumProvider
           return null;
         });
       }
-      return existedSDK.request(payload);
+      return this.existedSDK.request(payload);
     }
-
-    const { blockchainName, switchableNetwork, sessionKey } =
-      await this.#getBloctoProperties();
 
     // method that doesn't require user to be connected
     switch (payload.method) {
@@ -537,22 +539,21 @@ export default class EthereumProvider
     const { walletServer, blockchainName, sessionKey } =
       await this.#getBloctoProperties();
 
-    const existedSDK = (window as any).ethereum;
-    if (existedSDK && existedSDK.isBlocto) {
-      if (existedSDK.chainId !== this.chainId) {
-        await existedSDK.request({
+    if (this.existedSDK?.isBlocto) {
+      if (this.existedSDK.chainId !== this.chainId) {
+        await this.existedSDK.request({
           method: 'wallet_addEthereumChain',
           params: [{ chainId: this.chainId }],
         });
-        await existedSDK.request({
+        await this.existedSDK.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: this.chainId }],
         });
-        setEvmAddress(sessionKey, blockchainName, [existedSDK.address]);
+        setEvmAddress(sessionKey, blockchainName, [this.existedSDK.address]);
       }
       return new Promise((resolve, reject) =>
         // add a small delay to make sure the network has been switched
-        setTimeout(() => existedSDK.enable().then(resolve).catch(reject), 10)
+        setTimeout(() => this.existedSDK.enable().then(resolve).catch(reject), 10)
       );
     }
 
@@ -872,9 +873,9 @@ export default class EthereumProvider
   }
 
   async handleDisconnect(): Promise<void> {
-    const existedSDK = (window as any).ethereum;
-    if (existedSDK && existedSDK.isBlocto) {
-      return existedSDK.disconnect();
+    
+    if (this.existedSDK?.isBlocto) {
+      return this.existedSDK.request({ method: 'wallet_disconnect' });
     }
     const { sessionKey } = await this.#getBloctoProperties();
     removeAllEvmAddress(sessionKey);
@@ -908,4 +909,20 @@ export default class EthereumProvider
       throw ethErrors.rpc.invalidParams('Empty networkList');
     }
   }
+
+  override on(event: string, listener: (arg: any) => void): void {
+    if (this.existedSDK?.isBlocto)
+      this.existedSDK.on(event, listener);
+
+    super.on(event, listener);
+  }
+
+  override removeListener(event: string, listener: (arg: any) => void): void {
+    if (this.existedSDK?.isBlocto)
+      this.existedSDK.off(event, listener);
+
+    super.off(event, listener);
+  }
+
+  off = this.removeListener;
 }
