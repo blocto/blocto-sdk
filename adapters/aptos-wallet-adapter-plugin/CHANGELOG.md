@@ -1,5 +1,13 @@
 # @blocto/aptos-wallet-adapter-plugin
 
+## 0.2.7-beta.0
+
+### Patch Changes
+
+- 8d0b5bf: enhance in-app-sdk event support
+- Updated dependencies [8d0b5bf]
+  - @blocto/sdk@0.8.1-beta.0
+
 ## 0.2.6
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.8-beta.0
+
+### Patch Changes
+
+- 8d0b5bf: enhance in-app-sdk event support
+- Updated dependencies [8d0b5bf]
+  - @blocto/wagmi-connector@1.2.4-beta.0
+
 ## 0.2.7
 
 ### Patch Changes
@@ -7,7 +15,6 @@
 - 4835522: Fix export unreconize type for old typescript
 - Updated dependencies [4835522]
   - @blocto/wagmi-connector@1.2.2
-
 
 ## 0.2.7-beta.0
 
