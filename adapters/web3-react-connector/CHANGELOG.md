@@ -1,5 +1,13 @@
 # @blocto/web3-react-connector
 
+## 1.0.5-beta.0
+
+### Patch Changes
+
+- 8d0b5bf: enhance in-app-sdk event support
+- Updated dependencies [8d0b5bf]
+  - @blocto/sdk@0.8.1-beta.0
+
 ## 1.0.4
 
 ### Patch Changes
@@ -17,7 +25,6 @@
 - Updated dependencies [4835522]
 - Updated dependencies [e742f66]
   - @blocto/sdk@0.7.1
-
 
 ## 1.0.3-beta.0
 

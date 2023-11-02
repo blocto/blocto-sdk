@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.8.1-beta.0
+
+### Patch Changes
+
+- 8d0b5bf: enhance in-app-sdk event support
+
 ## 0.8.0
 
 ### Minor Changes
@@ -17,6 +23,7 @@
 ### Patch Changes
 
 - 58ef7a0: adjust eth_accounts to not require prior enable
+
 ## 0.7.1-beta.0
 
 ### Patch Changes

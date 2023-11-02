@@ -2,20 +2,18 @@
   "mode": "exit",
   "tag": "beta",
   "initialVersions": {
-    "@blocto/aptos-wallet-adapter-plugin": "0.2.5",
-    "@blocto/connectkit-connector": "0.2.0",
-    "@blocto/rainbowkit-connector": "0.2.6",
-    "@blocto/wagmi-connector": "1.2.1",
-    "@blocto/web3-react-connector": "1.0.2",
-    "@blocto/web3modal-connector": "0.1.1",
-    "@blocto/sdk": "0.7.0",
-    "@blocto/dappauth": "2.1.0",
+    "@blocto/aptos-wallet-adapter-plugin": "0.2.6",
+    "@blocto/connectkit-connector": "0.2.1",
+    "@blocto/rainbowkit-connector": "0.2.7",
+    "@blocto/wagmi-connector": "1.2.3",
+    "@blocto/web3-react-connector": "1.0.4",
+    "@blocto/web3modal-connector": "0.1.2",
+    "@blocto/sdk": "0.8.0",
+    "@blocto/dappauth": "2.2.0",
     "eslint-config-custom": "0.0.0",
     "tsconfig": "0.0.0"
   },
   "changesets": [
-    "funny-elephants-thank",
-    "new-brooms-refuse",
-    "six-foxes-add"
+    "angry-turkeys-complain"
   ]
 }
