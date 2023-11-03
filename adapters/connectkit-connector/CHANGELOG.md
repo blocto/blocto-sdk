@@ -1,5 +1,13 @@
 # @blocto/connectkit-connector
 
+## 0.2.2-beta.0
+
+### Patch Changes
+
+- 8d0b5bf: enhance in-app-sdk event support
+- Updated dependencies [8d0b5bf]
+  - @blocto/wagmi-connector@1.2.4-beta.0
+
 ## 0.2.1
 
 ### Patch Changes
