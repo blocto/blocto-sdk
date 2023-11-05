@@ -3,6 +3,6 @@ updates:
   - package-ecosystem: 'yarn'
     directory: '/'
     schedule:
-      interval: 'daily'
+      interval: 'weekly'
     ignore:
       - dependency-name: 'web3'
