@@ -604,10 +604,16 @@ export default class EthereumProvider
                 'message',
                 (event: Event, removeListener: () => void) => {
                   const messageEvent = event as MessageEvent;
-                  if (
-                    messageEvent.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED' &&
-                    messageEvent.data?.originChain !== CHAIN.ETHEREUM
-                  ) {
+                  const isAccountChanged =
+                    messageEvent.data?.type === 'BLOCTO_SDK:ACCOUNT_CHANGED';
+                  const isAnotherChain =
+                    messageEvent.data?.originChain !== CHAIN.ETHEREUM;
+                  if (isAccountChanged) {
+                    this.eventListeners?.accountsChanged.forEach((listener) =>
+                      listener([e.data.addr])
+                    );
+                  }
+                  if (isAccountChanged && isAnotherChain) {
                     this.handleDisconnect();
                     removeListener();
                   }
