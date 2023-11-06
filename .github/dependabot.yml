@@ -6,3 +6,4 @@ updates:
       interval: 'weekly'
     ignore:
       - dependency-name: 'web3'
+      - dependency-name: 'next'
