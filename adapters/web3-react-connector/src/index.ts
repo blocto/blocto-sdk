@@ -88,7 +88,7 @@ export class BloctoConnector extends Connector {
             params: [{ chainId: desiredChainId }],
           });
         });
-      this.activate(desiredChainId);
+      await this.activate(desiredChainId);
     } else {
       // AddEthereumChainParameter
       await this.provider
@@ -102,7 +102,7 @@ export class BloctoConnector extends Connector {
             params: [{ chainId: desiredChainId }],
           });
         });
-      this.activate(desiredChainId);
+      await this.activate(desiredChainId);
     }
   }
 
