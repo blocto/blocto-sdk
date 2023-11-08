@@ -927,7 +927,7 @@ export default class EthereumProvider
     if (this.existedSDK?.isBlocto)
       this.existedSDK.off(event, listener);
 
-    super.off(event, listener);
+    super.removeListener(event, listener);
   }
 
   off = this.removeListener;

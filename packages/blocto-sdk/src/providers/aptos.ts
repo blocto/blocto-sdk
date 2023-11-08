@@ -416,7 +416,7 @@ export default class AptosProvider
     if (this.existedSDK)
       this.existedSDK.off(event, listener);
   
-    super.off(event, listener);
+    super.removeListener(event, listener);
   }
   
   off = this.removeListener;
