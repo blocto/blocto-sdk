@@ -228,33 +228,39 @@ export default class EthereumProvider
     > = new Promise((resolve) => {
       // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
       if (Array.isArray(payload)) {
+        const { sendRequests, otherRequests } = payload.reduce(
+          (
+            acc: {
+              sendRequests: JsonRpcResponse[];
+              otherRequests: Promise<JsonRpcResponse>[];
+            },
+            request: JsonRpcRequest
+          ) => {
+            if (request.method === 'eth_sendTransaction') {
+              acc.sendRequests.push(request.params?.[0]);
+            } else {
+              acc.otherRequests.push(
+                this.request(request as EIP1193RequestPayload)
+              );
+            }
+            return acc;
+          },
+          { sendRequests: [], otherRequests: [] }
+        );
+
         // collect transactions and send batch with custom method
-        const transactions = payload.map((request) => request.params?.[0]);
+        const batchReqPayload = {
+          method: 'blocto_sendBatchTransaction',
+          params: sendRequests,
+        };
+        const batchReqPromise = this.request(batchReqPayload);
 
         const idBase = Math.floor(Math.random() * 10000);
 
-        const batchedRequestPayload = {
-          method: 'blocto_sendBatchTransaction',
-          params: transactions,
-        };
-
-        const batchResponsePromise = this.request(batchedRequestPayload);
-
-        const requests = payload.map(({ method, params }, index) =>
-          transactions.length > 0
-            ? batchResponsePromise
-            : this.request({
-                id: idBase + index + 1,
-                jsonrpc: '2.0',
-                method,
-                params,
-              })
-        );
-
         // resolve response when all request are executed
-        Promise.allSettled(requests)
-          .then((responses) =>
-            resolve(
+        Promise.allSettled([batchReqPromise, ...otherRequests])
+          .then((responses) => {
+            return resolve(
               <Array<JsonRpcResponse>>responses.map((response, index) => {
                 return {
                   id: String(idBase + index + 1),
@@ -270,8 +276,8 @@ export default class EthereumProvider
                       : undefined,
                 };
               })
-            )
-          )
+            );
+          })
           .catch((error) => {
             throw ethErrors.rpc.internal(error?.message);
           });
@@ -281,7 +287,7 @@ export default class EthereumProvider
     });
 
     // execute callback or return promise, depdends on callback arg given or not
-    if (callback) {
+    if (typeof callback === 'function') {
       handleRequest
         .then((data) => callback(null, <JsonRpcResponse>(<unknown>data)))
         .catch((error) => callback(error));
@@ -306,11 +312,9 @@ export default class EthereumProvider
 
   async request(payload: EIP1193RequestPayload): Promise<any> {
     if (!payload?.method) throw ethErrors.rpc.invalidRequest();
-
-
     const { blockchainName, switchableNetwork, sessionKey } =
       await this.#getBloctoProperties();
-      
+
     if (this.existedSDK?.isBlocto) {
       if (payload.method === 'wallet_switchEthereumChain') {
         if (!payload?.params?.[0]?.chainId) {
@@ -346,6 +350,9 @@ export default class EthereumProvider
             ? response.error.message
             : 'Request failed';
           throw ethErrors.rpc.internal(errorMessage);
+        }
+        if (typeof payload?.callback === 'function') {
+          payload.callback(null, response.result);
         }
         return response.result;
       }
@@ -553,7 +560,10 @@ export default class EthereumProvider
       }
       return new Promise((resolve, reject) =>
         // add a small delay to make sure the network has been switched
-        setTimeout(() => this.existedSDK.enable().then(resolve).catch(reject), 10)
+        setTimeout(
+          () => this.existedSDK.enable().then(resolve).catch(reject),
+          10
+        )
       );
     }
 
@@ -917,15 +927,13 @@ export default class EthereumProvider
   }
 
   override on(event: string, listener: (arg: any) => void): void {
-    if (this.existedSDK?.isBlocto)
-      this.existedSDK.on(event, listener);
+    if (this.existedSDK?.isBlocto) this.existedSDK.on(event, listener);
 
     super.on(event, listener);
   }
 
   override removeListener(event: string, listener: (arg: any) => void): void {
-    if (this.existedSDK?.isBlocto)
-      this.existedSDK.off(event, listener);
+    if (this.existedSDK?.isBlocto) this.existedSDK.off(event, listener);
 
     super.removeListener(event, listener);
   }
