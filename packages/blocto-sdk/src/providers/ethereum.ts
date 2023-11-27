@@ -74,7 +74,7 @@ export default class EthereumProvider
   private get existedSDK() {
     return (window as any).ethereum;
   }
-  
+
   constructor({ chainId, rpc, walletServer, appId }: EthereumProviderConfig) {
     super();
     // setup chainId
@@ -263,7 +263,7 @@ export default class EthereumProvider
             return resolve(
               <Array<JsonRpcResponse>>responses.map((response, index) => {
                 return {
-                  id: String(idBase + index + 1),
+                  id: String(payload[index].id || idBase + index + 1),
                   jsonrpc: '2.0',
                   method: payload[index].method,
                   result:
@@ -889,7 +889,6 @@ export default class EthereumProvider
   }
 
   async handleDisconnect(): Promise<void> {
-    
     if (this.existedSDK?.isBlocto) {
       return this.existedSDK.request({ method: 'wallet_disconnect' });
     }
