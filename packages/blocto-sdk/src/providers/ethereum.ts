@@ -253,7 +253,7 @@ export default class EthereumProvider
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
   // web3 v1.x BatchRequest still depends on it so we need to implement anyway ¯\_(ツ)_/¯
   async sendAsync(
-    payload: JsonRpcRequest | Array<JsonRpcRequest>,
+    payload: JsonRpcRequest | Array<JsonRpcRequest> | EIP1193RequestPayload,
     callback?: JsonRpcCallback
   ): Promise<JsonRpcResponse | Array<JsonRpcResponse> | void> {
     const handleRequest: Promise<
@@ -283,33 +283,81 @@ export default class EthereumProvider
 
         // collect transactions and send batch with custom method
         const batchReqPayload = {
-          method: 'blocto_sendBatchTransaction',
+          method: 'wallet_sendMultiCallTransaction',
           params: sendRequests,
         };
-        const batchReqPromise = this.request(batchReqPayload);
-
+        const isSendRequestsEmpty = sendRequests.length === 0;
         const idBase = Math.floor(Math.random() * 10000);
-
+        const allPromise = isSendRequestsEmpty
+          ? [...otherRequests]
+          : [this.request(batchReqPayload), ...otherRequests];
         // resolve response when all request are executed
-        Promise.allSettled([batchReqPromise, ...otherRequests])
+        Promise.allSettled(allPromise)
           .then((responses) => {
-            return resolve(
-              <Array<JsonRpcResponse>>responses.map((response, index) => {
+            if (isSendRequestsEmpty) {
+              return resolve(
+                <Array<JsonRpcResponse>>responses.map((response, index) => {
+                  return {
+                    id: String(payload[index]?.id || idBase + index + 1),
+                    jsonrpc: '2.0',
+                    method: payload[index].method,
+                    result:
+                      response.status === 'fulfilled'
+                        ? response.value
+                        : undefined,
+                    error:
+                      response.status !== 'fulfilled'
+                        ? response.reason
+                        : undefined,
+                  };
+                })
+              );
+            }
+            const originalLengthResponse = payload.map((item, index) => {
+              const response = responses[index];
+              const baseResponse = {
+                id: String(item.id || idBase + index + 1),
+                jsonrpc: '2.0',
+                method: item.method,
+              };
+              // const sendTransactionResponse =
+              if (!response?.status && item.method === 'eth_sendTransaction') {
                 return {
-                  id: String(payload[index].id || idBase + index + 1),
-                  jsonrpc: '2.0',
-                  method: payload[index].method,
-                  result:
-                    response.status === 'fulfilled'
-                      ? response.value
-                      : undefined,
-                  error:
-                    response.status !== 'fulfilled'
-                      ? response.reason
-                      : undefined,
+                  ...baseResponse,
+                  method: 'shouldInsertSendObj',
                 };
-              })
+              }
+              if (response.status === 'fulfilled') {
+                return {
+                  ...baseResponse,
+                  result: response.value, // 'value' exists on fulfilled
+                  error: undefined,
+                };
+              } else {
+                return {
+                  ...baseResponse,
+                  result: undefined,
+                  error: response.reason, // 'reason' exists on rejected
+                };
+              }
+            });
+            const sendTransactionResponse = originalLengthResponse.find(
+              (obj) => obj.method === 'eth_sendTransaction'
             );
+            const result = originalLengthResponse.map((e) => {
+              if (e?.method === 'shouldInsertSendObj') {
+                return {
+                  ...e,
+                  ...sendTransactionResponse,
+                  id: e.id,
+                };
+              } else {
+                return {
+                  ...e,
+                };
+              }
+            });
+            return resolve(<Array<JsonRpcResponse>>result);
           })
           .catch((error) => {
             throw ethErrors.rpc.internal(error?.message);
@@ -322,7 +370,9 @@ export default class EthereumProvider
     // execute callback or return promise, depdends on callback arg given or not
     if (typeof callback === 'function') {
       handleRequest
-        .then((data) => callback(null, <JsonRpcResponse>(<unknown>data)))
+        .then((data) => {
+          return callback(null, <JsonRpcResponse>(<unknown>data));
+        })
         .catch((error) => callback(error));
     } else {
       return <JsonRpcResponse>(<unknown>handleRequest);
@@ -344,6 +394,9 @@ export default class EthereumProvider
   }
 
   async request(payload: EIP1193RequestPayload): Promise<any> {
+    if (Array.isArray(payload)) {
+      return this.sendAsync(payload);
+    }
     if (!payload?.method) throw ethErrors.rpc.invalidRequest();
 
     const { blockchainName, switchableNetwork, sessionKeyEnv } =
@@ -437,7 +490,7 @@ export default class EthereumProvider
         case 'eth_sendTransaction':
           result = await this.handleSendTransaction(payload);
           break;
-        case 'blocto_sendBatchTransaction':
+        case 'wallet_sendMultiCallTransaction':
           result = await this.handleSendBatchTransaction(payload);
           break;
         case 'eth_signTransaction':
