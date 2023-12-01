@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.8.1-beta.1
+
+### Patch Changes
+
+- aa28bf6: add accountChanged eventListeners
+
 ## 0.8.1-beta.0
 
 ### Patch Changes
