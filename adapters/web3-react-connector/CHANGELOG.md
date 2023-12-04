@@ -1,5 +1,13 @@
 # @blocto/web3-react-connector
 
+## 1.0.5-beta.1
+
+### Patch Changes
+
+- eb72d1c: fix unhandle user reject error
+- Updated dependencies [aa28bf6]
+  - @blocto/sdk@0.8.1-beta.1
+
 ## 1.0.5-beta.0
 
 ### Patch Changes
