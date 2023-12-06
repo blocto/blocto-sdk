@@ -14,6 +14,7 @@ export interface EIP1193RequestPayload {
   jsonrpc?: string;
   method: string;
   params?: Array<any>;
+  callback?: JsonRpcCallback;
 }
 
 interface SwitchableNetwork {
