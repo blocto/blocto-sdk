@@ -256,30 +256,33 @@ export default class EthereumProvider
     payload: JsonRpcRequest | Array<JsonRpcRequest> | EIP1193RequestPayload,
     callback?: JsonRpcCallback
   ): Promise<JsonRpcResponse | Array<JsonRpcResponse> | void> {
+    const separateRequests = (payload: Array<JsonRpcRequest>) => {
+      return payload.reduce(
+        (
+          acc: {
+            sendRequests: JsonRpcResponse[];
+            otherRequests: Promise<JsonRpcResponse>[];
+          },
+          request: JsonRpcRequest
+        ) => {
+          if (request.method === 'eth_sendTransaction') {
+            acc.sendRequests.push(request.params?.[0]);
+          } else {
+            acc.otherRequests.push(
+              this.request(request as EIP1193RequestPayload)
+            );
+          }
+          return acc;
+        },
+        { sendRequests: [], otherRequests: [] }
+      );
+    };
     const handleRequest: Promise<
       void | JsonRpcResponse | Array<JsonRpcResponse>
     > = new Promise((resolve) => {
       // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
       if (Array.isArray(payload)) {
-        const { sendRequests, otherRequests } = payload.reduce(
-          (
-            acc: {
-              sendRequests: JsonRpcResponse[];
-              otherRequests: Promise<JsonRpcResponse>[];
-            },
-            request: JsonRpcRequest
-          ) => {
-            if (request.method === 'eth_sendTransaction') {
-              acc.sendRequests.push(request.params?.[0]);
-            } else {
-              acc.otherRequests.push(
-                this.request(request as EIP1193RequestPayload)
-              );
-            }
-            return acc;
-          },
-          { sendRequests: [], otherRequests: [] }
-        );
+        const { sendRequests, otherRequests } = separateRequests(payload);
 
         // collect transactions and send batch with custom method
         const batchReqPayload = {
@@ -394,6 +397,7 @@ export default class EthereumProvider
   }
 
   async request(payload: EIP1193RequestPayload): Promise<any> {
+    // web3.js v4 batch entry point
     if (Array.isArray(payload)) {
       return this.sendAsync(payload);
     }
@@ -942,21 +946,38 @@ export default class EthereumProvider
   ): Promise<string> {
     this.#checkNetworkMatched();
 
-    const extractParams = (params: Array<any>): Array<any> =>
-      params.map((param) =>
-        'params' in param
-          ? param.params[0] // handle passing web3.eth.sendTransaction.request(...) as a parameter with params
-          : param
-      );
-    const formatParams = extractParams(payload.params as Array<any>);
-    const copyPayload = { ...payload, params: formatParams };
+    const extractParams = (
+      params: Array<any>
+    ): { formatParams: any; revert: boolean } => {
+      const hasBoolean = params.some((param) => typeof param === 'boolean');
+      // batch transaction default revertFlag is false
+      let revert = false;
+      if (hasBoolean) {
+        revert = params.find((param) => typeof param === 'boolean');
+      }
+      const filteredParams = params
+        .filter((param) => typeof param !== 'boolean')
+        .map((param) => {
+          return param && typeof param === 'object' && 'params' in param
+            ? param.params[0]
+            : param;
+        });
+      return { formatParams: filteredParams, revert };
+    };
+    const { formatParams, revert } = extractParams(
+      payload.params as Array<any>
+    );
+    const copyPayload = {
+      ...payload,
+      params: Array.isArray(formatParams) ? formatParams[0] : formatParams,
+    };
 
     const { isValid, invalidMsg } = isValidTransactions(copyPayload.params);
     if (!isValid) {
       throw ethErrors.rpc.invalidParams(invalidMsg);
     }
 
-    return this.#createAuthzFrame(copyPayload.params);
+    return this.#createAuthzFrame(copyPayload.params.concat(revert));
   }
 
   async #createAuthzFrame(params: EIP1193RequestPayload['params']) {
