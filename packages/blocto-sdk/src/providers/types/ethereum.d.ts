@@ -1,7 +1,6 @@
 import { IEthereumProvider } from 'eip1193-provider';
 import { BaseConfig, KEY_SESSION } from '../../constants';
 import BloctoProviderInterface from './blocto.d';
-import { EvmSupportMapping } from '../../lib/getEvmSupport';
 
 export interface EthereumProviderConfig extends BaseConfig {
   chainId: string | number | null;
@@ -38,7 +37,6 @@ export interface EthereumProviderInterface
     walletServer: string;
     blockchainName: string;
     networkType: string;
-    supportNetworkList: EvmSupportMapping;
     switchableNetwork: SwitchableNetwork;
   };
   sendUserOperation(userOp: IUserOperation): Promise<string>;
