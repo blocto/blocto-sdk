@@ -976,14 +976,19 @@ export default class EthereumProvider
     if (!isValid) {
       throw ethErrors.rpc.invalidParams(invalidMsg);
     }
-
-    return this.#createAuthzFrame(copyPayload.params.concat(revert));
+    return this.#createAuthzFrame(copyPayload.params, revert);
   }
 
-  async #createAuthzFrame(params: EIP1193RequestPayload['params']) {
+  async #createAuthzFrame(
+    params: EIP1193RequestPayload['params'],
+    revert = true
+  ) {
     const { authorizationId } = await this.bloctoApi<{
       authorizationId: string;
-    }>(`/authz`, { method: 'POST', body: JSON.stringify(params) });
+    }>(`/authz`, {
+      method: 'POST',
+      body: JSON.stringify([params, revert]),
+    });
     const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
     return this.responseListener(authzFrame, 'txHash');
   }
