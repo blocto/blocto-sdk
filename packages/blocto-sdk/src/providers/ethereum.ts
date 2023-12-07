@@ -5,6 +5,7 @@ import {
   EIP1193RequestPayload,
   EthereumProviderConfig,
   EthereumProviderInterface,
+  AddEthereumChainParameter,
   JsonRpcRequest,
   JsonRpcResponse,
   JsonRpcCallback,
@@ -63,6 +64,7 @@ export default class EthereumProvider
   injectedWalletServer?: string;
   appId: string;
   _blocto: {
+    unloadedNetwork?: AddEthereumChainParameter[];
     sessionKeyEnv: KEY_SESSION;
     walletServer: string;
     blockchainName: string;
@@ -73,20 +75,10 @@ export default class EthereumProvider
   private get existedSDK() {
     return (window as any).ethereum;
   }
-  
-  constructor({ chainId, rpc, walletServer, appId }: EthereumProviderConfig) {
+
+  constructor(config: EthereumProviderConfig) {
     super();
-    // setup chainId
-    invariant(chainId, "'chainId' is required");
-    this.networkVersion = `${parseChainId(chainId)}`;
-    this.chainId = `0x${parseChainId(chainId).toString(16)}`;
-    // setup rpc
-    this.rpc = rpc || ETH_RPC_LIST[this.networkVersion];
-    invariant(this.rpc, "'rpc' is required");
-    // setup injectedWalletServer
-    this.injectedWalletServer = walletServer;
-    // NOTE: _blocto is not fully initialized yet at this point
-    // Any function should call #getBloctoProperties() to get the full _blocto properties
+    this.injectedWalletServer = config.walletServer;
     this._blocto = {
       sessionKeyEnv: KEY_SESSION.prod,
       walletServer: this.injectedWalletServer || '',
@@ -94,10 +86,41 @@ export default class EthereumProvider
       networkType: '',
       switchableNetwork: {},
     };
-    this.appId = appId || DEFAULT_APP_ID;
+    this.appId = config.appId || DEFAULT_APP_ID;
+    if ('chainId' in config) {
+      const { chainId, rpc } = config;
+      invariant(chainId, "'chainId' is required");
+      this.networkVersion = `${parseChainId(chainId)}`;
+      this.chainId = `0x${parseChainId(chainId).toString(16)}`;
+      // setup rpc
+      this.rpc = rpc || ETH_RPC_LIST[this.networkVersion];
+      invariant(this.rpc, "'rpc' is required");
+    } else {
+      const { defaultChainId, switchableChains } = config;
+      invariant(defaultChainId, "'defaultChainId' is required");
+      this.networkVersion = `${parseChainId(defaultChainId)}`;
+      this.chainId = `0x${parseChainId(defaultChainId).toString(16)}`;
+      // get config from switchableChains array
+      const chainConfig = switchableChains.find(
+        (chain) => parseChainId(chain.chainId) === parseChainId(defaultChainId)
+      );
+      if (!chainConfig) {
+        throw ethErrors.provider.custom({
+          code: 1001,
+          message: `Chain ${defaultChainId} is not in switchableChains list`,
+        });
+      }
+      this.rpc = chainConfig.rpcUrls?.[0] || ETH_RPC_LIST[this.networkVersion];
+      invariant(this.rpc, "'rpc' is required");
+      this._blocto.unloadedNetwork = switchableChains;
+    }
   }
 
   async #getBloctoProperties(): Promise<EthereumProvider['_blocto']> {
+    if (this._blocto?.unloadedNetwork) {
+      await this.loadSwitchableNetwork(this._blocto.unloadedNetwork);
+      delete this._blocto.unloadedNetwork;
+    }
     if (
       this._blocto.sessionKeyEnv &&
       this._blocto.walletServer &&
@@ -154,6 +177,7 @@ export default class EthereumProvider
     chainId: `${number}`;
     rpcUrls: string[];
   }): Promise<void> {
+    await this.#getBloctoProperties();
     const supportNetworkList = await getEvmSupport().catch((e) => {
       throw ethErrors.provider.custom({
         code: 1001,
@@ -910,10 +934,7 @@ export default class EthereumProvider
   }
 
   async loadSwitchableNetwork(
-    networkList: {
-      chainId: string;
-      rpcUrls?: string[];
-    }[]
+    networkList: AddEthereumChainParameter[]
   ): Promise<null> {
     // setup switchable list if user set networkList
     if (networkList?.length) {
