@@ -63,7 +63,7 @@ export default class EthereumProvider
   injectedWalletServer?: string;
   appId: string;
   _blocto: {
-    sessionKey: KEY_SESSION;
+    sessionKeyEnv: KEY_SESSION;
     walletServer: string;
     blockchainName: string;
     networkType: string;
@@ -74,7 +74,7 @@ export default class EthereumProvider
   private get existedSDK() {
     return (window as any).ethereum;
   }
-
+  
   constructor({ chainId, rpc, walletServer, appId }: EthereumProviderConfig) {
     super();
     // setup chainId
@@ -89,7 +89,7 @@ export default class EthereumProvider
     // NOTE: _blocto is not fully initialized yet at this point
     // Any function should call #getBloctoProperties() to get the full _blocto properties
     this._blocto = {
-      sessionKey: KEY_SESSION.prod,
+      sessionKeyEnv: KEY_SESSION.prod,
       walletServer: this.injectedWalletServer || '',
       blockchainName: '',
       networkType: '',
@@ -123,7 +123,7 @@ export default class EthereumProvider
       );
     this._blocto = {
       ...this._blocto,
-      sessionKey: ETH_SESSION_KEY_MAPPING[blocto_service_environment],
+      sessionKeyEnv: ETH_SESSION_KEY_MAPPING[blocto_service_environment],
       walletServer:
         this.injectedWalletServer ||
         ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment],
@@ -312,7 +312,8 @@ export default class EthereumProvider
 
   async request(payload: EIP1193RequestPayload): Promise<any> {
     if (!payload?.method) throw ethErrors.rpc.invalidRequest();
-    const { blockchainName, switchableNetwork, sessionKey } =
+
+    const { blockchainName, switchableNetwork, sessionKeyEnv } =
       await this.#getBloctoProperties();
 
     if (this.existedSDK?.isBlocto) {
@@ -363,11 +364,11 @@ export default class EthereumProvider
         return this.handleDisconnect();
       }
       case 'eth_accounts':
-        return getEvmAddress(sessionKey, blockchainName) || [];
+        return getEvmAddress(sessionKeyEnv, blockchainName) || [];
     }
 
     // Method that requires user to be connected
-    if (!getEvmAddress(sessionKey, blockchainName)) {
+    if (!getEvmAddress(sessionKeyEnv, blockchainName)) {
       const email = payload?.params?.[0];
       if (payload.method === 'eth_requestAccounts' && isEmail(email)) {
         await this.enable(email);
@@ -386,7 +387,7 @@ export default class EthereumProvider
         }
         // eslint-disable-next-line
         case 'eth_coinbase': {
-          result = getEvmAddress(sessionKey, blockchainName)?.[0];
+          result = getEvmAddress(sessionKeyEnv, blockchainName)?.[0];
           break;
         }
         case 'eth_signTypedData_v3':
@@ -440,9 +441,9 @@ export default class EthereumProvider
   }
 
   async bloctoApi<T>(url: string, options?: RequestInit): Promise<T> {
-    const { walletServer, blockchainName, sessionKey } =
+    const { walletServer, blockchainName, sessionKeyEnv } =
       await this.#getBloctoProperties();
-    const sessionId = getAccountStorage(sessionKey)?.code || '';
+    const sessionId = getAccountStorage(sessionKeyEnv)?.code || '';
     if (!sessionId) {
       throw ethErrors.provider.unauthorized();
     }
@@ -457,7 +458,7 @@ export default class EthereumProvider
       ...options,
     })
       .then((response) =>
-        responseSessionGuard<T>(response, sessionKey, () => {
+        responseSessionGuard<T>(response, sessionKeyEnv, () => {
           this.eventListeners?.disconnect.forEach((listener) =>
             listener(ethErrors.provider.disconnected())
           );
@@ -543,7 +544,7 @@ export default class EthereumProvider
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
   async enable(email?: string): Promise<ProviderAccounts> {
-    const { walletServer, blockchainName, sessionKey } =
+    const { walletServer, blockchainName, sessionKeyEnv } =
       await this.#getBloctoProperties();
 
     if (this.existedSDK?.isBlocto) {
@@ -556,7 +557,7 @@ export default class EthereumProvider
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: this.chainId }],
         });
-        setEvmAddress(sessionKey, blockchainName, [this.existedSDK.address]);
+        setEvmAddress(sessionKeyEnv, blockchainName, [this.existedSDK.address]);
       }
       return new Promise((resolve, reject) =>
         // add a small delay to make sure the network has been switched
@@ -567,7 +568,7 @@ export default class EthereumProvider
       );
     }
 
-    const address = getEvmAddress(sessionKey, blockchainName);
+    const address = getEvmAddress(sessionKeyEnv, blockchainName);
     if (address) {
       return new Promise((resolve) => {
         resolve(address);
@@ -595,7 +596,7 @@ export default class EthereumProvider
                 listener({ chainId: this.chainId })
               );
               setAccountStorage(
-                sessionKey,
+                sessionKeyEnv,
                 {
                   code: e.data.code,
                   evm: {
@@ -645,9 +646,9 @@ export default class EthereumProvider
 
   async fetchAccounts(): Promise<ProviderAccounts> {
     this.#checkNetworkMatched();
-    const { blockchainName, sessionKey } = await this.#getBloctoProperties();
+    const { blockchainName, sessionKeyEnv } = await this.#getBloctoProperties();
     const { accounts } = await this.bloctoApi<{ accounts: [] }>(`/accounts`);
-    setEvmAddress(sessionKey, blockchainName, accounts);
+    setEvmAddress(sessionKeyEnv, blockchainName, accounts);
     return accounts;
   }
 
@@ -712,9 +713,9 @@ export default class EthereumProvider
     if (!targetChainId) {
       throw ethErrors.rpc.invalidParams();
     }
-    const { walletServer, blockchainName, sessionKey, switchableNetwork } =
+    const { walletServer, blockchainName, sessionKeyEnv, switchableNetwork } =
       await this.#getBloctoProperties();
-    const oldAccount = getEvmAddress(sessionKey, blockchainName)?.[0];
+    const oldAccount = getEvmAddress(sessionKeyEnv, blockchainName)?.[0];
     const oldChainId = parseChainId(this.chainId);
     const newChainId = parseChainId(targetChainId);
     if (oldChainId === newChainId) {
@@ -777,7 +778,7 @@ export default class EthereumProvider
               detatchFrame(switchChainFrame);
               if (e.data?.addr && oldAccount) {
                 setAccountStorage(
-                  sessionKey,
+                  sessionKeyEnv,
                   {
                     code: e.data?.code,
                     evm: {
@@ -806,7 +807,7 @@ export default class EthereumProvider
                 this.eventListeners?.chainChanged.forEach((listener) =>
                   listener(this.chainId)
                 );
-                removeAllEvmAddress(sessionKey);
+                removeAllEvmAddress(sessionKeyEnv);
                 this.eventListeners?.disconnect.forEach((listener) =>
                   listener(ethErrors.provider.disconnected())
                 );
@@ -892,8 +893,8 @@ export default class EthereumProvider
     if (this.existedSDK?.isBlocto) {
       return this.existedSDK.request({ method: 'wallet_disconnect' });
     }
-    const { sessionKey } = await this.#getBloctoProperties();
-    removeAllEvmAddress(sessionKey);
+    const { sessionKeyEnv } = await this.#getBloctoProperties();
+    removeAllEvmAddress(sessionKeyEnv);
     this.eventListeners?.disconnect.forEach((listener) =>
       listener(ethErrors.provider.disconnected())
     );
