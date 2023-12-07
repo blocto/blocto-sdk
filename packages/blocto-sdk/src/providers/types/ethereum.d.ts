@@ -34,7 +34,7 @@ export interface EthereumProviderInterface
   networkVersion: string | number;
   rpc: string;
   _blocto: {
-    sessionKey: KEY_SESSION;
+    sessionKeyEnv: KEY_SESSION;
     walletServer: string;
     blockchainName: string;
     networkType: string;
