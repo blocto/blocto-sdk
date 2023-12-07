@@ -55,6 +55,7 @@ export interface EthereumProviderInterface
       rpcUrls?: string[];
     }[]
   ): Promise<null>;
+  supportChainList(): Promise<{ chainId: string; chainName: string }[]>;
   injectedWalletServer?: string;
 }
 
