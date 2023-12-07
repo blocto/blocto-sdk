@@ -972,6 +972,22 @@ export default class EthereumProvider
     }
   }
 
+  async supportChainList(): Promise<{ chainId: string; chainName: string }[]> {
+    const supportNetworkList = await getEvmSupport().catch((e) => {
+      throw ethErrors.provider.custom({
+        code: 1001,
+        message: `Get blocto server failed: ${e.message}`,
+      });
+    });
+    return Object.keys(supportNetworkList).map((chainId) => {
+      const { display_name } = supportNetworkList[chainId];
+      return {
+        chainId,
+        chainName: display_name,
+      };
+    });
+  }
+
   override on(event: string, listener: (arg: any) => void): void {
     if (this.existedSDK?.isBlocto) this.existedSDK.on(event, listener);
 
