@@ -37,7 +37,7 @@ import {
   isValidTransaction,
   isValidTransactions,
 } from '../lib/isValidTransaction';
-import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
+import { getEvmSupport } from '../lib/getEvmSupport';
 import { ethErrors } from 'eth-rpc-errors';
 import { isHexString, utf8ToHex } from '../lib/utf8toHex';
 
@@ -67,7 +67,6 @@ export default class EthereumProvider
     walletServer: string;
     blockchainName: string;
     networkType: string;
-    supportNetworkList: EvmSupportMapping;
     switchableNetwork: SwitchableNetwork;
   };
 
@@ -93,34 +92,39 @@ export default class EthereumProvider
       walletServer: this.injectedWalletServer || '',
       blockchainName: '',
       networkType: '',
-      supportNetworkList: {},
       switchableNetwork: {},
     };
     this.appId = appId || DEFAULT_APP_ID;
   }
 
   async #getBloctoProperties(): Promise<EthereumProvider['_blocto']> {
-    if (!Object.keys(this._blocto.supportNetworkList).length) {
-      await getEvmSupport()
-        .then((result) => (this._blocto.supportNetworkList = result))
-        .catch((e) => {
-          throw ethErrors.provider.custom({
-            code: 1001,
-            message: `Get blocto server failed: ${e.message}`,
-          });
-        });
+    if (
+      this._blocto.sessionKeyEnv &&
+      this._blocto.walletServer &&
+      this._blocto.blockchainName &&
+      this._blocto.networkType &&
+      this._blocto.switchableNetwork
+    ) {
+      return this._blocto;
     }
+    const supportNetworkList = await getEvmSupport().catch((e) => {
+      throw ethErrors.provider.custom({
+        code: 1001,
+        message: `Get blocto server failed: ${e.message}`,
+      });
+    });
     const {
       chain_id,
       name,
       network_type,
       blocto_service_environment,
       display_name,
-    } = this._blocto.supportNetworkList[this.networkVersion] ?? {};
-    if (!chain_id)
+    } = supportNetworkList[this.networkVersion] ?? {};
+    if (!chain_id) {
       throw ethErrors.provider.unsupportedMethod(
         `Get support chain failed: ${this.networkVersion} might not be supported yet.`
       );
+    }
     this._blocto = {
       ...this._blocto,
       sessionKeyEnv: ETH_SESSION_KEY_MAPPING[blocto_service_environment],
@@ -150,7 +154,12 @@ export default class EthereumProvider
     chainId: `${number}`;
     rpcUrls: string[];
   }): Promise<void> {
-    const { supportNetworkList } = await this.#getBloctoProperties();
+    const supportNetworkList = await getEvmSupport().catch((e) => {
+      throw ethErrors.provider.custom({
+        code: 1001,
+        message: `Get blocto server failed: ${e.message}`,
+      });
+    });
     const {
       chain_id,
       name,
