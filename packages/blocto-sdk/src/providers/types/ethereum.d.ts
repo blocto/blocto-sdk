@@ -1,13 +1,20 @@
 import { IEthereumProvider } from 'eip1193-provider';
 import { BaseConfig, KEY_SESSION } from '../../constants';
 import BloctoProviderInterface from './blocto.d';
-import { EvmSupportMapping } from '../../lib/getEvmSupport';
 
-export interface EthereumProviderConfig extends BaseConfig {
+interface SingleChainConfig extends BaseConfig {
   chainId: string | number | null;
   rpc?: string;
   walletServer?: string;
 }
+
+interface MultiChainConfig extends BaseConfig {
+  defaultChainId: string | number | null;
+  walletServer?: string;
+  switchableChains: AddEthereumChainParameter[];
+}
+// EthereumProviderConfig can be both single chain or multi chain config.
+export type EthereumProviderConfig = SingleChainConfig | MultiChainConfig;
 
 export interface EIP1193RequestPayload {
   id?: number;
@@ -34,11 +41,10 @@ export interface EthereumProviderInterface
   networkVersion: string | number;
   rpc: string;
   _blocto: {
-    sessionKey: KEY_SESSION;
+    sessionKeyEnv: KEY_SESSION;
     walletServer: string;
     blockchainName: string;
     networkType: string;
-    supportNetworkList: EvmSupportMapping;
     switchableNetwork: SwitchableNetwork;
   };
   sendUserOperation(userOp: IUserOperation): Promise<string>;
@@ -49,12 +55,14 @@ export interface EthereumProviderInterface
       rpcUrls?: string[];
     }[]
   ): Promise<null>;
+  supportChainList(): Promise<{ chainId: string; chainName: string }[]>;
   injectedWalletServer?: string;
 }
 
 export interface AddEthereumChainParameter {
   chainId: string;
   rpcUrls: string[];
+  [key: string]: any;
 }
 
 export interface JsonRpcRequest {

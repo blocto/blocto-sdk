@@ -5,6 +5,7 @@ import {
   EIP1193RequestPayload,
   EthereumProviderConfig,
   EthereumProviderInterface,
+  AddEthereumChainParameter,
   JsonRpcRequest,
   JsonRpcResponse,
   JsonRpcCallback,
@@ -37,7 +38,7 @@ import {
   isValidTransaction,
   isValidTransactions,
 } from '../lib/isValidTransaction';
-import { EvmSupportMapping, getEvmSupport } from '../lib/getEvmSupport';
+import { getEvmSupport } from '../lib/getEvmSupport';
 import { ethErrors } from 'eth-rpc-errors';
 import { isHexString, utf8ToHex } from '../lib/utf8toHex';
 
@@ -63,11 +64,11 @@ export default class EthereumProvider
   injectedWalletServer?: string;
   appId: string;
   _blocto: {
-    sessionKey: KEY_SESSION;
+    unloadedNetwork?: AddEthereumChainParameter[];
+    sessionKeyEnv: KEY_SESSION;
     walletServer: string;
     blockchainName: string;
     networkType: string;
-    supportNetworkList: EvmSupportMapping;
     switchableNetwork: SwitchableNetwork;
   };
 
@@ -75,55 +76,81 @@ export default class EthereumProvider
     return (window as any).ethereum;
   }
 
-  constructor({ chainId, rpc, walletServer, appId }: EthereumProviderConfig) {
+  constructor(config: EthereumProviderConfig) {
     super();
-    // setup chainId
-    invariant(chainId, "'chainId' is required");
-    this.networkVersion = `${parseChainId(chainId)}`;
-    this.chainId = `0x${parseChainId(chainId).toString(16)}`;
-    // setup rpc
-    this.rpc = rpc || ETH_RPC_LIST[this.networkVersion];
-    invariant(this.rpc, "'rpc' is required");
-    // setup injectedWalletServer
-    this.injectedWalletServer = walletServer;
-    // NOTE: _blocto is not fully initialized yet at this point
-    // Any function should call #getBloctoProperties() to get the full _blocto properties
+    this.injectedWalletServer = config.walletServer;
     this._blocto = {
-      sessionKey: KEY_SESSION.prod,
+      sessionKeyEnv: KEY_SESSION.prod,
       walletServer: this.injectedWalletServer || '',
       blockchainName: '',
       networkType: '',
-      supportNetworkList: {},
       switchableNetwork: {},
     };
-    this.appId = appId || DEFAULT_APP_ID;
+    this.appId = config.appId || DEFAULT_APP_ID;
+    if ('chainId' in config) {
+      const { chainId, rpc } = config;
+      invariant(chainId, "'chainId' is required");
+      this.networkVersion = `${parseChainId(chainId)}`;
+      this.chainId = `0x${parseChainId(chainId).toString(16)}`;
+      // setup rpc
+      this.rpc = rpc || ETH_RPC_LIST[this.networkVersion];
+      invariant(this.rpc, "'rpc' is required");
+    } else {
+      const { defaultChainId, switchableChains } = config;
+      invariant(defaultChainId, "'defaultChainId' is required");
+      this.networkVersion = `${parseChainId(defaultChainId)}`;
+      this.chainId = `0x${parseChainId(defaultChainId).toString(16)}`;
+      // get config from switchableChains array
+      const chainConfig = switchableChains.find(
+        (chain) => parseChainId(chain.chainId) === parseChainId(defaultChainId)
+      );
+      if (!chainConfig) {
+        throw ethErrors.provider.custom({
+          code: 1001,
+          message: `Chain ${defaultChainId} is not in switchableChains list`,
+        });
+      }
+      this.rpc = chainConfig.rpcUrls?.[0] || ETH_RPC_LIST[this.networkVersion];
+      invariant(this.rpc, "'rpc' is required");
+      this._blocto.unloadedNetwork = switchableChains;
+    }
   }
 
   async #getBloctoProperties(): Promise<EthereumProvider['_blocto']> {
-    if (!Object.keys(this._blocto.supportNetworkList).length) {
-      await getEvmSupport()
-        .then((result) => (this._blocto.supportNetworkList = result))
-        .catch((e) => {
-          throw ethErrors.provider.custom({
-            code: 1001,
-            message: `Get blocto server failed: ${e.message}`,
-          });
-        });
+    if (this._blocto?.unloadedNetwork) {
+      await this.loadSwitchableNetwork(this._blocto.unloadedNetwork);
+      delete this._blocto.unloadedNetwork;
     }
+    if (
+      this._blocto.sessionKeyEnv &&
+      this._blocto.walletServer &&
+      this._blocto.blockchainName &&
+      this._blocto.networkType &&
+      this._blocto.switchableNetwork
+    ) {
+      return this._blocto;
+    }
+    const supportNetworkList = await getEvmSupport().catch((e) => {
+      throw ethErrors.provider.custom({
+        code: 1001,
+        message: `Get blocto server failed: ${e.message}`,
+      });
+    });
     const {
       chain_id,
       name,
       network_type,
       blocto_service_environment,
       display_name,
-    } = this._blocto.supportNetworkList[this.networkVersion] ?? {};
-    if (!chain_id)
+    } = supportNetworkList[this.networkVersion] ?? {};
+    if (!chain_id) {
       throw ethErrors.provider.unsupportedMethod(
         `Get support chain failed: ${this.networkVersion} might not be supported yet.`
       );
+    }
     this._blocto = {
       ...this._blocto,
-      sessionKey: ETH_SESSION_KEY_MAPPING[blocto_service_environment],
+      sessionKeyEnv: ETH_SESSION_KEY_MAPPING[blocto_service_environment],
       walletServer:
         this.injectedWalletServer ||
         ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment],
@@ -150,7 +177,13 @@ export default class EthereumProvider
     chainId: `${number}`;
     rpcUrls: string[];
   }): Promise<void> {
-    const { supportNetworkList } = await this.#getBloctoProperties();
+    await this.#getBloctoProperties();
+    const supportNetworkList = await getEvmSupport().catch((e) => {
+      throw ethErrors.provider.custom({
+        code: 1001,
+        message: `Get blocto server failed: ${e.message}`,
+      });
+    });
     const {
       chain_id,
       name,
@@ -312,7 +345,8 @@ export default class EthereumProvider
 
   async request(payload: EIP1193RequestPayload): Promise<any> {
     if (!payload?.method) throw ethErrors.rpc.invalidRequest();
-    const { blockchainName, switchableNetwork, sessionKey } =
+
+    const { blockchainName, switchableNetwork, sessionKeyEnv } =
       await this.#getBloctoProperties();
 
     if (this.existedSDK?.isBlocto) {
@@ -363,11 +397,11 @@ export default class EthereumProvider
         return this.handleDisconnect();
       }
       case 'eth_accounts':
-        return getEvmAddress(sessionKey, blockchainName) || [];
+        return getEvmAddress(sessionKeyEnv, blockchainName) || [];
     }
 
     // Method that requires user to be connected
-    if (!getEvmAddress(sessionKey, blockchainName)) {
+    if (!getEvmAddress(sessionKeyEnv, blockchainName)) {
       const email = payload?.params?.[0];
       if (payload.method === 'eth_requestAccounts' && isEmail(email)) {
         await this.enable(email);
@@ -386,7 +420,7 @@ export default class EthereumProvider
         }
         // eslint-disable-next-line
         case 'eth_coinbase': {
-          result = getEvmAddress(sessionKey, blockchainName)?.[0];
+          result = getEvmAddress(sessionKeyEnv, blockchainName)?.[0];
           break;
         }
         case 'eth_signTypedData_v3':
@@ -440,9 +474,9 @@ export default class EthereumProvider
   }
 
   async bloctoApi<T>(url: string, options?: RequestInit): Promise<T> {
-    const { walletServer, blockchainName, sessionKey } =
+    const { walletServer, blockchainName, sessionKeyEnv } =
       await this.#getBloctoProperties();
-    const sessionId = getAccountStorage(sessionKey)?.code || '';
+    const sessionId = getAccountStorage(sessionKeyEnv)?.code || '';
     if (!sessionId) {
       throw ethErrors.provider.unauthorized();
     }
@@ -457,7 +491,7 @@ export default class EthereumProvider
       ...options,
     })
       .then((response) =>
-        responseSessionGuard<T>(response, sessionKey, () => {
+        responseSessionGuard<T>(response, sessionKeyEnv, () => {
           this.eventListeners?.disconnect.forEach((listener) =>
             listener(ethErrors.provider.disconnected())
           );
@@ -543,7 +577,7 @@ export default class EthereumProvider
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
   async enable(email?: string): Promise<ProviderAccounts> {
-    const { walletServer, blockchainName, sessionKey } =
+    const { walletServer, blockchainName, sessionKeyEnv } =
       await this.#getBloctoProperties();
 
     if (this.existedSDK?.isBlocto) {
@@ -556,7 +590,7 @@ export default class EthereumProvider
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: this.chainId }],
         });
-        setEvmAddress(sessionKey, blockchainName, [this.existedSDK.address]);
+        setEvmAddress(sessionKeyEnv, blockchainName, [this.existedSDK.address]);
       }
       return new Promise((resolve, reject) =>
         // add a small delay to make sure the network has been switched
@@ -567,7 +601,7 @@ export default class EthereumProvider
       );
     }
 
-    const address = getEvmAddress(sessionKey, blockchainName);
+    const address = getEvmAddress(sessionKeyEnv, blockchainName);
     if (address) {
       return new Promise((resolve) => {
         resolve(address);
@@ -595,7 +629,7 @@ export default class EthereumProvider
                 listener({ chainId: this.chainId })
               );
               setAccountStorage(
-                sessionKey,
+                sessionKeyEnv,
                 {
                   code: e.data.code,
                   evm: {
@@ -645,9 +679,9 @@ export default class EthereumProvider
 
   async fetchAccounts(): Promise<ProviderAccounts> {
     this.#checkNetworkMatched();
-    const { blockchainName, sessionKey } = await this.#getBloctoProperties();
+    const { blockchainName, sessionKeyEnv } = await this.#getBloctoProperties();
     const { accounts } = await this.bloctoApi<{ accounts: [] }>(`/accounts`);
-    setEvmAddress(sessionKey, blockchainName, accounts);
+    setEvmAddress(sessionKeyEnv, blockchainName, accounts);
     return accounts;
   }
 
@@ -712,9 +746,9 @@ export default class EthereumProvider
     if (!targetChainId) {
       throw ethErrors.rpc.invalidParams();
     }
-    const { walletServer, blockchainName, sessionKey, switchableNetwork } =
+    const { walletServer, blockchainName, sessionKeyEnv, switchableNetwork } =
       await this.#getBloctoProperties();
-    const oldAccount = getEvmAddress(sessionKey, blockchainName)?.[0];
+    const oldAccount = getEvmAddress(sessionKeyEnv, blockchainName)?.[0];
     const oldChainId = parseChainId(this.chainId);
     const newChainId = parseChainId(targetChainId);
     if (oldChainId === newChainId) {
@@ -729,11 +763,16 @@ export default class EthereumProvider
     this.networkVersion = `${newChainId}`;
     this.chainId = `0x${newChainId.toString(16)}`;
     this.rpc = switchableNetwork[newChainId].rpc_url;
+    this._blocto = {
+      ...this._blocto,
+      blockchainName: '',
+      networkType: '',
+    };
     if (!oldAccount) {
       this.eventListeners?.chainChanged.forEach((listener) =>
         listener(this.chainId)
       );
-      this.#getBloctoProperties();
+      await this.#getBloctoProperties();
       return null;
     }
     // Go login flow when switching to a different blocto server
@@ -757,6 +796,11 @@ export default class EthereumProvider
           this.networkVersion = `${oldChainId}`;
           this.chainId = `0x${oldChainId.toString(16)}`;
           this.rpc = switchableNetwork[oldChainId].rpc_url;
+          this._blocto = {
+            ...this._blocto,
+            blockchainName: '',
+            networkType: '',
+          };
           this.#getBloctoProperties();
           throw error;
         });
@@ -777,7 +821,7 @@ export default class EthereumProvider
               detatchFrame(switchChainFrame);
               if (e.data?.addr && oldAccount) {
                 setAccountStorage(
-                  sessionKey,
+                  sessionKeyEnv,
                   {
                     code: e.data?.code,
                     evm: {
@@ -806,7 +850,7 @@ export default class EthereumProvider
                 this.eventListeners?.chainChanged.forEach((listener) =>
                   listener(this.chainId)
                 );
-                removeAllEvmAddress(sessionKey);
+                removeAllEvmAddress(sessionKeyEnv);
                 this.eventListeners?.disconnect.forEach((listener) =>
                   listener(ethErrors.provider.disconnected())
                 );
@@ -816,6 +860,12 @@ export default class EthereumProvider
                 this.networkVersion = `${oldChainId}`;
                 this.chainId = `0x${oldChainId.toString(16)}`;
                 this.rpc = switchableNetwork[oldChainId].rpc_url;
+                this._blocto = {
+                  ...this._blocto,
+                  blockchainName: '',
+                  networkType: '',
+                };
+                this.#getBloctoProperties();
                 reject(ethErrors.provider.userRejectedRequest());
               }
             }
@@ -892,18 +942,15 @@ export default class EthereumProvider
     if (this.existedSDK?.isBlocto) {
       return this.existedSDK.request({ method: 'wallet_disconnect' });
     }
-    const { sessionKey } = await this.#getBloctoProperties();
-    removeAllEvmAddress(sessionKey);
+    const { sessionKeyEnv } = await this.#getBloctoProperties();
+    removeAllEvmAddress(sessionKeyEnv);
     this.eventListeners?.disconnect.forEach((listener) =>
       listener(ethErrors.provider.disconnected())
     );
   }
 
   async loadSwitchableNetwork(
-    networkList: {
-      chainId: string;
-      rpcUrls?: string[];
-    }[]
+    networkList: AddEthereumChainParameter[]
   ): Promise<null> {
     // setup switchable list if user set networkList
     if (networkList?.length) {
@@ -923,6 +970,22 @@ export default class EthereumProvider
     } else {
       throw ethErrors.rpc.invalidParams('Empty networkList');
     }
+  }
+
+  async supportChainList(): Promise<{ chainId: string; chainName: string }[]> {
+    const supportNetworkList = await getEvmSupport().catch((e) => {
+      throw ethErrors.provider.custom({
+        code: 1001,
+        message: `Get blocto server failed: ${e.message}`,
+      });
+    });
+    return Object.keys(supportNetworkList).map((chainId) => {
+      const { display_name } = supportNetworkList[chainId];
+      return {
+        chainId,
+        chainName: display_name,
+      };
+    });
   }
 
   override on(event: string, listener: (arg: any) => void): void {
