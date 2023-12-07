@@ -763,11 +763,16 @@ export default class EthereumProvider
     this.networkVersion = `${newChainId}`;
     this.chainId = `0x${newChainId.toString(16)}`;
     this.rpc = switchableNetwork[newChainId].rpc_url;
+    this._blocto = {
+      ...this._blocto,
+      blockchainName: '',
+      networkType: '',
+    };
     if (!oldAccount) {
       this.eventListeners?.chainChanged.forEach((listener) =>
         listener(this.chainId)
       );
-      this.#getBloctoProperties();
+      await this.#getBloctoProperties();
       return null;
     }
     // Go login flow when switching to a different blocto server
@@ -791,6 +796,11 @@ export default class EthereumProvider
           this.networkVersion = `${oldChainId}`;
           this.chainId = `0x${oldChainId.toString(16)}`;
           this.rpc = switchableNetwork[oldChainId].rpc_url;
+          this._blocto = {
+            ...this._blocto,
+            blockchainName: '',
+            networkType: '',
+          };
           this.#getBloctoProperties();
           throw error;
         });
@@ -850,6 +860,12 @@ export default class EthereumProvider
                 this.networkVersion = `${oldChainId}`;
                 this.chainId = `0x${oldChainId.toString(16)}`;
                 this.rpc = switchableNetwork[oldChainId].rpc_url;
+                this._blocto = {
+                  ...this._blocto,
+                  blockchainName: '',
+                  networkType: '',
+                };
+                this.#getBloctoProperties();
                 reject(ethErrors.provider.userRejectedRequest());
               }
             }
