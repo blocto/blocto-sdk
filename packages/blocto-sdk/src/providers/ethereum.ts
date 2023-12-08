@@ -253,7 +253,10 @@ export default class EthereumProvider
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
   // web3 v1.x BatchRequest still depends on it so we need to implement anyway ¯\_(ツ)_/¯
   async sendAsync(
-    payload: JsonRpcRequest | Array<JsonRpcRequest> | EIP1193RequestPayload,
+    payload:
+      | JsonRpcRequest
+      | Array<JsonRpcRequest>
+      | Array<EIP1193RequestPayload>,
     callback?: JsonRpcCallback
   ): Promise<JsonRpcResponse | Array<JsonRpcResponse> | void> {
     const separateRequests = (payload: Array<JsonRpcRequest>) => {
@@ -282,12 +285,14 @@ export default class EthereumProvider
     > = new Promise((resolve) => {
       // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
       if (Array.isArray(payload)) {
-        const { sendRequests, otherRequests } = separateRequests(payload);
+        const { sendRequests, otherRequests } = separateRequests(
+          payload as Array<JsonRpcRequest>
+        );
 
         // collect transactions and send batch with custom method
         const batchReqPayload = {
           method: 'wallet_sendMultiCallTransaction',
-          params: sendRequests,
+          params: [sendRequests, false],
         };
         const isSendRequestsEmpty = sendRequests.length === 0;
         const idBase = Math.floor(Math.random() * 10000);
@@ -946,37 +951,17 @@ export default class EthereumProvider
   ): Promise<string> {
     this.#checkNetworkMatched();
 
-    const extractParams = (
-      params: Array<any>
-    ): { formatParams: any; revert: boolean } => {
-      const hasBoolean = params.some((param) => typeof param === 'boolean');
-      // batch transaction default revertFlag is false
-      let revert = false;
-      if (hasBoolean) {
-        revert = params.find((param) => typeof param === 'boolean');
-      }
-      const filteredParams = params
-        .filter((param) => typeof param !== 'boolean')
-        .map((param) => {
-          return param && typeof param === 'object' && 'params' in param
-            ? param.params[0]
-            : param;
-        });
-      return { formatParams: filteredParams, revert };
-    };
-    const { formatParams, revert } = extractParams(
-      payload.params as Array<any>
-    );
-    const copyPayload = {
-      ...payload,
-      params: Array.isArray(formatParams) ? formatParams[0] : formatParams,
-    };
+    // compatible web3.js old version sdk
+    const formatParams = Array.isArray(payload.params)
+      ? payload.params[0]
+      : payload.params;
+    const revert = Array.isArray(payload.params) ? payload.params[1] : false;
 
-    const { isValid, invalidMsg } = isValidTransactions(copyPayload.params);
+    const { isValid, invalidMsg } = isValidTransactions(formatParams);
     if (!isValid) {
       throw ethErrors.rpc.invalidParams(invalidMsg);
     }
-    return this.#createAuthzFrame(copyPayload.params, revert);
+    return this.#createAuthzFrame(formatParams, revert);
   }
 
   async #createAuthzFrame(
