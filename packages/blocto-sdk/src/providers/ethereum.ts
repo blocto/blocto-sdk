@@ -951,17 +951,21 @@ export default class EthereumProvider
   ): Promise<string> {
     this.#checkNetworkMatched();
 
-    // compatible web3.js old version sdk
-    const formatParams = Array.isArray(payload.params)
-      ? payload.params[0]
-      : payload.params;
-    const revert = Array.isArray(payload.params) ? payload.params[1] : false;
+    let originalParams, revertFlag;
+    if (Array.isArray(payload.params) && payload.params.length >= 2) {
+      [originalParams, revertFlag] = payload.params;
+    } else {
+      originalParams = payload.params;
+      revertFlag = false;
+    }
 
-    const { isValid, invalidMsg } = isValidTransactions(formatParams);
+    const revert = revertFlag ? revertFlag : false;
+
+    const { isValid, invalidMsg } = isValidTransactions(originalParams);
     if (!isValid) {
       throw ethErrors.rpc.invalidParams(invalidMsg);
     }
-    return this.#createAuthzFrame(formatParams, revert);
+    return this.#createAuthzFrame(originalParams, revert);
   }
 
   async #createAuthzFrame(
