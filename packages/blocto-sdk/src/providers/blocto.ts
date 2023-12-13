@@ -23,7 +23,7 @@ class BloctoProvider implements EIP1193Provider {
 
   // implement by children
   // eslint-disable-next-line
-  async request(payload: RequestArguments) {}
+  async request(payload: RequestArguments | Array<RequestArguments>) {}
 
   on(event: string, listener: (arg: any) => void): void {
     if (!EIP1193_EVENTS.includes(event)) return;

@@ -48,7 +48,9 @@ export interface EthereumProviderInterface
     switchableNetwork: SwitchableNetwork;
   };
   sendUserOperation(userOp: IUserOperation): Promise<string>;
-  request(args: EIP1193RequestPayload): Promise<any>;
+  request(
+    args: EIP1193RequestPayload | Array<EIP1193RequestPayload>
+  ): Promise<any>;
   loadSwitchableNetwork(
     networkList: {
       chainId: string;
