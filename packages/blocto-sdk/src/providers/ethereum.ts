@@ -299,6 +299,7 @@ export default class EthereumProvider
         const allPromise = isSendRequestsEmpty
           ? [...otherRequests]
           : [this.request(batchReqPayload), ...otherRequests];
+
         // resolve response when all request are executed
         Promise.allSettled(allPromise)
           .then((responses) => {
@@ -323,16 +324,17 @@ export default class EthereumProvider
             }
             const originalLengthResponse = payload.map((item, index) => {
               const response = responses[index];
+              const sendResponse = responses[0]; // allPromise[0] must be batchReqPayload
               const baseResponse = {
                 id: String(item.id || idBase + index + 1),
                 jsonrpc: '2.0',
                 method: item.method,
               };
-              // const sendTransactionResponse =
-              if (!response?.status && item.method === 'eth_sendTransaction') {
+              if (index !== 0 && !responses[index]) {
                 return {
                   ...baseResponse,
-                  method: 'shouldInsertSendObj',
+                  ...sendResponse,
+                  id: String(item.id),
                 };
               }
               if (response.status === 'fulfilled') {
@@ -349,23 +351,7 @@ export default class EthereumProvider
                 };
               }
             });
-            const sendTransactionResponse = originalLengthResponse.find(
-              (obj) => obj.method === 'eth_sendTransaction'
-            );
-            const result = originalLengthResponse.map((e) => {
-              if (e?.method === 'shouldInsertSendObj') {
-                return {
-                  ...e,
-                  ...sendTransactionResponse,
-                  id: e.id,
-                };
-              } else {
-                return {
-                  ...e,
-                };
-              }
-            });
-            return resolve(<Array<JsonRpcResponse>>result);
+            return resolve(<Array<JsonRpcResponse>>originalLengthResponse);
           })
           .catch((error) => {
             throw ethErrors.rpc.internal(error?.message);
