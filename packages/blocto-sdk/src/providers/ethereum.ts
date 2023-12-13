@@ -11,6 +11,7 @@ import {
   JsonRpcCallback,
   SwitchableNetwork,
   IUserOperation,
+  PromiseResponseItem,
 } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
@@ -280,6 +281,54 @@ export default class EthereumProvider
         { sendRequests: [], otherRequests: [] }
       );
     };
+
+    function createBaseResponse(item: JsonRpcResponse): JsonRpcResponse {
+      return {
+        id: String(item.id),
+        jsonrpc: '2.0',
+        method: item.method,
+      };
+    }
+
+    function processResponses(
+      payload: JsonRpcRequest[],
+      responses: PromiseResponseItem[]
+    ): JsonRpcResponse[] {
+      const processedResponses: JsonRpcResponse[] = [];
+      let responseIndex = 0;
+      let ethSendTransactionProcessed = false;
+
+      payload.forEach((item) => {
+        const baseResponse = createBaseResponse(item as JsonRpcResponse);
+        if (item.method === 'eth_sendTransaction') {
+          if (
+            !ethSendTransactionProcessed &&
+            responses[responseIndex] &&
+            responses[responseIndex].status === 'fulfilled'
+          ) {
+            baseResponse.result = responses[responseIndex].value;
+            ethSendTransactionProcessed = true;
+            responseIndex++;
+          } else {
+            baseResponse.result = responses[0].value;
+          }
+        } else {
+          if (responseIndex < responses.length) {
+            baseResponse.result = responses[responseIndex].value;
+            baseResponse.error =
+              responses[responseIndex].status !== 'fulfilled'
+                ? responses[responseIndex].reason
+                : undefined;
+            responseIndex++;
+          }
+        }
+
+        processedResponses.push(baseResponse);
+      });
+
+      return processedResponses;
+    }
+
     const handleRequest: Promise<
       void | JsonRpcResponse | Array<JsonRpcResponse>
     > = new Promise((resolve) => {
@@ -322,35 +371,11 @@ export default class EthereumProvider
                 })
               );
             }
-            const originalLengthResponse = payload.map((item, index) => {
-              const response = responses[index];
-              const sendResponse = responses[0]; // allPromise[0] must be batchReqPayload
-              const baseResponse = {
-                id: String(item.id || idBase + index + 1),
-                jsonrpc: '2.0',
-                method: item.method,
-              };
-              if (index !== 0 && !responses[index]) {
-                return {
-                  ...baseResponse,
-                  ...sendResponse,
-                  id: String(item.id),
-                };
-              }
-              if (response.status === 'fulfilled') {
-                return {
-                  ...baseResponse,
-                  result: response.value, // 'value' exists on fulfilled
-                  error: undefined,
-                };
-              } else {
-                return {
-                  ...baseResponse,
-                  result: undefined,
-                  error: response.reason, // 'reason' exists on rejected
-                };
-              }
-            });
+            const originalLengthResponse = processResponses(
+              payload as JsonRpcRequest[],
+              responses
+            );
+
             return resolve(<Array<JsonRpcResponse>>originalLengthResponse);
           })
           .catch((error) => {

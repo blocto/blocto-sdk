@@ -87,6 +87,12 @@ export type JsonRpcCallback = (
   response?: JsonRpcResponse
 ) => unknown;
 
+export interface PromiseResponseItem {
+  status: 'fulfilled' | 'rejected';
+  value?: any;
+  reason?: any;
+}
+
 /**
  *  A [[HexString]] whose length is even, which ensures it is a valid
  *  representation of binary data.
