@@ -387,7 +387,9 @@ export default class EthereumProvider
     });
   }
 
-  async request(payload: EIP1193RequestPayload): Promise<any> {
+  async request(
+    payload: EIP1193RequestPayload | Array<EIP1193RequestPayload>
+  ): Promise<any> {
     // web3.js v4 batch entry point
     if (Array.isArray(payload)) {
       return this.sendAsync(payload);
