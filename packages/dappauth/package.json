@@ -8,6 +8,7 @@
     "control",
     "eth_sign"
   ],
+  "type": "module",
   "repository": "github:blocto/dappauth.js",
   "main": "./dist/dappauth.js",
   "module": "./dist/dappauth.module.js",
