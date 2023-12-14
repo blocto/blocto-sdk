@@ -48,7 +48,9 @@ export interface EthereumProviderInterface
     switchableNetwork: SwitchableNetwork;
   };
   sendUserOperation(userOp: IUserOperation): Promise<string>;
-  request(args: EIP1193RequestPayload): Promise<any>;
+  request(
+    args: EIP1193RequestPayload | Array<EIP1193RequestPayload>
+  ): Promise<any>;
   loadSwitchableNetwork(
     networkList: {
       chainId: string;
@@ -84,6 +86,12 @@ export type JsonRpcCallback = (
   error: Error | null,
   response?: JsonRpcResponse
 ) => unknown;
+
+export interface PromiseResponseItem {
+  status: 'fulfilled' | 'rejected';
+  value?: any;
+  reason?: any;
+}
 
 /**
  *  A [[HexString]] whose length is even, which ensures it is a valid

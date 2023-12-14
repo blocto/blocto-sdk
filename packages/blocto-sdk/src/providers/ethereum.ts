@@ -11,6 +11,7 @@ import {
   JsonRpcCallback,
   SwitchableNetwork,
   IUserOperation,
+  PromiseResponseItem,
 } from './types/ethereum.d';
 import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
@@ -253,63 +254,120 @@ export default class EthereumProvider
   // DEPRECATED API: see https://docs.metamask.io/guide/ethereum-provider.html#legacy-methods implementation
   // web3 v1.x BatchRequest still depends on it so we need to implement anyway ¯\_(ツ)_/¯
   async sendAsync(
-    payload: JsonRpcRequest | Array<JsonRpcRequest>,
+    payload:
+      | JsonRpcRequest
+      | Array<JsonRpcRequest>
+      | Array<EIP1193RequestPayload>,
     callback?: JsonRpcCallback
   ): Promise<JsonRpcResponse | Array<JsonRpcResponse> | void> {
+    const separateRequests = (payload: Array<JsonRpcRequest>) => {
+      return payload.reduce(
+        (
+          acc: {
+            sendRequests: JsonRpcResponse[];
+            otherRequests: Promise<JsonRpcResponse>[];
+          },
+          request: JsonRpcRequest
+        ) => {
+          if (request.method === 'eth_sendTransaction') {
+            acc.sendRequests.push(request.params?.[0]);
+          } else {
+            acc.otherRequests.push(
+              this.request(request as EIP1193RequestPayload)
+            );
+          }
+          return acc;
+        },
+        { sendRequests: [], otherRequests: [] }
+      );
+    };
+
+    function createBaseResponse(item: JsonRpcResponse): JsonRpcResponse {
+      return {
+        id: String(item.id),
+        jsonrpc: '2.0',
+        method: item.method,
+      };
+    }
+
+    function processResponses(
+      payload: JsonRpcRequest[],
+      responses: PromiseResponseItem[]
+    ): JsonRpcResponse[] {
+      const processedResponses: JsonRpcResponse[] = [];
+      let responseIndex = 1;
+      payload.forEach((item) => {
+        const baseResponse = createBaseResponse(item as JsonRpcResponse);
+        if (item.method === 'eth_sendTransaction') {
+          baseResponse.result = responses[0].value;
+          baseResponse.error =
+            responses[0].status !== 'fulfilled'
+              ? responses[0].reason
+              : undefined;
+        } else {
+          if (responseIndex < responses.length) {
+            baseResponse.result = responses[responseIndex].value;
+            baseResponse.error =
+              responses[responseIndex].status !== 'fulfilled'
+                ? responses[responseIndex].reason
+                : undefined;
+            responseIndex++;
+          }
+        }
+        processedResponses.push(baseResponse);
+      });
+
+      return processedResponses;
+    }
+
     const handleRequest: Promise<
       void | JsonRpcResponse | Array<JsonRpcResponse>
     > = new Promise((resolve) => {
       // web3 v1.x concat batched JSON-RPC requests to an array, handle it here
       if (Array.isArray(payload)) {
-        const { sendRequests, otherRequests } = payload.reduce(
-          (
-            acc: {
-              sendRequests: JsonRpcResponse[];
-              otherRequests: Promise<JsonRpcResponse>[];
-            },
-            request: JsonRpcRequest
-          ) => {
-            if (request.method === 'eth_sendTransaction') {
-              acc.sendRequests.push(request.params?.[0]);
-            } else {
-              acc.otherRequests.push(
-                this.request(request as EIP1193RequestPayload)
-              );
-            }
-            return acc;
-          },
-          { sendRequests: [], otherRequests: [] }
+        const { sendRequests, otherRequests } = separateRequests(
+          payload as Array<JsonRpcRequest>
         );
 
         // collect transactions and send batch with custom method
         const batchReqPayload = {
-          method: 'blocto_sendBatchTransaction',
-          params: sendRequests,
+          method: 'wallet_sendMultiCallTransaction',
+          params: [sendRequests, false],
         };
-        const batchReqPromise = this.request(batchReqPayload);
-
+        const isSendRequestsEmpty = sendRequests.length === 0;
         const idBase = Math.floor(Math.random() * 10000);
+        const allPromise = isSendRequestsEmpty
+          ? [...otherRequests]
+          : [this.request(batchReqPayload), ...otherRequests];
 
         // resolve response when all request are executed
-        Promise.allSettled([batchReqPromise, ...otherRequests])
+        Promise.allSettled(allPromise)
           .then((responses) => {
-            return resolve(
-              <Array<JsonRpcResponse>>responses.map((response, index) => {
-                return {
-                  id: String(payload[index].id || idBase + index + 1),
-                  jsonrpc: '2.0',
-                  method: payload[index].method,
-                  result:
-                    response.status === 'fulfilled'
-                      ? response.value
-                      : undefined,
-                  error:
-                    response.status !== 'fulfilled'
-                      ? response.reason
-                      : undefined,
-                };
-              })
+            if (isSendRequestsEmpty) {
+              return resolve(
+                <Array<JsonRpcResponse>>responses.map((response, index) => {
+                  return {
+                    id: String(payload[index]?.id || idBase + index + 1),
+                    jsonrpc: '2.0',
+                    method: payload[index].method,
+                    result:
+                      response.status === 'fulfilled'
+                        ? response.value
+                        : undefined,
+                    error:
+                      response.status !== 'fulfilled'
+                        ? response.reason
+                        : undefined,
+                  };
+                })
+              );
+            }
+            const originalLengthResponse = processResponses(
+              payload as JsonRpcRequest[],
+              responses
             );
+
+            return resolve(<Array<JsonRpcResponse>>originalLengthResponse);
           })
           .catch((error) => {
             throw ethErrors.rpc.internal(error?.message);
@@ -322,7 +380,9 @@ export default class EthereumProvider
     // execute callback or return promise, depdends on callback arg given or not
     if (typeof callback === 'function') {
       handleRequest
-        .then((data) => callback(null, <JsonRpcResponse>(<unknown>data)))
+        .then((data) => {
+          return callback(null, <JsonRpcResponse>(<unknown>data));
+        })
         .catch((error) => callback(error));
     } else {
       return <JsonRpcResponse>(<unknown>handleRequest);
@@ -343,7 +403,13 @@ export default class EthereumProvider
     });
   }
 
-  async request(payload: EIP1193RequestPayload): Promise<any> {
+  async request(
+    payload: EIP1193RequestPayload | Array<EIP1193RequestPayload>
+  ): Promise<any> {
+    // web3.js v4 batch entry point
+    if (Array.isArray(payload)) {
+      return this.sendAsync(payload);
+    }
     if (!payload?.method) throw ethErrors.rpc.invalidRequest();
 
     const { blockchainName, switchableNetwork, sessionKeyEnv } =
@@ -437,7 +503,7 @@ export default class EthereumProvider
         case 'eth_sendTransaction':
           result = await this.handleSendTransaction(payload);
           break;
-        case 'blocto_sendBatchTransaction':
+        case 'wallet_sendMultiCallTransaction':
           result = await this.handleSendBatchTransaction(payload);
           break;
         case 'eth_signTransaction':
@@ -889,27 +955,33 @@ export default class EthereumProvider
   ): Promise<string> {
     this.#checkNetworkMatched();
 
-    const extractParams = (params: Array<any>): Array<any> =>
-      params.map((param) =>
-        'params' in param
-          ? param.params[0] // handle passing web3.eth.sendTransaction.request(...) as a parameter with params
-          : param
-      );
-    const formatParams = extractParams(payload.params as Array<any>);
-    const copyPayload = { ...payload, params: formatParams };
+    let originalParams, revertFlag;
+    if (Array.isArray(payload.params) && payload.params.length >= 2) {
+      [originalParams, revertFlag] = payload.params;
+    } else {
+      originalParams = payload.params;
+      revertFlag = false;
+    }
 
-    const { isValid, invalidMsg } = isValidTransactions(copyPayload.params);
+    const revert = revertFlag ? revertFlag : false;
+
+    const { isValid, invalidMsg } = isValidTransactions(originalParams);
     if (!isValid) {
       throw ethErrors.rpc.invalidParams(invalidMsg);
     }
-
-    return this.#createAuthzFrame(copyPayload.params);
+    return this.#createAuthzFrame(originalParams, revert);
   }
 
-  async #createAuthzFrame(params: EIP1193RequestPayload['params']) {
+  async #createAuthzFrame(
+    params: EIP1193RequestPayload['params'],
+    revert = true
+  ) {
     const { authorizationId } = await this.bloctoApi<{
       authorizationId: string;
-    }>(`/authz`, { method: 'POST', body: JSON.stringify(params) });
+    }>(`/authz`, {
+      method: 'POST',
+      body: JSON.stringify([params, revert]),
+    });
     const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
     return this.responseListener(authzFrame, 'txHash');
   }
