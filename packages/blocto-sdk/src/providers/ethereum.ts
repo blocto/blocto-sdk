@@ -295,23 +295,15 @@ export default class EthereumProvider
       responses: PromiseResponseItem[]
     ): JsonRpcResponse[] {
       const processedResponses: JsonRpcResponse[] = [];
-      let responseIndex = 0;
-      let ethSendTransactionProcessed = false;
-
+      let responseIndex = 1;
       payload.forEach((item) => {
         const baseResponse = createBaseResponse(item as JsonRpcResponse);
         if (item.method === 'eth_sendTransaction') {
-          if (
-            !ethSendTransactionProcessed &&
-            responses[responseIndex] &&
-            responses[responseIndex].status === 'fulfilled'
-          ) {
-            baseResponse.result = responses[responseIndex].value;
-            ethSendTransactionProcessed = true;
-            responseIndex++;
-          } else {
-            baseResponse.result = responses[0].value;
-          }
+          baseResponse.result = responses[0].value;
+          baseResponse.error =
+            responses[0].status !== 'fulfilled'
+              ? responses[0].reason
+              : undefined;
         } else {
           if (responseIndex < responses.length) {
             baseResponse.result = responses[responseIndex].value;
@@ -322,7 +314,6 @@ export default class EthereumProvider
             responseIndex++;
           }
         }
-
         processedResponses.push(baseResponse);
       });
 
