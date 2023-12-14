@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import { fromRpcSig, ecrecover, publicToAddress, bufferToHex, hashPersonalMessage, keccak } from 'ethereumjs-util';
 import ERC1271 from './ABIs/ERC1271.js';
-import { mergeErrors, isHexString, removeHexPrefix } from './utils.js';
+import { mergeErrors, isHexString, removeHexPrefix } from './utils/index.js';
 
 // bytes4(keccak256("isValidSignature(bytes32,bytes)")
 const ERC1271_MAGIC_VALUE = '0x1626ba7e';

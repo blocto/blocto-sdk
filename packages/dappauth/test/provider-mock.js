@@ -1,4 +1,4 @@
-module.exports = class MockProvider {
+export default class MockProvider {
   constructor(mockContract) {
     this.mockContract = mockContract;
   }
@@ -24,4 +24,4 @@ module.exports = class MockProvider {
   send(payload, callback) {
     this.sendAsync(payload, callback);
   }
-};
+}

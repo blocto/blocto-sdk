@@ -8,7 +8,7 @@ import copy from 'rollup-plugin-copy';
 export default [
   // CommonJS
   {
-    input: 'index.js',
+    input: 'src/index.js',
     output: {
       file: 'dist/dappauth.js',
       format: 'cjs',
@@ -18,16 +18,14 @@ export default [
     plugins: [
       copy({
         targets: [
-          { src: './ABIs', dest: 'dist' },
-          { src: './utils.js', dest: 'dist' },
+          { src: './src/ABIs', dest: 'dist' },
+          { src: './src/utils', dest: 'dist' },
         ],
       }),
+      commonjs(),
       resolve({
-        preferBuiltins: true,
         browser: true,
-      }),
-      commonjs({
-        include: 'node_modules/**',
+        preferBuiltins: false,
       }),
       json(),
       polyfills(),
@@ -38,7 +36,7 @@ export default [
   },
   // es
   {
-    input: 'index.js',
+    input: 'src/index.js',
     output: {
       file: 'dist/dappauth.module.js',
       format: 'es',
@@ -47,16 +45,14 @@ export default [
     plugins: [
       copy({
         targets: [
-          { src: './ABIs', dest: 'dist' },
-          { src: './utils.js', dest: 'dist' },
+          { src: './src/ABIs', dest: 'dist' },
+          { src: './src/utils', dest: 'dist' },
         ],
       }),
+      commonjs(),
       resolve({
-        preferBuiltins: true,
         browser: true,
-      }),
-      commonjs({
-        include: 'node_modules/**',
+        preferBuiltins: false,
       }),
       json(),
       polyfills(),
@@ -64,7 +60,7 @@ export default [
   },
   // umd
   {
-    input: 'index.js',
+    input: 'src/index.js',
     output: {
       file: 'dist/dappauth.umd.js',
       format: 'umd',
@@ -73,16 +69,14 @@ export default [
     plugins: [
       copy({
         targets: [
-          { src: './ABIs', dest: 'dist' },
-          { src: './utils.js', dest: 'dist' },
+          { src: './src/ABIs', dest: 'dist' },
+          { src: './src/utils', dest: 'dist' },
         ],
       }),
+      commonjs(),
       resolve({
-        preferBuiltins: true,
+        preferBuiltins: false,
         browser: true,
-      }),
-      commonjs({
-        include: 'node_modules/**',
       }),
       json(),
       polyfills(),

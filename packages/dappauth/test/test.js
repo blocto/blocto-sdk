@@ -1,7 +1,7 @@
 import { privateToPublic, stripHexPrefix } from 'ethereumjs-util';
 import { equal } from 'assert';
-import DappAuth from '../index.js';
-import { removeHexPrefix } from '../utils.js';
+import DappAuth from '../src/index.js';
+import { removeHexPrefix } from '../src/utils/index.js';
 import ProviderMock from './provider-mock.js';
 import ContractMock from './contract-mock.js';
 import { generateRandomKey, keyToAddress, signEOAPersonalMessage, signERC1654PersonalMessage } from './test-utils.js';
@@ -27,7 +27,6 @@ describe('DappAuth', function() {
       expectedAuthorizedSignerError: false,
       expectedAuthorizedSigner: true,
     },
-
     {
       title:
         'External wallets should NOT be authorized signers when signing the wrong challenge',
@@ -92,7 +91,6 @@ describe('DappAuth', function() {
       expectedAuthorizedSignerError: false,
       expectedAuthorizedSigner: true,
     },
-
     {
       title:
         'Smart-contract wallets with a 1-of-1 incorrect internal key should NOT be authorized signers over their address',
@@ -127,7 +125,7 @@ describe('DappAuth', function() {
   ];
 
   testCases.forEach((test) =>
-    it(test.title, async function() {
+    it(test.title, async () => {
       const dappAuth = new DappAuth(
         new ProviderMock(new ContractMock(test.mockContract)),
       );

@@ -1,6 +1,4 @@
-/* eslint-disable */
-
-module.exports = [
+export default [
   {
     constant: true,
     inputs: [

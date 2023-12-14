@@ -1,8 +1,9 @@
 import { fromRpcSig, ecrecover, publicToAddress } from 'ethereumjs-util';
-import { rawDecode } from 'ethereumjs-abi';
+import abi from 'ethereumjs-abi';
 import { Buffer } from 'safe-buffer';
-import testUtils from './test-utils.js';
+import { generateErc191MessageHash } from './test-utils.js';
 
+const { rawDecode } = abi;
 // bytes4(keccak256("isValidSignature(bytes32,bytes)")
 const ERC1271_METHOD_SIG = '1626ba7e';
 
@@ -54,7 +55,7 @@ export default class MockContract {
 
     // Get the address of whoever signed this message
     const { v, r, s } = fromRpcSig(`0x${expected_authrorised_sig}`);
-    const erc191MessageHash = testUtils.erc191MessageHash(hash, this.address);
+    const erc191MessageHash = generateErc191MessageHash(hash, this.address);
     const recoveredKey = ecrecover(erc191MessageHash, v, r, s);
     const recoveredAddress = publicToAddress(recoveredKey);
 
