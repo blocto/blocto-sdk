@@ -19,9 +19,9 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "test": "npm run eslint && nyc mocha test/*",
+    "test": "npm run lint && nyc mocha test/*",
     "prettier:watch": "onchange '**/*.js' -- prettier --write {{changed}}",
-    "eslint": "eslint ./ --ext .js",
+    "lint": "eslint --ext .js src/",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "author": "Pazams <maor@pazams.com>",
