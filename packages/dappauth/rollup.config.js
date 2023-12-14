@@ -1,11 +1,11 @@
-const commonjs = require('@rollup/plugin-commonjs');
-const resolve = require('@rollup/plugin-node-resolve');
-const json = require('rollup-plugin-json');
-const polyfills = require('rollup-plugin-polyfill-node');
-const copy = require('rollup-plugin-copy');
+import commonjs from '@rollup/plugin-commonjs';
+import resolve from '@rollup/plugin-node-resolve';
+import json from 'rollup-plugin-json';
+import polyfills from 'rollup-plugin-polyfill-node';
+import copy from 'rollup-plugin-copy';
 
 
-module.exports = [
+export default [
   // CommonJS
   {
     input: 'index.js',

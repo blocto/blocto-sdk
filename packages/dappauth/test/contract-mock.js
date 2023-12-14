@@ -1,12 +1,12 @@
-const ethUtil = require('ethereumjs-util');
-const ethAbi = require('ethereumjs-abi');
-const Buffer = require('safe-buffer').Buffer;
-const testUtils = require('./test-utils.js');
+import { fromRpcSig, ecrecover, publicToAddress } from 'ethereumjs-util';
+import { rawDecode } from 'ethereumjs-abi';
+import { Buffer } from 'safe-buffer';
+import testUtils from './test-utils.js';
 
 // bytes4(keccak256("isValidSignature(bytes32,bytes)")
 const ERC1271_METHOD_SIG = '1626ba7e';
 
-module.exports = class MockContract {
+export default class MockContract {
   constructor(options) {
     this.authorizedKey = options.authorizedKey;
     this.address = options.address;
@@ -17,7 +17,7 @@ module.exports = class MockContract {
     return `0x${ERC1271_METHOD_SIG}00000000000000000000000000000000000000000000000000000000`; // a.k.a the "magic value".
   }
 
-  static _false(callback) {
+  static _false() {
     return '0x0000000000000000000000000000000000000000000000000000000000000000';
   }
 
@@ -26,13 +26,13 @@ module.exports = class MockContract {
   // @return {String}
   run(methodCall, methodParams) {
     switch (methodCall) {
-      case ERC1271_METHOD_SIG:
-        const [hash, signature] = ethAbi.rawDecode(
+      case ERC1271_METHOD_SIG: {
+        const [hash, signature] = rawDecode(
           ['bytes32', 'bytes'],
           Buffer.from(methodParams, 'hex'),
-        );
-
-        return this._1626ba7e(hash, signature);
+          );
+          return this._1626ba7e(hash, signature);
+        }
       default:
         throw new Error(`Unexpected method ${methodCall}`);
     }
@@ -53,12 +53,12 @@ module.exports = class MockContract {
     const expected_authrorised_sig = multi_sigs[0];
 
     // Get the address of whoever signed this message
-    const { v, r, s } = ethUtil.fromRpcSig(`0x${expected_authrorised_sig}`);
+    const { v, r, s } = fromRpcSig(`0x${expected_authrorised_sig}`);
     const erc191MessageHash = testUtils.erc191MessageHash(hash, this.address);
-    const recoveredKey = ethUtil.ecrecover(erc191MessageHash, v, r, s);
-    const recoveredAddress = ethUtil.publicToAddress(recoveredKey);
+    const recoveredKey = ecrecover(erc191MessageHash, v, r, s);
+    const recoveredAddress = publicToAddress(recoveredKey);
 
-    const expectedAddress = ethUtil.publicToAddress(this.authorizedKey);
+    const expectedAddress = publicToAddress(this.authorizedKey);
 
     if (recoveredAddress.toString() === expectedAddress.toString()) {
       return MockContract._true();
@@ -66,4 +66,4 @@ module.exports = class MockContract {
 
     return MockContract._false();
   }
-};
+}
