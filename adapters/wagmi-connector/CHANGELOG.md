@@ -1,5 +1,17 @@
 # @blocto/wagmi-connector
 
+## 1.2.4-beta.1
+
+### Patch Changes
+
+- b9dac7d: support web3js v4
+- 00a3832: sendAsync can send another requests
+- Updated dependencies [b9dac7d]
+- Updated dependencies [55afe21]
+- Updated dependencies [3017eb1]
+- Updated dependencies [00a3832]
+  - @blocto/sdk@0.9.0-beta.2
+
 ## 1.2.4-beta.0
 
 ### Patch Changes

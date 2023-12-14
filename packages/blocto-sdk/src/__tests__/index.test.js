@@ -168,16 +168,16 @@ describe('Testing BloctoSDK ethereum provider', () => {
           'https://wallet-v2.blocto.app/api/bsc/authz'
         );
         expect(fetch.mock.lastCall[1].body).toBe(
-          '[{"from":"0x123","to":"0x123","value":"0x29a2241af62c0000"}]'
+          '[[{"from":"0x123","to":"0x123","value":"0x29a2241af62c0000"}],true]'
         );
       });
   });
-  test('should request blocto_sendBatchTransaction in EIP-1193 way has right payload', async () => {
+  test('should request wallet_sendMultiCallTransaction in EIP-1193 way has right payload', async () => {
     return ethereum
       .request({
-        method: 'blocto_sendBatchTransaction',
+        method: 'wallet_sendMultiCallTransaction',
         params: [
-          {
+          [{
             from: '0x123',
             to: '0x123',
             value: '0x01abc',
@@ -186,7 +186,8 @@ describe('Testing BloctoSDK ethereum provider', () => {
             from: '0x456',
             to: '0x456',
             value: '0x02def',
-          },
+          }],
+          false
         ],
       })
       .then(() => {
@@ -194,11 +195,11 @@ describe('Testing BloctoSDK ethereum provider', () => {
           'https://wallet-v2.blocto.app/api/bsc/authz'
         );
         expect(fetch.mock.lastCall[1].body).toBe(
-          '[{"from":"0x123","to":"0x123","value":"0x01abc"},{"from":"0x456","to":"0x456","value":"0x02def"}]'
+          '[[{"from":"0x123","to":"0x123","value":"0x01abc"},{"from":"0x456","to":"0x456","value":"0x02def"}],false]'
         );
       });
   });
-  test('should request blocto_sendBatchTransaction in Web3 Batch Request way has right payload', async () => {
+  test('should request wallet_sendMultiCallTransaction in Web3 Batch Request way has right payload', async () => {
     return ethereum
       .sendAsync([
         {
@@ -227,7 +228,7 @@ describe('Testing BloctoSDK ethereum provider', () => {
           'https://wallet-v2.blocto.app/api/bsc/authz'
         );
         expect(fetch.mock.lastCall[1].body).toBe(
-          '[{"from":"0x123","to":"0x123","value":"0x01abc"},{"from":"0x456","to":"0x456","value":"0x02def"}]'
+          '[[{"from":"0x123","to":"0x123","value":"0x01abc"},{"from":"0x456","to":"0x456","value":"0x02def"}],false]'
         );
       });
   });
@@ -284,7 +285,7 @@ describe('Testing BloctoSDK providers with appId', () => {
           'https://wallet-v2.blocto.app/api/bsc/authz'
         );
         expect(fetch.mock.lastCall[1].body).toBe(
-          '[{"from":"0x123","to":"0x123","value":"0x29a2241af62c0000"}]'
+          '[[{"from":"0x123","to":"0x123","value":"0x29a2241af62c0000"}],true]'
         );
       });
   });

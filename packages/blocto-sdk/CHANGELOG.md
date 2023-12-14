@@ -1,5 +1,17 @@
 # @blocto/sdk
 
+## 0.9.0-beta.2
+
+### Minor Changes
+
+- 55afe21: support web3js version 4
+- 3017eb1: Support load multiple chain configs in evm provider
+
+### Patch Changes
+
+- b9dac7d: support web3js v4
+- 00a3832: sendAsync can send another requests
+
 ## 0.8.1-beta.1
 
 ### Patch Changes
