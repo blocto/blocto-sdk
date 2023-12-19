@@ -1,7 +1,7 @@
 import { privateToPublic, stripHexPrefix } from 'ethereumjs-util';
 import { equal } from 'assert';
-import DappAuth from '../src/index.js';
-import { removeHexPrefix } from '../src/utils/index.js';
+import DappAuth from '../../src/index.js';
+import { removeHexPrefix } from '../../src/utils/index.js';
 import ProviderMock from './provider-mock.js';
 import ContractMock from './contract-mock.js';
 import { generateRandomKey, keyToAddress, signEOAPersonalMessage, signERC1654PersonalMessage } from './test-utils.js';
