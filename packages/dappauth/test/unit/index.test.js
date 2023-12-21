@@ -1,15 +1,15 @@
-const ethUtil = require('ethereumjs-util');
-const assert = require('assert');
-const DappAuth = require('../index.js');
-const utils = require('../utils.js');
-const ProviderMock = require('./provider-mock.js');
-const ContractMock = require('./contract-mock.js');
-const testUtils = require('./test-utils.js');
+import { privateToPublic, stripHexPrefix } from 'ethereumjs-util';
+import { equal } from 'assert';
+import DappAuth from '../../src/index.js';
+import { removeHexPrefix } from '../../src/utils/index.js';
+import ProviderMock from './provider-mock.js';
+import ContractMock from './contract-mock.js';
+import { generateRandomKey, keyToAddress, signEOAPersonalMessage, signERC1654PersonalMessage } from './test-utils.js';
 
 describe('DappAuth', function() {
-  const keyA = testUtils.generateRandomKey();
-  const keyB = testUtils.generateRandomKey();
-  const keyC = testUtils.generateRandomKey();
+  const keyA = generateRandomKey();
+  const keyB = generateRandomKey();
+  const keyC = generateRandomKey();
 
   const testCases = [
     {
@@ -18,7 +18,7 @@ describe('DappAuth', function() {
       challenge: 'foo',
       challengeSign: 'foo',
       signingKeys: [keyA],
-      authAddr: testUtils.keyToAddress(keyA),
+      authAddr: keyToAddress(keyA),
       mockContract: {
         authorizedKey: null,
         address: null,
@@ -27,7 +27,6 @@ describe('DappAuth', function() {
       expectedAuthorizedSignerError: false,
       expectedAuthorizedSigner: true,
     },
-
     {
       title:
         'External wallets should NOT be authorized signers when signing the wrong challenge',
@@ -35,10 +34,10 @@ describe('DappAuth', function() {
       challenge: 'foo',
       challengeSign: 'bar',
       signingKeys: [keyA],
-      authAddr: testUtils.keyToAddress(keyA),
+      authAddr: keyToAddress(keyA),
       mockContract: {
-        authorizedKey: ethUtil.privateToPublic(keyC),
-        address: testUtils.keyToAddress(keyA),
+        authorizedKey: privateToPublic(keyC),
+        address: keyToAddress(keyA),
         errorIsValidSignature: false,
       },
       expectedAuthorizedSignerError: false,
@@ -51,10 +50,10 @@ describe('DappAuth', function() {
       challenge: 'foo',
       challengeSign: 'foo',
       signingKeys: [keyA],
-      authAddr: testUtils.keyToAddress(keyB),
+      authAddr: keyToAddress(keyB),
       mockContract: {
-        authorizedKey: ethUtil.privateToPublic(keyC),
-        address: testUtils.keyToAddress(keyB),
+        authorizedKey: privateToPublic(keyC),
+        address: keyToAddress(keyB),
         errorIsValidSignature: false,
       },
       expectedAuthorizedSignerError: false,
@@ -67,10 +66,10 @@ describe('DappAuth', function() {
       challenge: 'foo',
       challengeSign: 'foo',
       signingKeys: [keyB],
-      authAddr: testUtils.keyToAddress(keyA),
+      authAddr: keyToAddress(keyA),
       mockContract: {
-        authorizedKey: ethUtil.privateToPublic(keyB),
-        address: testUtils.keyToAddress(keyA),
+        authorizedKey: privateToPublic(keyB),
+        address: keyToAddress(keyA),
         errorIsValidSignature: false,
       },
       expectedAuthorizedSignerError: false,
@@ -83,16 +82,15 @@ describe('DappAuth', function() {
       challenge: 'foo',
       challengeSign: 'foo',
       signingKeys: [keyB, keyC],
-      authAddr: testUtils.keyToAddress(keyA),
+      authAddr: keyToAddress(keyA),
       mockContract: {
-        authorizedKey: ethUtil.privateToPublic(keyB),
-        address: testUtils.keyToAddress(keyA),
+        authorizedKey: privateToPublic(keyB),
+        address: keyToAddress(keyA),
         errorIsValidSignature: false,
       },
       expectedAuthorizedSignerError: false,
       expectedAuthorizedSigner: true,
     },
-
     {
       title:
         'Smart-contract wallets with a 1-of-1 incorrect internal key should NOT be authorized signers over their address',
@@ -100,10 +98,10 @@ describe('DappAuth', function() {
       challenge: 'foo',
       challengeSign: 'foo',
       signingKeys: [keyB],
-      authAddr: testUtils.keyToAddress(keyA),
+      authAddr: keyToAddress(keyA),
       mockContract: {
-        authorizedKey: ethUtil.privateToPublic(keyC),
-        address: testUtils.keyToAddress(keyA),
+        authorizedKey: privateToPublic(keyC),
+        address: keyToAddress(keyA),
         errorIsValidSignature: false,
       },
       expectedAuthorizedSignerError: false,
@@ -115,10 +113,10 @@ describe('DappAuth', function() {
       challenge: 'foo',
       challengeSign: 'foo',
       signingKeys: [keyB],
-      authAddr: testUtils.keyToAddress(keyA),
+      authAddr: keyToAddress(keyA),
       mockContract: {
-        authorizedKey: ethUtil.privateToPublic(keyB),
-        address: testUtils.keyToAddress(keyA),
+        authorizedKey: privateToPublic(keyB),
+        address: keyToAddress(keyA),
         errorIsValidSignature: true,
       },
       expectedAuthorizedSignerError: true,
@@ -127,18 +125,18 @@ describe('DappAuth', function() {
   ];
 
   testCases.forEach((test) =>
-    it(test.title, async function() {
+    it(test.title, async () => {
       const dappAuth = new DappAuth(
         new ProviderMock(new ContractMock(test.mockContract)),
       );
 
       const signatureFunc = test.isEOA
-        ? testUtils.signEOAPersonalMessage
-        : testUtils.signERC1654PersonalMessage;
+        ? signEOAPersonalMessage
+        : signERC1654PersonalMessage;
 
       const signatures = `0x${test.signingKeys
         .map((signingKey) =>
-          ethUtil.stripHexPrefix(
+          stripHexPrefix(
             signatureFunc(test.challengeSign, signingKey, test.authAddr),
           ),
         )
@@ -156,8 +154,8 @@ describe('DappAuth', function() {
         isError = true;
       }
 
-      assert.equal(isError, test.expectedAuthorizedSignerError);
-      assert.equal(isAuthorizedSigner, test.expectedAuthorizedSigner);
+      equal(isError, test.expectedAuthorizedSignerError);
+      equal(isAuthorizedSigner, test.expectedAuthorizedSigner);
     }),
   );
 
@@ -173,13 +171,13 @@ describe('DappAuth', function() {
     );
 
     const eoaHash = dappAuth._hashEOAPersonalMessage('foo');
-    assert.equal(
+    equal(
       `0x${eoaHash.toString('hex')}`,
       '0x76b2e96714d3b5e6eb1d1c509265430b907b44f72b2a22b06fcd4d96372b8565',
     );
 
     const scHash = dappAuth._hashSCMessage('foo');
-    assert.equal(
+    equal(
       `0x${scHash.toString('hex')}`,
       '0x41b1a0649752af1b28b3dc29a1556eee781e4a4c3a1f7f53f90fa834de098c4d',
     );
@@ -200,7 +198,7 @@ describe('DappAuth', function() {
     // result if 0xffff is decoded as hex:  13a6aa3102b2d639f36804a2d7c31469618fd7a7907c658a7b2aa91a06e31e47
     // result if 0xffff is decoded as utf8: 247aefb5d2e5b17fca61f786c779f7388485460c13e51308f88b2ff84ffa6851
     const eoaHash = dappAuth._hashEOAPersonalMessage('0xffff');
-    assert.equal(
+    equal(
       `0x${eoaHash.toString('hex')}`,
       '0x13a6aa3102b2d639f36804a2d7c31469618fd7a7907c658a7b2aa91a06e31e47',
     );
@@ -208,7 +206,7 @@ describe('DappAuth', function() {
     // result if 0xffff is decoded as hex:  06d41322d79dfed27126569cb9a80eb0967335bf2f3316359d2a93c779fcd38a
     // result if 0xffff is decoded as utf8: f0443ea82539c5136844b0a175f544b7ee7bc0fc5ce940bad19f08eaf618af71
     const scHash = dappAuth._hashSCMessage('0xffff');
-    assert.equal(
+    equal(
       `0x${scHash.toString('hex')}`,
       '0x06d41322d79dfed27126569cb9a80eb0967335bf2f3316359d2a93c779fcd38a',
     );
@@ -234,20 +232,20 @@ describe('DappAuth', function() {
       isAuthorizedSigner = await dappAuth.isAuthorizedSigner(
         'foo',
         signatures,
-        testUtils.keyToAddress(keyA),
+        keyToAddress(keyA),
       );
     } catch (error) {
       isError = true;
     }
 
-    assert.equal(isError, true);
-    assert.equal(isAuthorizedSigner, false);
+    equal(isError, true);
+    equal(isAuthorizedSigner, false);
   });
 });
 
 describe('utils', function() {
   it('Should remove hex prefix if value is hex prefixed', function() {
     const value = 'foo';
-    assert.equal(utils.removeHexPrefix(value), 'foo');
+    equal(removeHexPrefix(value), 'foo');
   });
 });
