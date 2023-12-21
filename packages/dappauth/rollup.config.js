@@ -4,7 +4,6 @@ import json from 'rollup-plugin-json';
 import polyfills from 'rollup-plugin-polyfill-node';
 import copy from 'rollup-plugin-copy';
 
-
 export default [
   // CommonJS
   {
@@ -25,14 +24,14 @@ export default [
       commonjs(),
       resolve({
         browser: true,
-        preferBuiltins: false,
+        preferBuiltins: true,
       }),
       json(),
       polyfills(),
     ],
     treeshake: {
       unknownGlobalSideEffects: false,
-    }
+    },
   },
   // es
   {
@@ -52,7 +51,7 @@ export default [
       commonjs(),
       resolve({
         browser: true,
-        preferBuiltins: false,
+        preferBuiltins: true,
       }),
       json(),
       polyfills(),
@@ -75,7 +74,7 @@ export default [
       }),
       commonjs(),
       resolve({
-        preferBuiltins: false,
+        preferBuiltins: true,
         browser: true,
       }),
       json(),
