@@ -57,8 +57,8 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
       const _chainId = chainId ?? this.chains[0]?.id;
       const config: EthereumProviderConfig = {
         chainId: _chainId,
-        rpc:
-          this.chains.find((x) => x.id === _chainId)?.rpcUrls.default.http?.[0],
+        rpc: this.chains.find((x) => x.id === _chainId)?.rpcUrls.default
+          .http?.[0],
       };
       this.#provider = new BloctoSDK({ ethereum: config, appId })?.ethereum;
     }
@@ -133,22 +133,26 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
   }
 
   async switchChain(chainId: number): Promise<Chain> {
-    const provider = await this.getProvider();
-    const id = numberToHex(chainId);
-    const chain = this.chains.find((x) => x.id === chainId);
-    const isBloctoSupportChain =
-      provider._blocto.supportNetworkList[`${chainId}`];
-
-    if (!chain || !isBloctoSupportChain) {
-      throw new SwitchChainError(new Error(`Blocto unsupported chain: ${id}`));
-    }
-
     try {
+      const provider = await this.getProvider();
+      const id = numberToHex(chainId);
+      const chain = this.chains.find((x) => x.id === chainId);
+      const networks = await provider.supportChainList();
+      const evmSupportMap = networks.reduce(
+        (a: any, v: any) => ({ ...a, [v.chain_id]: v }),
+        {}
+      );
+      const isBloctoSupportChain = evmSupportMap[`${chainId}`];
+
+      if (!chain || !isBloctoSupportChain) {
+        throw new SwitchChainError(
+          new Error(`Blocto unsupported chain: ${id}`)
+        );
+      }
+
       await provider.request({
         method: 'wallet_addEthereumChain',
-        params: [
-          { chainId: id, rpcUrls: chain?.rpcUrls.default.http },
-        ],
+        params: [{ chainId: id, rpcUrls: chain?.rpcUrls.default.http }],
       });
       await provider.request({
         method: 'wallet_switchEthereumChain',

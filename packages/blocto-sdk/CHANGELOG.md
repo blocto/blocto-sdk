@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.9.0-beta.3
+
+### Minor Changes
+
+- d34fca2: Add RPC endpoints for the L2 chains (Sepolia, Arbitrum Sepolia, Optimism Sepolia, Base, Base Goerli, Base Sepolia, Zora, Zora Goerli, Zora Sepolia, Scroll, Scroll Goerli, Scroll Sepolia, Linea, Linea Goerli and zKatana Sepolia)
+
 ## 0.9.0-beta.2
 
 ### Minor Changes
