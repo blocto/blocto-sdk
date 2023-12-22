@@ -1,5 +1,16 @@
 # @blocto/wagmi-connector
 
+## 1.3.0-beta.2
+
+### Minor Changes
+
+- fce0e50: Get blocto support list through api
+
+### Patch Changes
+
+- Updated dependencies [d34fca2]
+  - @blocto/sdk@0.9.0-beta.3
+
 ## 1.2.4-beta.1
 
 ### Patch Changes
