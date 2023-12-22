@@ -39,11 +39,44 @@ export const ETH_RPC_LIST: Mapping = {
   42161: 'https://arb1.arbitrum.io/rpc',
   // Arbitrum Testnet
   421613: 'https://endpoints.omniatech.io/v1/arbitrum/goerli/public',
+  // Arbitrum Sepolia Testnet
+  421614: 'https://arbitrum-sepolia.blockpi.network/v1/rpc/public',
 
   // Optimism Mainnet
   10: 'https://mainnet.optimism.io',
   // Optimism Goerli Testnet
   420: 'https://goerli.optimism.io',
+  // Optimism Sepolia Testnet
+  11155420: 'https://sepolia.optimism.io',
+
+  // Base Mainnet
+  8453: 'https://mainnet.base.org',
+  // Base Goerli Testnet
+  84531: 'https://goerli.base.org',
+  // Base Sepolia Testnet
+  84532: 'https://sepolia.base.org',
+
+  // Zora
+  7777777: 'https://rpc.zora.energy',
+  // Zora Goerli Testnet
+  999: 'https://testnet.rpc.zora.energy',
+  // Zora Sepolia Testnet
+  999999999: 'https://sepolia.rpc.zora.energy',
+
+  // Scroll
+  534352: 'https://rpc.scroll.io',
+  // Scroll Goerli Testnet
+  534353: 'https://alpha-rpc.scroll.io/l2',
+  // Scroll Sepolia Testnet
+  534351: 'https://sepolia-rpc.scroll.io',
+
+  // Linea
+  59144: 'https://rpc.linea.build',
+  // Linea Goerli Testnet
+  59140: 'https://rpc.goerli.linea.build',
+
+  // zKatana Sepolia Testnet
+  1261120: 'https://rpc.startale.com/zkatana',
 };
 
 export const ETH_ENV_WALLET_SERVER_MAPPING: Mapping = {
