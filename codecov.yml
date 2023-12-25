@@ -1,0 +1,51 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 5%
+
+component_management:
+  default_rules: # default rules that will be inherited by all components
+    statuses:
+      - type: project
+        target: 80%
+      - type: patch
+        target: 80%
+
+  individual_components:
+    - component_id: 'blocto-sdk'
+      paths:
+        - /packages/blocto-sdk/src/
+    - component_id: 'dappauth'
+      paths:
+        - /packages/dappauth/src/
+    - component_id: 'aptos-wallet-adapter-plugin'
+      paths:
+        - /adapters/aptos-wallet-adapter-plugin/src/
+    - component_id: 'connectkit-connector'
+      paths:
+        - /adapters/connectkit-connector/src/
+    - component_id: 'rainbowkit-connector'
+      paths:
+        - /adapters/rainbowkit-connector/src/
+    - component_id: 'wagmi-connector'
+      paths:
+        - /adapters/wagmi-connector/src/
+    - component_id: 'web3-react-connector'
+      paths:
+        - /adapters/web3-react-connector/src/
+    - component_id: 'web3modal-connector'
+      paths:
+        - /adapters/web3modal-connector/src/
+
+comment:
+  layout: 'header, diff, flags, components'
+  behavior: 'default'
+  require_changes: false
+  require_base: no
+  require_head: no
