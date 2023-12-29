@@ -43,7 +43,7 @@ export class BloctoConnector extends Connector {
           rpc: this.options.rpc,
         },
       });
-      this.provider = bloctoSDK.ethereum as unknown as Provider;
+      this.provider = (bloctoSDK.ethereum as unknown) as Provider;
     }
 
     if (!this.provider) throw new Error('Blocto Provider not found');
@@ -54,9 +54,9 @@ export class BloctoConnector extends Connector {
   private async getChainId(): Promise<string> {
     return (await this.provider?.request({ method: 'eth_chainId' })) as string;
   }
-  
+
   public async activate(
-    desiredChainIdOrChainParameters?:AddEthereumChainParameter
+    desiredChainIdOrChainParameters?: AddEthereumChainParameter
   ): Promise<void> {
     const desiredChainId = desiredChainIdOrChainParameters?.chainId;
     const provider = this.getProvider();
@@ -66,7 +66,9 @@ export class BloctoConnector extends Connector {
       !desiredChainId ||
       parseChainId(desiredChainId) === parseChainId(chainId)
     ) {
-      const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
+      const accounts = (await provider.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
 
       return this.actions.update({
         chainId: parseChainId(chainId),
@@ -74,21 +76,21 @@ export class BloctoConnector extends Connector {
       });
     }
 
-      // switch chain
-      await provider.request({
-          method: 'wallet_addEthereumChain',
-          params: [desiredChainIdOrChainParameters],
-        })
+    // switch chain
+    await provider.request({
+      method: 'wallet_addEthereumChain',
+      params: [desiredChainIdOrChainParameters],
+    });
 
-      await provider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: desiredChainId }],
-      });
+    await provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: desiredChainId }],
+    });
   }
 
   public deactivate(): void {
     const provider = this.getProvider();
-    
+
     provider.request({ method: 'wallet_disconnect' });
     this.actions.resetState();
   }
