@@ -1,8 +1,7 @@
 import type {
   Actions,
   AddEthereumChainParameter,
-  ProviderConnectInfo,
-  ProviderRpcError,
+  Provider,
 } from '@web3-react/types';
 import { Connector } from '@web3-react/types';
 import BloctoSDK from '@blocto/sdk';
@@ -17,97 +16,80 @@ function parseChainId(chainId: string | number): number {
  * @param options - Options to pass to Blocto SDK.
  * @param onError - Handler to report errors thrown from eventListeners.
  */
+type BloctoOptions = {
+  chainId: number;
+  rpc: string;
+};
+
 export interface BloctoConstructorArgs {
   actions: Actions;
-  options: {
-    chainId: number;
-    rpc: string;
-  };
+  options: BloctoOptions;
   onError?: (error: Error) => void;
 }
 
 export class BloctoConnector extends Connector {
-  public provider: any;
-  private bloctoSDK: BloctoSDK;
+  private options: BloctoOptions;
 
   constructor({ actions, options, onError }: BloctoConstructorArgs) {
     super(actions, onError);
-    this.bloctoSDK = new BloctoSDK({
-      ethereum: {
-        chainId: options.chainId,
-        rpc: options.rpc,
-      },
-    });
-    this.provider = this.bloctoSDK.ethereum;
+    this.options = options;
   }
 
-  private async isomorphicInitialize(): Promise<void> {
-    this.provider.on('connect', ({ chainId }: ProviderConnectInfo): void => {
-      this.actions.update({ chainId: parseChainId(chainId) });
-    });
-    this.provider.on('disconnect', (error: ProviderRpcError): void => {
-      this.actions.resetState();
-      this.onError?.(error);
-    });
-    this.provider.on('chainChanged', (chainId: string): void => {
-      this.actions.update({ chainId: parseChainId(chainId) });
-    });
-    this.provider.on('accountsChanged', (accounts: string[]): void => {
-      if (accounts.length === 0) this.actions.resetState();
-      else this.actions.update({ accounts });
-    });
+  private getProvider() {
+    if (!this.provider) {
+      const bloctoSDK = new BloctoSDK({
+        ethereum: {
+          chainId: this.options.chainId,
+          rpc: this.options.rpc,
+        },
+      });
+      this.provider = bloctoSDK.ethereum as unknown as Provider;
+    }
+
+    if (!this.provider) throw new Error('Blocto Provider not found');
+
+    return this.provider;
   }
 
+  private async getChainId(): Promise<string> {
+    return (await this.provider?.request({ method: 'eth_chainId' })) as string;
+  }
+  
   public async activate(
-    desiredChainIdOrChainParameters?: number | AddEthereumChainParameter
+    desiredChainIdOrChainParameters?:AddEthereumChainParameter
   ): Promise<void> {
-    const desiredChainId =
-      typeof desiredChainIdOrChainParameters === 'number'
-        ? desiredChainIdOrChainParameters
-        : desiredChainIdOrChainParameters?.chainId;
-    await this.isomorphicInitialize();
-    if (!this.provider) throw new Error('No provider');
+    const desiredChainId = desiredChainIdOrChainParameters?.chainId;
+    const provider = this.getProvider();
+    const chainId = await this.getChainId();
+
     if (
       !desiredChainId ||
-      parseChainId(desiredChainId) === parseChainId(this.provider.chainId)
+      parseChainId(desiredChainId) === parseChainId(chainId)
     ) {
-      const accounts = await this.provider.request({ method: 'eth_requestAccounts' });
+      const accounts = await provider.request({ method: 'eth_requestAccounts' }) as string[];
+
       return this.actions.update({
-        chainId: parseChainId(this.provider.chainId),
+        chainId: parseChainId(chainId),
         accounts,
       });
-    } else if (typeof desiredChainIdOrChainParameters === 'number') {
-      await this.provider
-        .request({
-          method: 'wallet_addEthereumChain',
-          params: [{ chainId: desiredChainId }],
-        })
-        .then(() => {
-          this.provider.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: desiredChainId }],
-          });
-        });
-      await this.activate(desiredChainId);
-    } else {
-      // AddEthereumChainParameter
-      await this.provider
-        .request({
+    }
+
+      // switch chain
+      await provider.request({
           method: 'wallet_addEthereumChain',
           params: [desiredChainIdOrChainParameters],
         })
-        .then(() => {
-          this.provider.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: desiredChainId }],
-          });
-        });
-      await this.activate(desiredChainId);
-    }
+
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: desiredChainId }],
+      });
   }
 
   public deactivate(): void {
-    this.provider?.handleDisconnect();
+    const provider = this.getProvider();
+    
+    provider.request({ method: 'wallet_disconnect' });
     this.actions.resetState();
   }
 }
