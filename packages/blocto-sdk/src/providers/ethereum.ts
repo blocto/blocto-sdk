@@ -163,7 +163,8 @@ export default class EthereumProvider
           name,
           display_name,
           network_type,
-          wallet_web_url: this._blocto.walletServer,
+          wallet_web_url: this.injectedWalletServer ||
+          ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment],
           rpc_url: this.rpc,
         },
       },
@@ -443,6 +444,7 @@ export default class EthereumProvider
       case 'wallet_addEthereumChain': {
         return this.loadSwitchableNetwork(payload?.params || []);
       }
+      case 'eth_blockNumber':
       case 'eth_call': {
         const response = await this.handleReadRequests(payload);
         if (!response || (response && !response.result && response.error)) {
@@ -462,8 +464,9 @@ export default class EthereumProvider
       case 'wallet_disconnect': {
         return this.handleDisconnect();
       }
-      case 'eth_accounts':
+      case 'eth_accounts': {
         return getEvmAddress(sessionKeyEnv, blockchainName) || [];
+      }
     }
 
     // Method that requires user to be connected
