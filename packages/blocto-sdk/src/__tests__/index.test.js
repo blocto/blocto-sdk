@@ -177,17 +177,19 @@ describe('Testing BloctoSDK ethereum provider', () => {
       .request({
         method: 'wallet_sendMultiCallTransaction',
         params: [
-          [{
-            from: '0x123',
-            to: '0x123',
-            value: '0x01abc',
-          },
-          {
-            from: '0x456',
-            to: '0x456',
-            value: '0x02def',
-          }],
-          false
+          [
+            {
+              from: '0x123',
+              to: '0x123',
+              value: '0x01abc',
+            },
+            {
+              from: '0x456',
+              to: '0x456',
+              value: '0x02def',
+            },
+          ],
+          false,
         ],
       })
       .then(() => {

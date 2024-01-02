@@ -19,10 +19,10 @@ export const isStorageSupported = () => {
 };
 
 class MemoryStorage {
-  storage = {};
+  private storage: { [key: string]: any } = {};
 
   getItem(key: string): string | null {
-    return (this as any)[key] || null;
+    return this.storage[key] !== undefined ? String(this.storage[key]) : null;
   }
 
   setItem(key: string, value: unknown): void {

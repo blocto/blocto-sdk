@@ -21,7 +21,7 @@
     "build": "NODE_ENV=production rollup -c",
     "clean": "rimraf dist",
     "lint": "eslint --ext .js,.ts src/",
-    "test": "jest",
+    "test": "jest --coverage=true --coverage-reporters=text",
     "prepublishOnly": "npm-run-all clean build",
     "rollup-watch": "NODE_ENV=development rollup -c rollup.config.dev.js --watch",
     "serve": "live-server --port=7777 --https=dev-cert/index.js dev",

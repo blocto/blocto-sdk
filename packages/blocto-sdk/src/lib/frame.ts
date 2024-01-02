@@ -14,7 +14,7 @@ export function attachFrame(frame: HTMLIFrameElement): void {
   document.body.appendChild(frame);
 }
 
-export function detatchFrame(frame: HTMLIFrameElement): void {
+export function detachFrame(frame: HTMLIFrameElement): void {
   const parentNode = frame && frame.parentNode;
   if (parentNode && parentNode.removeChild instanceof Function) {
     parentNode.removeChild(frame);

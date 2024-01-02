@@ -11,7 +11,7 @@ import {
   SignMessagePayload,
   SignMessageResponse,
 } from './types/aptos.d';
-import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
+import { createFrame, attachFrame, detachFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   setAccountStorage,
@@ -147,7 +147,6 @@ export default class AptosProvider
     transaction: AptosTypes.TransactionPayload,
     txOptions: TxOptions = {}
   ): Promise<{ hash: AptosTypes.HexEncodedBytes }> {
-
     if (this.existedSDK) {
       return this.existedSDK.signAndSubmitTransaction(transaction, txOptions);
     }
@@ -198,13 +197,13 @@ export default class AptosProvider
           ) {
             if (e.data.status === 'APPROVED') {
               removeEventListener();
-              detatchFrame(authzFrame);
+              detachFrame(authzFrame);
               resolve({ hash: e.data.txHash });
             }
 
             if (e.data.status === 'DECLINED') {
               removeEventListener();
-              detatchFrame(authzFrame);
+              detachFrame(authzFrame);
               if (e.data.errorCode === 'incorrect_session_id') {
                 this.disconnect();
               }
@@ -217,7 +216,6 @@ export default class AptosProvider
   }
 
   async signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {
-
     const formattedPayload = checkMessagePayloadFormat(payload);
 
     if (this.existedSDK) {
@@ -269,13 +267,13 @@ export default class AptosProvider
           ) {
             if (e.data.status === 'APPROVED') {
               removeEventListener();
-              detatchFrame(signFrame);
+              detachFrame(signFrame);
               resolve(e.data);
             }
 
             if (e.data.status === 'DECLINED') {
               removeEventListener();
-              detatchFrame(signFrame);
+              detachFrame(signFrame);
               if (e.data.errorCode === 'incorrect_session_id') {
                 this.disconnect();
               }
@@ -291,7 +289,10 @@ export default class AptosProvider
     if (this.existedSDK) {
       return new Promise((resolve, reject) =>
         // add a small delay to make sure the network has been switched
-        setTimeout(() => this.existedSDK.connect().then(resolve).catch(reject), 10)
+        setTimeout(
+          () => this.existedSDK.connect().then(resolve).catch(reject),
+          10
+        )
       );
     }
 
@@ -323,7 +324,7 @@ export default class AptosProvider
           if (e.origin === this.server) {
             if (e.data.type === 'APTOS:FRAME:RESPONSE') {
               removeListener();
-              detatchFrame(loginFrame);
+              detachFrame(loginFrame);
               setAccountStorage(
                 this.sessionKey,
                 {
@@ -380,7 +381,7 @@ export default class AptosProvider
 
             if (e.data.type === 'APTOS:FRAME:CLOSE') {
               removeListener();
-              detatchFrame(loginFrame);
+              detachFrame(loginFrame);
               reject(new Error('User declined the login request'));
             }
           }
@@ -406,18 +407,16 @@ export default class AptosProvider
   }
 
   override on(event: string, listener: (arg: any) => void): void {
-    if (this.existedSDK)
-      this.existedSDK.on(event, listener);
-  
+    if (this.existedSDK) this.existedSDK.on(event, listener);
+
     super.on(event, listener);
   }
-  
+
   override removeListener(event: string, listener: (arg: any) => void): void {
-    if (this.existedSDK)
-      this.existedSDK.off(event, listener);
-  
+    if (this.existedSDK) this.existedSDK.off(event, listener);
+
     super.removeListener(event, listener);
   }
-  
+
   off = this.removeListener;
 }

@@ -13,7 +13,7 @@ import {
   IUserOperation,
   PromiseResponseItem,
 } from './types/ethereum.d';
-import { createFrame, attachFrame, detatchFrame } from '../lib/frame';
+import { createFrame, attachFrame, detachFrame } from '../lib/frame';
 import addSelfRemovableHandler from '../lib/addSelfRemovableHandler';
 import {
   setAccountStorage,
@@ -593,13 +593,13 @@ export default class EthereumProvider
           ) {
             if (e.data.status === 'APPROVED') {
               removeEventListener();
-              detatchFrame(frame);
+              detachFrame(frame);
               resolve(e.data[objectKey]);
             }
 
             if (e.data.status === 'DECLINED') {
               removeEventListener();
-              detatchFrame(frame);
+              detachFrame(frame);
               if (e.data.errorCode === 'incorrect_session_id') {
                 this.handleDisconnect();
               }
@@ -610,7 +610,7 @@ export default class EthereumProvider
           }
           if (e.data.type === 'ETH:FRAME:CLOSE') {
             removeEventListener();
-            detatchFrame(frame);
+            detachFrame(frame);
             reject(
               ethErrors.provider.userRejectedRequest(
                 'User declined the request'
@@ -690,7 +690,7 @@ export default class EthereumProvider
           if (e.origin === walletServer) {
             if (e.data.type === 'ETH:FRAME:RESPONSE') {
               removeListener();
-              detatchFrame(loginFrame);
+              detachFrame(loginFrame);
               this.eventListeners?.connect.forEach((listener) =>
                 listener({ chainId: this.chainId })
               );
@@ -734,7 +734,7 @@ export default class EthereumProvider
 
             if (e.data.type === 'ETH:FRAME:CLOSE') {
               removeListener();
-              detatchFrame(loginFrame);
+              detachFrame(loginFrame);
               reject(ethErrors.provider.userRejectedRequest());
             }
           }
@@ -884,7 +884,7 @@ export default class EthereumProvider
           if (e.origin === walletServer) {
             if (e.data.type === 'ETH:FRAME:RESPONSE') {
               removeListener();
-              detatchFrame(switchChainFrame);
+              detachFrame(switchChainFrame);
               if (e.data?.addr && oldAccount) {
                 setAccountStorage(
                   sessionKeyEnv,
@@ -911,7 +911,7 @@ export default class EthereumProvider
 
             if (e.data.type === 'ETH:FRAME:CLOSE') {
               removeListener();
-              detatchFrame(switchChainFrame);
+              detachFrame(switchChainFrame);
               if (e.data?.hasApprovedSwitchChain) {
                 this.eventListeners?.chainChanged.forEach((listener) =>
                   listener(this.chainId)

@@ -149,9 +149,9 @@ export const setEvmAddress = (
 };
 
 export const removeAllEvmAddress = (key: KEY_SESSION): void => {
-    const newAccountStorage = getItem<AccountStorage>(key);
-    if (!newAccountStorage) return;
-    newAccountStorage.data.evm = {};
-    setItem(key, newAccountStorage);
-    return;
+  const newAccountStorage = getItem<AccountStorage>(key);
+  if (!newAccountStorage) return;
+  newAccountStorage.data.evm = {};
+  setItem(key, newAccountStorage);
+  return;
 };
