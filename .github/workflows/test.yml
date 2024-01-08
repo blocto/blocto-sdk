@@ -34,8 +34,7 @@ jobs:
         id: testWithCache
         run: yarn turbo lint test build --cache-dir=.turbo
         continue-on-error: true
-      
+
       - name: Try to do again without cache
-        if: failure() && steps.testWithCache.outcome == 'failure'
+        if: steps.testWithCache.outcome == 'failure'
         run: yarn turbo lint test build --force --cache-dir=.turbo
-        

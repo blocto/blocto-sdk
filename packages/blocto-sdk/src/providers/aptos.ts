@@ -66,6 +66,10 @@ export default class AptosProvider
   api?: string;
   sessionKey: KEY_SESSION;
 
+  private get existedSDK() {
+    return (window as any).bloctoAptos;
+  }
+
   constructor({ chainId, server, appId }: AptosProviderConfig) {
     super();
 
@@ -111,9 +115,8 @@ export default class AptosProvider
   async signTransaction(
     transaction: unknown
   ): Promise<AptosTypes.SubmitTransactionRequest> {
-    const existedSDK = (window as any).bloctoAptos;
-    if (existedSDK) {
-      return existedSDK.signTransaction(transaction);
+    if (this.existedSDK) {
+      return this.existedSDK.signTransaction(transaction);
     }
 
     const hasConnected = await this.isConnected();
@@ -127,9 +130,8 @@ export default class AptosProvider
   }
 
   async disconnect(): Promise<void> {
-    const existedSDK = (window as any).bloctoAptos;
-    if (existedSDK) {
-      await existedSDK.disconnect();
+    if (this.existedSDK) {
+      await this.existedSDK.disconnect();
       return;
     }
     removeChainAddress(this.sessionKey, CHAIN.APTOS);
@@ -145,10 +147,9 @@ export default class AptosProvider
     transaction: AptosTypes.TransactionPayload,
     txOptions: TxOptions = {}
   ): Promise<{ hash: AptosTypes.HexEncodedBytes }> {
-    const existedSDK = (window as any).bloctoAptos;
 
-    if (existedSDK) {
-      return existedSDK.signAndSubmitTransaction(transaction, txOptions);
+    if (this.existedSDK) {
+      return this.existedSDK.signAndSubmitTransaction(transaction, txOptions);
     }
 
     const hasConnected = await this.isConnected();
@@ -216,12 +217,11 @@ export default class AptosProvider
   }
 
   async signMessage(payload: SignMessagePayload): Promise<SignMessageResponse> {
-    const existedSDK = (window as any).bloctoAptos;
 
     const formattedPayload = checkMessagePayloadFormat(payload);
 
-    if (existedSDK) {
-      return existedSDK.signMessage(formattedPayload);
+    if (this.existedSDK) {
+      return this.existedSDK.signMessage(formattedPayload);
     }
 
     const hasConnected = await this.isConnected();
@@ -288,11 +288,10 @@ export default class AptosProvider
   }
 
   async connect(): Promise<PublicAccount> {
-    const existedSDK = (window as any).bloctoAptos;
-    if (existedSDK) {
+    if (this.existedSDK) {
       return new Promise((resolve, reject) =>
         // add a small delay to make sure the network has been switched
-        setTimeout(() => existedSDK.connect().then(resolve).catch(reject), 10)
+        setTimeout(() => this.existedSDK.connect().then(resolve).catch(reject), 10)
       );
     }
 
@@ -405,4 +404,20 @@ export default class AptosProvider
     setChainAddress(this.sessionKey, CHAIN.APTOS, accounts);
     return accounts?.[0] || '';
   }
+
+  override on(event: string, listener: (arg: any) => void): void {
+    if (this.existedSDK)
+      this.existedSDK.on(event, listener);
+  
+    super.on(event, listener);
+  }
+  
+  override removeListener(event: string, listener: (arg: any) => void): void {
+    if (this.existedSDK)
+      this.existedSDK.off(event, listener);
+  
+    super.removeListener(event, listener);
+  }
+  
+  off = this.removeListener;
 }

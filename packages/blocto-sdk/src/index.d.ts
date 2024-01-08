@@ -25,8 +25,8 @@ export {
   EthereumTypes,
 };
 export declare interface BloctoSDKConfig extends BaseConfig {
-  ethereum?: Omit<EthereumProviderConfig, 'appId'>;
-  aptos?: Omit<AptosProviderConfig>;
+  ethereum?: EthereumProviderConfig;
+  aptos?: AptosProviderConfig;
 }
 declare class BloctoSDK {
   ethereum?: EthereumProviderInterface;

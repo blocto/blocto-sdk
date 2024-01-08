@@ -1,5 +1,57 @@
 # @blocto/web3-react-connector
 
+## 1.0.5
+
+### Patch Changes
+
+- b9dac7d: support web3js v4
+- 8d0b5bf: enhance in-app-sdk event support
+- 00a3832: sendAsync can send another requests
+- eb72d1c: fix unhandle user reject error
+- Updated dependencies [b9dac7d]
+- Updated dependencies [8d0b5bf]
+- Updated dependencies [55afe21]
+- Updated dependencies [3017eb1]
+- Updated dependencies [00a3832]
+- Updated dependencies [aa28bf6]
+- Updated dependencies [d34fca2]
+  - @blocto/sdk@0.9.0
+
+## 1.0.5-beta.2
+
+### Patch Changes
+
+- b9dac7d: support web3js v4
+- 00a3832: sendAsync can send another requests
+- Updated dependencies [b9dac7d]
+- Updated dependencies [55afe21]
+- Updated dependencies [3017eb1]
+- Updated dependencies [00a3832]
+  - @blocto/sdk@0.9.0-beta.2
+
+## 1.0.5-beta.1
+
+### Patch Changes
+
+- eb72d1c: fix unhandle user reject error
+- Updated dependencies [aa28bf6]
+  - @blocto/sdk@0.8.1-beta.1
+
+## 1.0.5-beta.0
+
+### Patch Changes
+
+- 8d0b5bf: enhance in-app-sdk event support
+- Updated dependencies [8d0b5bf]
+  - @blocto/sdk@0.8.1-beta.0
+
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies [a4d3fbd]
+  - @blocto/sdk@0.8.0
+
 ## 1.0.3
 
 ### Patch Changes
@@ -10,6 +62,15 @@
 - Updated dependencies [4835522]
 - Updated dependencies [e742f66]
   - @blocto/sdk@0.7.1
+
+## 1.0.3-beta.0
+
+### Patch Changes
+
+- 4835522: Fix export unreconize type for old typescript
+- Updated dependencies [4835522]
+- Updated dependencies [e742f66]
+  - @blocto/sdk@0.7.1-beta.0
 
 ## 1.0.2
 

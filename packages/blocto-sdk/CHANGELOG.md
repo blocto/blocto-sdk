@@ -1,5 +1,56 @@
 # @blocto/sdk
 
+## 0.9.0
+
+### Minor Changes
+
+- 55afe21: support web3js version 4
+- 3017eb1: Support load multiple chain configs in evm provider
+- d34fca2: Add RPC endpoints for the L2 chains (Sepolia, Arbitrum Sepolia, Optimism Sepolia, Base, Base Goerli, Base Sepolia, Zora, Zora Goerli, Zora Sepolia, Scroll, Scroll Goerli, Scroll Sepolia, Linea, Linea Goerli and zKatana Sepolia)
+
+### Patch Changes
+
+- b9dac7d: support web3js v4
+- 8d0b5bf: enhance in-app-sdk event support
+- 00a3832: sendAsync can send another requests
+- aa28bf6: add accountChanged eventListeners
+
+## 0.9.0-beta.3
+
+### Minor Changes
+
+- d34fca2: Add RPC endpoints for the L2 chains (Sepolia, Arbitrum Sepolia, Optimism Sepolia, Base, Base Goerli, Base Sepolia, Zora, Zora Goerli, Zora Sepolia, Scroll, Scroll Goerli, Scroll Sepolia, Linea, Linea Goerli and zKatana Sepolia)
+
+## 0.9.0-beta.2
+
+### Minor Changes
+
+- 55afe21: support web3js version 4
+- 3017eb1: Support load multiple chain configs in evm provider
+
+### Patch Changes
+
+- b9dac7d: support web3js v4
+- 00a3832: sendAsync can send another requests
+
+## 0.8.1-beta.1
+
+### Patch Changes
+
+- aa28bf6: add accountChanged eventListeners
+
+## 0.8.1-beta.0
+
+### Patch Changes
+
+- 8d0b5bf: enhance in-app-sdk event support
+
+## 0.8.0
+
+### Minor Changes
+
+- a4d3fbd: disable eth_sign method
+
 ## 0.7.2
 
 ### Patch Changes
@@ -11,6 +62,11 @@
 ### Patch Changes
 
 - 58ef7a0: adjust eth_accounts to not require prior enable
+
+## 0.7.1-beta.0
+
+### Patch Changes
+
 - 4835522: Fix export unreconize type for old typescript
 - e742f66: AccountChange use addSelfRemovableHandler
 

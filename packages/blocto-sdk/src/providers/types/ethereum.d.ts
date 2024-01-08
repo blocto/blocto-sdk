@@ -1,19 +1,27 @@
 import { IEthereumProvider } from 'eip1193-provider';
 import { BaseConfig, KEY_SESSION } from '../../constants';
 import BloctoProviderInterface from './blocto.d';
-import { EvmSupportMapping } from '../../lib/getEvmSupport';
 
-export interface EthereumProviderConfig extends BaseConfig {
+interface SingleChainConfig extends BaseConfig {
   chainId: string | number | null;
   rpc?: string;
   walletServer?: string;
 }
+
+interface MultiChainConfig extends BaseConfig {
+  defaultChainId: string | number | null;
+  walletServer?: string;
+  switchableChains: AddEthereumChainParameter[];
+}
+// EthereumProviderConfig can be both single chain or multi chain config.
+export type EthereumProviderConfig = SingleChainConfig | MultiChainConfig;
 
 export interface EIP1193RequestPayload {
   id?: number;
   jsonrpc?: string;
   method: string;
   params?: Array<any>;
+  callback?: JsonRpcCallback;
 }
 
 interface SwitchableNetwork {
@@ -33,27 +41,30 @@ export interface EthereumProviderInterface
   networkVersion: string | number;
   rpc: string;
   _blocto: {
-    sessionKey: KEY_SESSION;
+    sessionKeyEnv: KEY_SESSION;
     walletServer: string;
     blockchainName: string;
     networkType: string;
-    supportNetworkList: EvmSupportMapping;
     switchableNetwork: SwitchableNetwork;
   };
   sendUserOperation(userOp: IUserOperation): Promise<string>;
-  request(args: EIP1193RequestPayload): Promise<any>;
+  request(
+    args: EIP1193RequestPayload | Array<EIP1193RequestPayload>
+  ): Promise<any>;
   loadSwitchableNetwork(
     networkList: {
       chainId: string;
       rpcUrls?: string[];
     }[]
   ): Promise<null>;
+  supportChainList(): Promise<{ chainId: string; chainName: string }[]>;
   injectedWalletServer?: string;
 }
 
 export interface AddEthereumChainParameter {
   chainId: string;
   rpcUrls: string[];
+  [key: string]: any;
 }
 
 export interface JsonRpcRequest {
@@ -75,6 +86,12 @@ export type JsonRpcCallback = (
   error: Error | null,
   response?: JsonRpcResponse
 ) => unknown;
+
+export interface PromiseResponseItem {
+  status: 'fulfilled' | 'rejected';
+  value?: any;
+  reason?: any;
+}
 
 /**
  *  A [[HexString]] whose length is even, which ensures it is a valid
