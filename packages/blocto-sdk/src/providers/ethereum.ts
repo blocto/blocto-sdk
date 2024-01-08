@@ -445,6 +445,7 @@ export default class EthereumProvider
         return this.loadSwitchableNetwork(payload?.params || []);
       }
       case 'eth_blockNumber':
+      case 'web3_clientVersion':
       case 'eth_call': {
         const response = await this.handleReadRequests(payload);
         if (!response || (response && !response.result && response.error)) {
