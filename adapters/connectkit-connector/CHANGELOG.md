@@ -1,5 +1,18 @@
 # @blocto/connectkit-connector
 
+## 0.2.2
+
+### Patch Changes
+
+- b9dac7d: support web3js v4
+- 8d0b5bf: enhance in-app-sdk event support
+- 00a3832: sendAsync can send another requests
+- Updated dependencies [b9dac7d]
+- Updated dependencies [8d0b5bf]
+- Updated dependencies [e075c22]
+- Updated dependencies [00a3832]
+  - @blocto/wagmi-connector@1.3.0
+
 ## 0.2.2-beta.2
 
 ### Patch Changes

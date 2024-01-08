@@ -1,5 +1,21 @@
 # @blocto/aptos-wallet-adapter-plugin
 
+## 0.2.7
+
+### Patch Changes
+
+- b9dac7d: support web3js v4
+- 8d0b5bf: enhance in-app-sdk event support
+- 00a3832: sendAsync can send another requests
+- Updated dependencies [b9dac7d]
+- Updated dependencies [8d0b5bf]
+- Updated dependencies [55afe21]
+- Updated dependencies [3017eb1]
+- Updated dependencies [00a3832]
+- Updated dependencies [aa28bf6]
+- Updated dependencies [d34fca2]
+  - @blocto/sdk@0.9.0
+
 ## 0.2.7-beta.1
 
 ### Patch Changes
