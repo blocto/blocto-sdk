@@ -1,7 +1,8 @@
 import type {
   Actions,
   AddEthereumChainParameter,
-  Provider,
+  ProviderConnectInfo,
+  ProviderRpcError,
 } from '@web3-react/types';
 import { Connector } from '@web3-react/types';
 import BloctoSDK from '@blocto/sdk';
@@ -28,70 +29,81 @@ export interface BloctoConstructorArgs {
 }
 
 export class BloctoConnector extends Connector {
-  private options: BloctoOptions;
+  public provider: any;
 
   constructor({ actions, options, onError }: BloctoConstructorArgs) {
     super(actions, onError);
-    this.options = options;
-  }
+    const bloctoSDK = new BloctoSDK({
+      ethereum: {
+        chainId: options.chainId,
+        rpc: options.rpc,
+      },
+    });
 
-  private getProvider() {
-    if (!this.provider) {
-      const bloctoSDK = new BloctoSDK({
-        ethereum: {
-          chainId: this.options.chainId,
-          rpc: this.options.rpc,
-        },
-      });
-      this.provider = (bloctoSDK.ethereum as unknown) as Provider;
-    }
+    this.provider = bloctoSDK.ethereum;
 
-    if (!this.provider) throw new Error('Blocto Provider not found');
-
-    return this.provider;
-  }
-
-  private async getChainId(): Promise<string> {
-    return (await this.provider?.request({ method: 'eth_chainId' })) as string;
+    this.provider.on(
+      'connect',
+      async ({ chainId }: ProviderConnectInfo): Promise<void> => {
+        const accounts = await this.provider.request({
+          method: 'eth_accounts',
+        });
+        this.actions.update({ chainId: parseChainId(chainId), accounts });
+      }
+    );
+    this.provider.on('disconnect', (error: ProviderRpcError): void => {
+      this.actions.resetState();
+      this.onError?.(error);
+    });
+    this.provider.on('chainChanged', async (chainId: string): Promise<void> => {
+      const accounts = await this.provider.request({ method: 'eth_accounts' });
+      this.actions.update({ chainId: parseChainId(chainId), accounts });
+    });
+    this.provider.on('accountsChanged', (accounts: string[]): void => {
+      if (accounts.length === 0) this.actions.resetState();
+      else this.actions.update({ accounts });
+    });
   }
 
   public async activate(
-    desiredChainIdOrChainParameters?: AddEthereumChainParameter
+    desiredChainIdOrChainParameters?: number | AddEthereumChainParameter
   ): Promise<void> {
-    const desiredChainId = desiredChainIdOrChainParameters?.chainId;
-    const provider = this.getProvider();
-    const chainId = await this.getChainId();
+    const desiredChainId =
+      typeof desiredChainIdOrChainParameters === 'number'
+        ? desiredChainIdOrChainParameters
+        : desiredChainIdOrChainParameters?.chainId;
 
+    if (!this.provider) throw new Error('No provider');
     if (
       !desiredChainId ||
-      parseChainId(desiredChainId) === parseChainId(chainId)
+      parseChainId(desiredChainId) === parseChainId(this.provider.chainId)
     ) {
-      const accounts = (await provider.request({
+      const accounts = await this.provider.request({
         method: 'eth_requestAccounts',
-      })) as string[];
+      });
 
       return this.actions.update({
-        chainId: parseChainId(chainId),
+        chainId: parseChainId(this.provider.chainId),
         accounts,
       });
     }
+    const addEthereumChainParameters =
+      typeof desiredChainIdOrChainParameters === 'number'
+        ? { chainId: desiredChainId }
+        : desiredChainIdOrChainParameters;
 
-    // switch chain
-    await provider.request({
+    await this.provider.request({
       method: 'wallet_addEthereumChain',
-      params: [desiredChainIdOrChainParameters],
+      params: [addEthereumChainParameters],
     });
-
-    await provider.request({
+    await this.provider.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: desiredChainId }],
     });
   }
 
   public deactivate(): void {
-    const provider = this.getProvider();
-
-    provider.request({ method: 'wallet_disconnect' });
+    this.provider.request({ method: 'wallet_disconnect' });
     this.actions.resetState();
   }
 }
