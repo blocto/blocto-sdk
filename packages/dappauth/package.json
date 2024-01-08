@@ -1,6 +1,6 @@
 {
   "name": "@blocto/dappauth",
-  "version": "2.2.1-beta.0",
+  "version": "2.2.1",
   "description": "A util to prove actionable control ('ownership') over a public Ethereum address using eth_sign",
   "keywords": [
     "ethereum",
