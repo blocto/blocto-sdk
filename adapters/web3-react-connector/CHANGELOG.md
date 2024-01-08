@@ -1,5 +1,22 @@
 # @blocto/web3-react-connector
 
+## 1.0.5
+
+### Patch Changes
+
+- b9dac7d: support web3js v4
+- 8d0b5bf: enhance in-app-sdk event support
+- 00a3832: sendAsync can send another requests
+- eb72d1c: fix unhandle user reject error
+- Updated dependencies [b9dac7d]
+- Updated dependencies [8d0b5bf]
+- Updated dependencies [55afe21]
+- Updated dependencies [3017eb1]
+- Updated dependencies [00a3832]
+- Updated dependencies [aa28bf6]
+- Updated dependencies [d34fca2]
+  - @blocto/sdk@0.9.0
+
 ## 1.0.5-beta.2
 
 ### Patch Changes
