@@ -149,12 +149,13 @@ export default class EthereumProvider
         `Get support chain failed: ${this.networkVersion} might not be supported yet.`
       );
     }
+    const walletServer =
+      this.injectedWalletServer ||
+      ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment];
     this._blocto = {
       ...this._blocto,
       sessionKeyEnv: ETH_SESSION_KEY_MAPPING[blocto_service_environment],
-      walletServer:
-        this.injectedWalletServer ||
-        ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment],
+      walletServer,
       blockchainName: name,
       networkType: network_type,
       switchableNetwork: {
@@ -163,8 +164,7 @@ export default class EthereumProvider
           name,
           display_name,
           network_type,
-          wallet_web_url: this.injectedWalletServer ||
-          ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment],
+          wallet_web_url: walletServer,
           rpc_url: this.rpc,
         },
       },
