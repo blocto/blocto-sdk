@@ -1,5 +1,5 @@
-import BloctoSDK from '../main';
-import AptosProvider from '../providers/aptos';
+import BloctoSDK from '../../main';
+import AptosProvider from '../../providers/aptos';
 
 describe('BloctoSDK Aptos', () => {
   it('should instantiate with AptosProvider when aptos config is provided', () => {
