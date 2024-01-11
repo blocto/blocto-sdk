@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.9.1-beta.0
+
+### Patch Changes
+
+- 4ea8a07: fix web3-react-connector duplicate authn popup
+
 ## 0.9.0
 
 ### Minor Changes
