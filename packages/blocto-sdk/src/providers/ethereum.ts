@@ -74,6 +74,7 @@ export default class EthereumProvider
   };
 
   private get existedSDK() {
+    if (typeof window === 'undefined') return undefined;
     return (window as any).ethereum;
   }
 
