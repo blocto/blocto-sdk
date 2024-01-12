@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.9.1-beta.1
+
+### Patch Changes
+
+- 48fa07a: fix: handle existedSDK handle window not defined
+
 ## 0.9.1-beta.0
 
 ### Patch Changes
