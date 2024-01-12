@@ -74,6 +74,7 @@ export default class EthereumProvider
   };
 
   private get existedSDK() {
+    if (typeof window === 'undefined') return undefined;
     return (window as any).ethereum;
   }
 
@@ -647,6 +648,13 @@ export default class EthereumProvider
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
   async enable(email?: string): Promise<ProviderAccounts> {
+    if (typeof window === 'undefined') {
+      throw ethErrors.provider.custom({
+        code: 1001,
+        message: 'Blocto SDK only works in browser environment',
+      });
+    }
+
     const { walletServer, blockchainName, sessionKeyEnv } =
       await this.#getBloctoProperties();
 
