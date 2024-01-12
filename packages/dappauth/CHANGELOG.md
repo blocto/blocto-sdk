@@ -1,5 +1,11 @@
 # @blocto/dappauth
 
+## 2.2.2-beta.0
+
+### Patch Changes
+
+- 48fa07a: fix: handle existedSDK handle window not defined
+
 ## 2.2.1
 
 ### Patch Changes
