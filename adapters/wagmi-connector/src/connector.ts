@@ -139,7 +139,7 @@ class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
       const chain = this.chains.find((x) => x.id === chainId);
       const networks = await provider.supportChainList();
       const evmSupportMap = networks.reduce(
-        (a: any, v: any) => ({ ...a, [v.chain_id]: v }),
+        (a: any, v: any) => ({ ...a, [v.chainId]: v }),
         {}
       );
       const isBloctoSupportChain = evmSupportMap[`${chainId}`];
