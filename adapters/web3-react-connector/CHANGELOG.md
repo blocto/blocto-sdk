@@ -1,5 +1,13 @@
 # @blocto/web3-react-connector
 
+## 1.0.6-beta.1
+
+### Patch Changes
+
+- 48fa07a: fix: handle existedSDK handle window not defined
+- Updated dependencies [48fa07a]
+  - @blocto/sdk@0.9.1-beta.1
+
 ## 1.0.6-beta.0
 
 ### Patch Changes

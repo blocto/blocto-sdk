@@ -1,5 +1,13 @@
 # @blocto/connectkit-connector
 
+## 0.2.3-beta.1
+
+### Patch Changes
+
+- 48fa07a: fix: handle existedSDK handle window not defined
+- Updated dependencies [48fa07a]
+  - @blocto/wagmi-connector@1.3.1-beta.1
+
 ## 0.2.3-beta.0
 
 ### Patch Changes
