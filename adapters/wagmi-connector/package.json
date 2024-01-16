@@ -15,10 +15,11 @@
   "scripts": {
     "build": "tsc && vite build",
     "lint": "eslint src --ext .ts",
-    "test": "vitest"
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@types/node": "^20.2.5",
+    "@vitest/coverage-v8": "^1.2.0",
     "@wagmi/chains": "^1.8.0",
     "@wagmi/core": "^2.2.0",
     "typescript": "^5.1.3",
