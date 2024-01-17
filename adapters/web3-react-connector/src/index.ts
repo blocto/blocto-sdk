@@ -46,7 +46,7 @@ export class BloctoConnector extends Connector {
       'connect',
       async ({ chainId }: ProviderConnectInfo): Promise<void> => {
         const accounts = await this.provider.request({
-          method: 'eth_accounts',
+          method: 'eth_requestAccounts',
         });
         this.actions.update({ chainId: parseChainId(chainId), accounts });
       }
@@ -56,12 +56,10 @@ export class BloctoConnector extends Connector {
       this.onError?.(error);
     });
     this.provider.on('chainChanged', async (chainId: string): Promise<void> => {
-      const accounts = await this.provider.request({ method: 'eth_accounts' });
+      const accounts = await this.provider.request({
+        method: 'eth_requestAccounts',
+      });
       this.actions.update({ chainId: parseChainId(chainId), accounts });
-    });
-    this.provider.on('accountsChanged', (accounts: string[]): void => {
-      if (accounts.length === 0) this.actions.resetState();
-      else this.actions.update({ accounts });
     });
   }
 
