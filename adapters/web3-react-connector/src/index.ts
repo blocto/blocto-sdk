@@ -61,10 +61,6 @@ export class BloctoConnector extends Connector {
       });
       this.actions.update({ chainId: parseChainId(chainId), accounts });
     });
-    this.provider.on('accountsChanged', (accounts: string[]): void => {
-      if (accounts.length === 0) this.actions.resetState();
-      else this.actions.update({ accounts });
-    });
   }
 
   public async activate(
