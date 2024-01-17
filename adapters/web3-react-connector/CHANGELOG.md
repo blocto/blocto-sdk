@@ -1,5 +1,12 @@
 # @blocto/web3-react-connector
 
+## 1.0.6-beta.2
+
+### Patch Changes
+
+- 267f154: fix(wagmi): correct typo with chainId
+- ebda1c4: fix(web3-react): use eth_requestAccounts replace eth_accounts
+
 ## 1.0.6-beta.1
 
 ### Patch Changes
