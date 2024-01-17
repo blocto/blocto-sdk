@@ -1,5 +1,11 @@
 # @blocto/wagmi-connector
 
+## 1.3.1-beta.2
+
+### Patch Changes
+
+- 267f154: fix(wagmi): correct typo with chainId
+
 ## 1.3.1-beta.1
 
 ### Patch Changes
