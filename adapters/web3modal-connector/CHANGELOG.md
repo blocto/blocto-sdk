@@ -1,5 +1,13 @@
 # @blocto/web3modal-connector
 
+## 0.1.4-beta.2
+
+### Patch Changes
+
+- 267f154: fix(wagmi): correct typo with chainId
+- Updated dependencies [267f154]
+  - @blocto/wagmi-connector@1.3.1-beta.2
+
 ## 0.1.4-beta.1
 
 ### Patch Changes
