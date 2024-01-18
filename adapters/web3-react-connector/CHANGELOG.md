@@ -1,5 +1,17 @@
 # @blocto/web3-react-connector
 
+## 1.0.6
+
+### Patch Changes
+
+- 267f154: fix(wagmi): correct typo with chainId
+- 48fa07a: fix: handle existedSDK handle window not defined
+- ebda1c4: fix(web3-react): use eth_requestAccounts replace eth_accounts
+- 4ea8a07: fix web3-react-connector duplicate authn popup
+- Updated dependencies [48fa07a]
+- Updated dependencies [4ea8a07]
+  - @blocto/sdk@0.9.1
+
 ## 1.0.6-beta.2
 
 ### Patch Changes

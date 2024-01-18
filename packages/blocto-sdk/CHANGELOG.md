@@ -1,5 +1,12 @@
 # @blocto/sdk
 
+## 0.9.1
+
+### Patch Changes
+
+- 48fa07a: fix: handle existedSDK handle window not defined
+- 4ea8a07: fix web3-react-connector duplicate authn popup
+
 ## 0.9.1-beta.1
 
 ### Patch Changes
