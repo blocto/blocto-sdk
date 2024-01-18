@@ -1,5 +1,11 @@
 # @blocto/wagmi-connector
 
+## 2.0.0
+
+### Major Changes
+
+- 196aee7: blocto connector support wagmi v2
+
 ## 2.0.0-beta.0
 
 ### Major Changes
