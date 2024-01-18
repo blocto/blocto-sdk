@@ -1,2 +1,2 @@
-export { default as BloctoConnector } from './connector';
+export { blocto } from './connector';
 export type * from './connector';
