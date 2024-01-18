@@ -1,5 +1,37 @@
 # @blocto/rainbowkit-connector
 
+## 0.2.9
+
+### Patch Changes
+
+- 267f154: fix(wagmi): correct typo with chainId
+- 48fa07a: fix: handle existedSDK handle window not defined
+- Updated dependencies [267f154]
+- Updated dependencies [48fa07a]
+  - @blocto/wagmi-connector@1.3.1
+
+## 0.2.9-beta.2
+
+### Patch Changes
+
+- 267f154: fix(wagmi): correct typo with chainId
+- Updated dependencies [267f154]
+  - @blocto/wagmi-connector@1.3.1-beta.2
+
+## 0.2.9-beta.1
+
+### Patch Changes
+
+- 48fa07a: fix: handle existedSDK handle window not defined
+- Updated dependencies [48fa07a]
+  - @blocto/wagmi-connector@1.3.1-beta.1
+
+## 0.2.9-beta.0
+
+### Patch Changes
+
+- @blocto/wagmi-connector@1.3.1-beta.0
+
 ## 0.2.8
 
 ### Patch Changes

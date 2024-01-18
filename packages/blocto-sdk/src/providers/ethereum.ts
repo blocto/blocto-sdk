@@ -74,6 +74,7 @@ export default class EthereumProvider
   };
 
   private get existedSDK() {
+    if (typeof window === 'undefined') return undefined;
     return (window as any).ethereum;
   }
 
@@ -149,12 +150,13 @@ export default class EthereumProvider
         `Get support chain failed: ${this.networkVersion} might not be supported yet.`
       );
     }
+    const walletServer =
+      this.injectedWalletServer ||
+      ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment];
     this._blocto = {
       ...this._blocto,
       sessionKeyEnv: ETH_SESSION_KEY_MAPPING[blocto_service_environment],
-      walletServer:
-        this.injectedWalletServer ||
-        ETH_ENV_WALLET_SERVER_MAPPING[blocto_service_environment],
+      walletServer,
       blockchainName: name,
       networkType: network_type,
       switchableNetwork: {
@@ -163,7 +165,7 @@ export default class EthereumProvider
           name,
           display_name,
           network_type,
-          wallet_web_url: this._blocto.walletServer,
+          wallet_web_url: walletServer,
           rpc_url: this.rpc,
         },
       },
@@ -443,6 +445,8 @@ export default class EthereumProvider
       case 'wallet_addEthereumChain': {
         return this.loadSwitchableNetwork(payload?.params || []);
       }
+      case 'eth_blockNumber':
+      case 'web3_clientVersion':
       case 'eth_call': {
         const response = await this.handleReadRequests(payload);
         if (!response || (response && !response.result && response.error)) {
@@ -462,8 +466,9 @@ export default class EthereumProvider
       case 'wallet_disconnect': {
         return this.handleDisconnect();
       }
-      case 'eth_accounts':
+      case 'eth_accounts': {
         return getEvmAddress(sessionKeyEnv, blockchainName) || [];
+      }
     }
 
     // Method that requires user to be connected
@@ -643,6 +648,13 @@ export default class EthereumProvider
   // eip-1102 alias
   // DEPRECATED API: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1102.md
   async enable(email?: string): Promise<ProviderAccounts> {
+    if (typeof window === 'undefined') {
+      throw ethErrors.provider.custom({
+        code: 1001,
+        message: 'Blocto SDK only works in browser environment',
+      });
+    }
+
     const { walletServer, blockchainName, sessionKeyEnv } =
       await this.#getBloctoProperties();
 
