@@ -1,5 +1,14 @@
 # @blocto/aptos-wallet-adapter-plugin
 
+## 0.2.8
+
+### Patch Changes
+
+- 48fa07a: fix: handle existedSDK handle window not defined
+- Updated dependencies [48fa07a]
+- Updated dependencies [4ea8a07]
+  - @blocto/sdk@0.9.1
+
 ## 0.2.8-beta.1
 
 ### Patch Changes
