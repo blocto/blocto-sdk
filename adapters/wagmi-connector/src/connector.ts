@@ -1,25 +1,18 @@
-import {
-  Connector,
-  Chain,
-  ConnectorData,
-  WalletClient,
-  ConnectorNotFoundError,
-} from '@wagmi/core';
-import {
-  SwitchChainError,
-  Address,
-  createWalletClient,
-  custom,
-  numberToHex,
-} from 'viem';
 import type {
-  EthereumProviderConfig,
+  EthereumProviderConfig as BloctoEthereumProviderParameters,
   EthereumProviderInterface as BloctoProvider,
 } from '@blocto/sdk';
 import BloctoSDK from '@blocto/sdk';
-import { normalizeChainId } from './util/normalizeChainId';
+import { createConnector, normalizeChainId } from '@wagmi/core';
+import {
+  RpcError,
+  SwitchChainError,
+  UserRejectedRequestError,
+  getAddress,
+  numberToHex,
+} from 'viem';
 
-type BloctoOptions = {
+export type BloctoParameters = {
   /**
    * Your app’s unique identifier that can be obtained at https://developers.blocto.app,
    * To get advanced features and support with Blocto.
@@ -29,201 +22,143 @@ type BloctoOptions = {
   appId?: string;
 };
 
-class BloctoConnector extends Connector<BloctoProvider, BloctoOptions> {
-  readonly id = 'blocto';
-  readonly name = 'Blocto';
-  readonly ready = true;
-  #provider?: BloctoProvider;
-  #onAccountsChangedBind: typeof this.onAccountsChanged;
-  #onChainChangedBind: typeof this.onChainChanged;
-  #onDisconnectBind: typeof this.onDisconnect;
+blocto.type = 'blocto' as const;
+export function blocto({ appId }: BloctoParameters = {}) {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  type Properties = {};
+  type StorageItem = {
+    store: any;
+    'wagmi.recentConnectorId': string;
+  };
 
-  constructor({
-    chains,
-    options = {},
-  }: {
-    chains?: Chain[];
-    options?: BloctoOptions;
-  }) {
-    super({ chains, options });
-    this.#onAccountsChangedBind = this.onAccountsChanged.bind(this);
-    this.#onChainChangedBind = this.onChainChanged.bind(this);
-    this.#onDisconnectBind = this.onDisconnect.bind(this);
-  }
+  let walletProvider: BloctoProvider | undefined;
+  const handleConnectReset = () => {
+    walletProvider = undefined;
+  };
 
-  getProvider({ chainId }: { chainId?: number } = {}): Promise<BloctoProvider> {
-    if (!this.#provider) {
-      const { appId } = this.options;
-      const _chainId = chainId ?? this.chains[0]?.id;
-      const config: EthereumProviderConfig = {
-        chainId: _chainId,
-        rpc: this.chains.find((x) => x.id === _chainId)?.rpcUrls.default
-          .http?.[0],
-      };
-      this.#provider = new BloctoSDK({ ethereum: config, appId })?.ethereum;
-    }
+  return createConnector<BloctoProvider, Properties, StorageItem>((config) => ({
+    id: 'blocto',
+    name: 'Blocto',
+    type: blocto.type,
+    async connect({ chainId } = {}) {
+      try {
+        const provider = await this.getProvider({ chainId });
 
-    if (!this.#provider) {
-      throw new ConnectorNotFoundError();
-    }
+        config.emitter.emit('message', { type: 'connecting' });
 
-    return Promise.resolve(this.#provider);
-  }
+        await provider.request({
+          method: 'eth_requestAccounts',
+        });
 
-  async connect(config?: {
-    chainId?: number;
-  }): Promise<Required<ConnectorData>> {
-    try {
-      const provider = await this.getProvider(config);
+        const accounts = await this.getAccounts();
+        const _chainId = await this.getChainId();
 
-      this.#setupListeners();
-      this.emit('message', { type: 'connecting' });
-
-      await provider.request({
-        method: 'eth_requestAccounts',
-      });
-
-      const account = await this.getAccount();
-      const id = await this.getChainId();
-      const unsupported = this.isChainUnsupported(id);
-
-      return {
-        account,
-        chain: { id, unsupported },
-      };
-    } catch (error: unknown) {
-      this.#handleConnectReset();
-      throw error;
-    }
-  }
-
-  async disconnect(): Promise<void> {
-    const provider = await this.getProvider();
-    await provider.request({ method: 'wallet_disconnect' });
-    this.#removeListeners();
-    this.#handleConnectReset();
-  }
-
-  async getAccount(): Promise<Address> {
-    const provider = await this.getProvider();
-    const accounts = await provider.request({
-      method: 'eth_accounts',
-    });
-    const [address] = accounts || [];
-
-    if (!address) {
-      throw new Error('No accounts found');
-    }
-
-    return address;
-  }
-
-  async getChainId(): Promise<number> {
-    const provider = await this.getProvider();
-    const chainId = await provider.request({ method: 'eth_chainId' });
-
-    return normalizeChainId(chainId);
-  }
-
-  async isAuthorized(): Promise<boolean> {
-    const walletName = this.storage?.getItem('wallet');
-    const connected = Boolean(this.storage?.getItem('connected'));
-    const isConnect = walletName === 'blocto' && connected;
-    return Promise.resolve(isConnect);
-  }
-
-  async switchChain(chainId: number): Promise<Chain> {
-    try {
-      const provider = await this.getProvider();
-      const id = numberToHex(chainId);
-      const chain = this.chains.find((x) => x.id === chainId);
-      const networks = await provider.supportChainList();
-      const evmSupportMap = networks.reduce(
-        (a: any, v: any) => ({ ...a, [v.chainId]: v }),
-        {}
-      );
-      const isBloctoSupportChain = evmSupportMap[`${chainId}`];
-
-      if (!chain || !isBloctoSupportChain) {
-        throw new SwitchChainError(
-          new Error(`Blocto unsupported chain: ${id}`)
-        );
-      }
-
-      await provider.request({
-        method: 'wallet_addEthereumChain',
-        params: [{ chainId: id, rpcUrls: chain?.rpcUrls.default.http }],
-      });
-      await provider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: id }],
-      });
-
-      return chain;
-    } catch (error: unknown) {
-      if (this.#isUserRejectedRequestError(error)) {
+        return { accounts, chainId: _chainId };
+      } catch (error: unknown) {
+        handleConnectReset();
         throw error;
       }
-      throw new SwitchChainError(error as Error);
-    }
-  }
+    },
+    async disconnect() {
+      const provider = await this.getProvider();
+      await provider.request({ method: 'wallet_disconnect' });
+      handleConnectReset();
+    },
+    async getAccounts() {
+      const provider = await this.getProvider();
+      const accounts = (await provider.request({
+        method: 'eth_accounts',
+      })) as string[];
 
-  async getWalletClient({
-    chainId,
-  }: {
-    chainId?: number;
-  }): Promise<WalletClient> {
-    const [provider, account] = await Promise.all([
-      this.getProvider(),
-      this.getAccount(),
-    ]);
-    const chain = this.chains.find((x) => x.id === chainId);
-    if (!provider) throw new Error('provider is required.');
-    return createWalletClient({
-      account,
-      chain,
-      transport: custom(provider),
-    }) as WalletClient;
-  }
+      return accounts.map(getAddress);
+    },
+    async getChainId() {
+      const provider = await this.getProvider();
+      const chainId =
+        provider.chainId ??
+        (await provider?.request({ method: 'eth_chainId' }));
+      return normalizeChainId(chainId);
+    },
+    async getProvider({ chainId } = {}) {
+      if (!walletProvider) {
+        const store = await config.storage?.getItem('store');
+        const lastConnectedChainId = store?.state?.chainId;
+        const desiredChainId = chainId ?? lastConnectedChainId;
+        const ethereum: BloctoEthereumProviderParameters = {
+          chainId: desiredChainId,
+          rpc: config.chains.find((x) => x.id === desiredChainId)?.rpcUrls
+            .default.http[0],
+        };
 
-  protected onAccountsChanged(): void {
-    // not supported yet
-  }
+        walletProvider = new BloctoSDK({ ethereum, appId })?.ethereum;
 
-  protected async onChainChanged(chainId: string | number): Promise<void> {
-    const id = normalizeChainId(chainId);
-    const unsupported = this.isChainUnsupported(id);
-    const account = await this.getAccount();
-    this.emit('change', { chain: { id, unsupported }, account });
-  }
-  protected onDisconnect(): void {
-    this.emit('disconnect');
-  }
+        if (!walletProvider) {
+          throw new Error('Blocto SDK is not initialized.');
+        }
 
-  async #setupListeners(): Promise<void> {
-    const provider = await this.getProvider();
+        walletProvider.on('accountsChanged', this.onAccountsChanged.bind(this));
+        walletProvider.on('chainChanged', this.onChainChanged.bind(this));
+        walletProvider.on('disconnect', this.onDisconnect.bind(this));
+      }
 
-    provider.on('accountsChanged', this.#onAccountsChangedBind);
-    provider.on('chainChanged', this.#onChainChangedBind);
-    provider.on('disconnect', this.#onDisconnectBind);
-  }
+      return Promise.resolve(walletProvider);
+    },
+    async isAuthorized() {
+      const recentConnectorId = await config.storage?.getItem(
+        'recentConnectorId'
+      );
+      if (recentConnectorId !== this.id) return false;
 
-  async #removeListeners(): Promise<void> {
-    const provider = await this.getProvider();
+      const accounts = await this.getAccounts();
+      return !!accounts.length;
+    },
+    async switchChain({ chainId }) {
+      try {
+        const provider = await this.getProvider();
+        const id = numberToHex(chainId);
+        const chain = config.chains.find((x) => x.id === chainId);
+        const networks = await provider.supportChainList();
+        const evmSupportMap = networks.reduce(
+          (a: any, v: any) => ({ ...a, [v.chainId]: v }),
+          {}
+        );
+        const isBloctoSupportChain = evmSupportMap[`${chainId}`];
 
-    provider.off('accountsChanged', this.#onAccountsChangedBind);
-    provider.off('chainChanged', this.#onChainChangedBind);
-    provider.off('disconnect', this.#onDisconnectBind);
-  }
+        if (!chain || !isBloctoSupportChain) {
+          throw new SwitchChainError(
+            new Error(`Blocto unsupported chain: ${id}`)
+          );
+        }
 
-  #handleConnectReset(): void {
-    this.#provider = undefined;
-  }
+        await provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [{ chainId: id, rpcUrls: chain?.rpcUrls.default.http }],
+        });
+        await provider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: id }],
+        });
 
-  #isUserRejectedRequestError(error: unknown): boolean {
-    return /(user rejected)/i.test((error as Error).message);
-  }
+        return chain;
+      } catch (err) {
+        const error = err as RpcError;
+        if (error.code === UserRejectedRequestError.code)
+          throw new UserRejectedRequestError(error);
+
+        throw new SwitchChainError(error as Error);
+      }
+    },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    onAccountsChanged() {},
+    async onChainChanged(chainId: string) {
+      const accounts = await this.getAccounts();
+      config.emitter.emit('change', {
+        chainId: normalizeChainId(chainId),
+        accounts,
+      });
+    },
+    async onDisconnect() {
+      config.emitter.emit('disconnect');
+    },
+  }));
 }
-
-export default BloctoConnector;
-export type { BloctoOptions };
