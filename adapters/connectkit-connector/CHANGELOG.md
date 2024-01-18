@@ -1,5 +1,15 @@
 # @blocto/connectkit-connector
 
+## 0.2.3
+
+### Patch Changes
+
+- 267f154: fix(wagmi): correct typo with chainId
+- 48fa07a: fix: handle existedSDK handle window not defined
+- Updated dependencies [267f154]
+- Updated dependencies [48fa07a]
+  - @blocto/wagmi-connector@1.3.1
+
 ## 0.2.3-beta.2
 
 ### Patch Changes
