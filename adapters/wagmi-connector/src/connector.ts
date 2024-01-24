@@ -124,7 +124,11 @@ export function blocto({ appId }: BloctoParameters = {}) {
         );
         const isBloctoSupportChain = evmSupportMap[`${chainId}`];
 
-        if (!chain || !isBloctoSupportChain) {
+        if (!chain) {
+          throw new SwitchChainError(new Error(`Chain not in config: ${id}`));
+        }
+
+        if (!isBloctoSupportChain) {
           throw new SwitchChainError(
             new Error(`Blocto unsupported chain: ${id}`)
           );
