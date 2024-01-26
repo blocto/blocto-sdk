@@ -74,9 +74,7 @@ export function blocto({ appId }: BloctoParameters = {}) {
     },
     async getChainId() {
       const provider = await this.getProvider();
-      const chainId =
-        provider.chainId ??
-        (await provider?.request({ method: 'eth_chainId' }));
+      const chainId = await provider?.request({ method: 'eth_chainId' });
       return normalizeChainId(chainId);
     },
     async getProvider({ chainId } = {}) {
