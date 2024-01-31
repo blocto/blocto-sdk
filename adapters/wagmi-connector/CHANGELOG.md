@@ -1,5 +1,19 @@
 # @blocto/wagmi-connector
 
+## 2.0.1
+
+### Patch Changes
+
+- 7f68b54: fix(wagmi): obtain chainId through request
+- 073daf0: Show not in config error message when attempt to switch dapp unsupport chain
+
+## 2.0.1-beta.0
+
+### Patch Changes
+
+- 7f68b54: fix(wagmi): obtain chainId through request
+- 073daf0: Show not in config error message when attempt to switch dapp unsupport chain
+
 ## 2.0.0
 
 ### Major Changes
