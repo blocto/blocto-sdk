@@ -2,7 +2,7 @@
   "name": "@blocto/wagmi-connector",
   "description": "Blocto wallet connector extend from wagmi Connector",
   "author": "Calvin Chang",
-  "version": "2.0.1-beta.0",
+  "version": "2.0.1",
   "type": "module",
   "main": "./dist/index.umd.cjs",
   "module": "./dist/index.js",
