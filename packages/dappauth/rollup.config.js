@@ -14,6 +14,7 @@ export default [
       name: 'DappAuth',
       exports: 'auto',
     },
+    external: ['ethereumjs-util', 'web3'],
     plugins: [
       copy({
         targets: [
@@ -23,7 +24,6 @@ export default [
       }),
       commonjs(),
       resolve({
-        browser: true,
         preferBuiltins: true,
       }),
       json(),
@@ -41,6 +41,7 @@ export default [
       format: 'es',
       name: 'DappAuth',
     },
+    external: ['ethereumjs-util', 'web3'],
     plugins: [
       copy({
         targets: [
@@ -50,7 +51,6 @@ export default [
       }),
       commonjs(),
       resolve({
-        browser: true,
         preferBuiltins: true,
       }),
       json(),
@@ -65,6 +65,7 @@ export default [
       format: 'umd',
       name: 'DappAuth',
     },
+    external: ['ethereumjs-util', 'web3'],
     plugins: [
       copy({
         targets: [
