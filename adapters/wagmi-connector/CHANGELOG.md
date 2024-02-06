@@ -1,5 +1,11 @@
 # @blocto/wagmi-connector
 
+## 2.0.1
+
+### Patch Changes
+
+- 073daf0: Show not in config error message when attempt to switch dapp unsupport chain
+
 ## 2.0.0
 
 ### Major Changes
