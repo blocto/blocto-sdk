@@ -89,7 +89,6 @@ export function blocto({ appId }: BloctoParameters = {}) {
         };
 
         walletProvider = new BloctoSDK({ ethereum, appId })?.ethereum;
-
         if (!walletProvider) {
           throw new Error('Blocto SDK is not initialized.');
         }
@@ -105,7 +104,6 @@ export function blocto({ appId }: BloctoParameters = {}) {
       const recentConnectorId = await config.storage?.getItem(
         'recentConnectorId'
       );
-      console.log(config);
       if (recentConnectorId !== this.id) return false;
 
       const accounts = await this.getAccounts();
