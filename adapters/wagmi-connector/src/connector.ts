@@ -70,7 +70,7 @@ export function blocto({ appId }: BloctoParameters = {}) {
         method: 'eth_accounts',
       })) as string[];
 
-      return accounts.map(getAddress);
+      return accounts.map((x) => getAddress(x));
     },
     async getChainId() {
       const provider = await this.getProvider();
@@ -105,6 +105,7 @@ export function blocto({ appId }: BloctoParameters = {}) {
       const recentConnectorId = await config.storage?.getItem(
         'recentConnectorId'
       );
+      console.log(config);
       if (recentConnectorId !== this.id) return false;
 
       const accounts = await this.getAccounts();
