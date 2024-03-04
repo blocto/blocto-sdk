@@ -77,6 +77,11 @@ export const ETH_RPC_LIST: Mapping = {
 
   // zKatana Sepolia Testnet
   1261120: 'https://rpc.startale.com/zkatana',
+
+  // Blast
+  81457: 'https://rpc.blast.io',
+  // Blast Sepolia Testnet
+  168587773: 'https://sepolia.blast.io'
 };
 
 export const ETH_ENV_WALLET_SERVER_MAPPING: Mapping = {
