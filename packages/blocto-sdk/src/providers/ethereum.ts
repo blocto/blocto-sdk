@@ -687,7 +687,7 @@ export default class EthereumProvider
     }
 
     const params = new URLSearchParams();
-    params.set('l6n', window.location.origin)
+    params.set('l6n', window.location.origin);
     params.set('v', SDK_VERSION);
     params.set('q', `${window.location.pathname}${window.location.search}`);
     const emailParam = email && isEmail(email) ? `/${email}` : '';
@@ -996,9 +996,14 @@ export default class EthereumProvider
       body: JSON.stringify([params, revert]),
     });
     const iframeParams = new URLSearchParams();
-    iframeParams.set('l6n', window.location.origin)
-    iframeParams.set('q', `${window.location.pathname}${window.location.search}`);
-    const authzFrame = await this.setIframe(`/authz/${authorizationId}?${iframeParams.toString()}`);
+    iframeParams.set('l6n', window.location.origin);
+    iframeParams.set(
+      'q',
+      `${window.location.pathname}${window.location.search}`
+    );
+    const authzFrame = await this.setIframe(
+      `/authz/${authorizationId}?${iframeParams.toString()}`
+    );
     return this.responseListener(authzFrame, 'txHash');
   }
 
