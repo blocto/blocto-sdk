@@ -687,8 +687,9 @@ export default class EthereumProvider
     }
 
     const params = new URLSearchParams();
-    params.set('l6n', window.location.origin);
+    params.set('l6n', window.location.origin)
     params.set('v', SDK_VERSION);
+    params.set('q', `${window.location.pathname}${window.location.search}`);
     const emailParam = email && isEmail(email) ? `/${email}` : '';
     const loginFrame = await this.setIframe(
       `/authn${emailParam}?${params.toString()}`
@@ -994,7 +995,10 @@ export default class EthereumProvider
       method: 'POST',
       body: JSON.stringify([params, revert]),
     });
-    const authzFrame = await this.setIframe(`/authz/${authorizationId}`);
+    const iframeParams = new URLSearchParams();
+    iframeParams.set('l6n', window.location.origin)
+    iframeParams.set('q', `${window.location.pathname}${window.location.search}`);
+    const authzFrame = await this.setIframe(`/authz/${authorizationId}?${iframeParams.toString()}`);
     return this.responseListener(authzFrame, 'txHash');
   }
 
