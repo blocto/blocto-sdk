@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.10.0-beta.0
+
+### Minor Changes
+
+- 74abbd7: Add L2 Blast & Blast Sepolia Testnet
+
 ## 0.9.1
 
 ### Patch Changes
