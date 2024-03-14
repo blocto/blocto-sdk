@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.10.0-beta.1
+
+### Minor Changes
+
+- bd6b11c: passing dApp's urlParams to login & authz Iframe
+
 ## 0.10.0-beta.0
 
 ### Minor Changes
