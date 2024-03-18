@@ -70,7 +70,7 @@ export function blocto({ appId }: BloctoParameters = {}) {
         method: 'eth_accounts',
       })) as string[];
 
-      return accounts.map(getAddress);
+      return accounts.map((x) => getAddress(x));
     },
     async getChainId() {
       const provider = await this.getProvider();
@@ -89,7 +89,6 @@ export function blocto({ appId }: BloctoParameters = {}) {
         };
 
         walletProvider = new BloctoSDK({ ethereum, appId })?.ethereum;
-
         if (!walletProvider) {
           throw new Error('Blocto SDK is not initialized.');
         }

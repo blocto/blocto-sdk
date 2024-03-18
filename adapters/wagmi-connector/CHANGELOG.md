@@ -1,5 +1,22 @@
 # @blocto/wagmi-connector
 
+## 2.0.2
+
+### Patch Changes
+
+- 5191913: adjust the usage of getAddress function
+- Updated dependencies [bd6b11c]
+- Updated dependencies [74abbd7]
+  - @blocto/sdk@0.10.0
+
+## 2.0.2-beta.0
+
+### Patch Changes
+
+- 5191913: adjust the usage of getAddress function
+- Updated dependencies [74abbd7]
+  - @blocto/sdk@0.10.0-beta.0
+
 ## 2.0.1
 
 ### Patch Changes

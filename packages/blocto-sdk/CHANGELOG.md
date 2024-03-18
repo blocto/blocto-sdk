@@ -1,5 +1,24 @@
 # @blocto/sdk
 
+## 0.10.0
+
+### Minor Changes
+
+- bd6b11c: passing dApp's urlParams to login & authz Iframe
+- 74abbd7: Add L2 Blast & Blast Sepolia Testnet
+
+## 0.10.0-beta.1
+
+### Minor Changes
+
+- bd6b11c: passing dApp's urlParams to login & authz Iframe
+
+## 0.10.0-beta.0
+
+### Minor Changes
+
+- 74abbd7: Add L2 Blast & Blast Sepolia Testnet
+
 ## 0.9.1
 
 ### Patch Changes

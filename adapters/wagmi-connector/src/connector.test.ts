@@ -1,15 +1,13 @@
-/**
- * @vitest-environment jsdom
- */
-
 import { expect, test, describe, vi, beforeEach, afterEach } from 'vitest';
 import { createConfig } from '@wagmi/core';
 import { polygonMumbai, arbitrumGoerli } from '@wagmi/chains';
-import * as viem from 'viem';
+import { SwitchChainError, http, numberToHex } from 'viem';
 import { normalizeChainId } from '@wagmi/core';
-import { blocto } from './index';
+import { blocto } from './';
 
-vi.mock('viem');
+const walletProvider = {
+  on: vi.fn(),
+};
 
 describe('blocto-connector', () => {
   let connector: any;
@@ -19,13 +17,11 @@ describe('blocto-connector', () => {
       pollingInterval: 100,
       storage: null,
       transports: {
-        [polygonMumbai.id]: viem.http(),
-        [arbitrumGoerli.id]: viem.http(),
+        [polygonMumbai.id]: http(),
+        [arbitrumGoerli.id]: http(),
       },
     });
-
-    const connectorFn = blocto();
-    connector = config._internal.connectors.setup(connectorFn);
+    connector = config._internal.connectors.setup(blocto());
   });
 
   afterEach(() => {
@@ -55,6 +51,19 @@ describe('blocto-connector', () => {
     });
   });
 
+  test('catch error when user decline to connect', () => {
+    const chainId = 1;
+    const userRejectedRequest = new Error('User rejected request');
+    const provider = {
+      request: vi.fn().mockImplementation(() => {
+        throw userRejectedRequest;
+      }),
+    };
+    connector.getProvider = vi.fn().mockResolvedValue(provider);
+
+    expect(connector.connect({ chainId })).rejects.toThrow(userRejectedRequest);
+  });
+
   test('disconnect', async () => {
     const provider = {
       request: vi.fn().mockResolvedValue(undefined),
@@ -75,7 +84,6 @@ describe('blocto-connector', () => {
       request: vi.fn().mockResolvedValue(accounts),
     };
     connector.getProvider = vi.fn().mockResolvedValue(provider);
-    vi.spyOn(viem, 'getAddress').mockImplementation((x) => x as `0x${string}`);
 
     const result = await connector.getAccounts();
 
@@ -99,6 +107,30 @@ describe('blocto-connector', () => {
     expect(provider.request).toHaveBeenCalledWith({ method: 'eth_chainId' });
   });
 
+  test('getProvider', async () => {
+    vi.mock('@blocto/sdk', () => ({
+      default: vi.fn().mockImplementation(() => ({
+        ethereum: walletProvider,
+      })),
+    }));
+
+    const chainId = 1;
+    const result = await connector.getProvider({ chainId });
+
+    expect(result).toEqual(walletProvider);
+    expect(walletProvider.on).toHaveBeenCalledWith(
+      'accountsChanged',
+      expect.any(Function)
+    );
+    expect(walletProvider.on).toHaveBeenCalledWith(
+      'chainChanged',
+      expect.any(Function)
+    );
+    expect(walletProvider.on).toHaveBeenCalledWith(
+      'disconnect',
+      expect.any(Function)
+    );
+  });
   test('isAuthorized', async () => {
     const accounts = ['0xc61B4Aa62E5FD40cceB08C602Eb5D157b257b49a'];
     connector.getAccounts = vi.fn().mockResolvedValue(accounts);
@@ -120,7 +152,6 @@ describe('blocto-connector', () => {
       ),
     };
     connector.getProvider = vi.fn().mockResolvedValue(provider);
-    vi.spyOn(viem, 'numberToHex').mockReturnValue(viem.numberToHex(chainId));
 
     const chain = await connector.switchChain({ chainId });
 
@@ -129,19 +160,57 @@ describe('blocto-connector', () => {
       method: 'wallet_addEthereumChain',
       params: [
         {
-          chainId: viem.numberToHex(chainId),
+          chainId: numberToHex(chainId),
           rpcUrls: arbitrumGoerli.rpcUrls.default.http,
         },
       ],
     });
     expect(provider.request).toHaveBeenCalledWith({
       method: 'wallet_switchEthereumChain',
-      params: [
-        {
-          chainId: viem.numberToHex(chainId),
-        },
-      ],
+      params: [{ chainId: numberToHex(chainId) }],
     });
     expect(chain.id).toEqual(chainId);
+  });
+
+  test('catch error when switching to unConfigured chain', async () => {
+    const unConfiguredChainId = 111111;
+    const provider = {
+      request: vi.fn().mockResolvedValue(undefined),
+      supportChainList: vi.fn().mockResolvedValue(
+        [polygonMumbai, arbitrumGoerli].map(({ id, name }) => ({
+          chainId: id,
+          chainName: name,
+        }))
+      ),
+    };
+    connector.getProvider = vi.fn().mockResolvedValue(provider);
+    const expectError = new SwitchChainError(
+      new Error(`Chain not in config: ${numberToHex(unConfiguredChainId)}`)
+    );
+
+    expect(
+      connector.switchChain({ chainId: unConfiguredChainId })
+    ).rejects.toThrow(expectError);
+  });
+
+  test('catch error when switching to blocto unsupported chain', async () => {
+    const unsupportedChainId = arbitrumGoerli.id;
+    const provider = {
+      request: vi.fn().mockResolvedValue(undefined),
+      supportChainList: vi.fn().mockResolvedValue(
+        [polygonMumbai].map(({ id, name }) => ({
+          chainId: id,
+          chainName: name,
+        }))
+      ),
+    };
+    connector.getProvider = vi.fn().mockResolvedValue(provider);
+    const expectError = new SwitchChainError(
+      new Error(`Blocto unsupported chain: ${numberToHex(unsupportedChainId)}`)
+    );
+
+    expect(
+      connector.switchChain({ chainId: unsupportedChainId })
+    ).rejects.toThrow(expectError);
   });
 });
