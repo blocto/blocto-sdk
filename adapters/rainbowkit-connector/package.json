@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@rainbow-me/rainbowkit": "^2.0.4",
-    "@blocto/wagmi-connector": "npm:@blocto/wagmi-connector@^2.0.2"
+    "@blocto/wagmi-connector": "latest"
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",
