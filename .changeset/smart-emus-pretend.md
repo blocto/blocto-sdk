@@ -1,5 +1,5 @@
 ---
-'@blocto/rainbowkit-connector': patch
+'@blocto/rainbowkit-connector': major
 ---
 
 support rainbowkt v2
