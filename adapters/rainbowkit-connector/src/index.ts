@@ -4,7 +4,6 @@ import { blocto, createConnector } from '@blocto/wagmi-connector';
 export const bloctoWallet =
   ({ appId } = { appId: undefined }) =>
   (): Wallet => {
-    console.log('appId: ', appId);
     return {
       id: 'blocto',
       name: 'Blocto',
