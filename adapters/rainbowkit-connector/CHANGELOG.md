@@ -1,5 +1,11 @@
 # @blocto/rainbowkit-connector
 
+## 2.0.1
+
+### Patch Changes
+
+- d5aa448: update rainbowkit version and fix appId params
+
 ## 2.0.0
 
 ### Major Changes
