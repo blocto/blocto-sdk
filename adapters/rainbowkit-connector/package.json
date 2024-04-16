@@ -1,6 +1,6 @@
 {
   "name": "@blocto/rainbowkit-connector",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "blocto wallet connector to use rainbowkit",
   "author": "Blocto Wallet",
   "main": "./dist/index.js",
@@ -33,7 +33,7 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@rainbow-me/rainbowkit": "^2.0.4",
+    "@rainbow-me/rainbowkit": "^2.0.5",
     "@blocto/wagmi-connector": "^2.0.3"
   },
   "devDependencies": {

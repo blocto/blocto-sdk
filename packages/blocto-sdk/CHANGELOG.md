@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.10.1
+
+### Patch Changes
+
+- 97ac7d7: deprecate goerli testnet info
+
 ## 0.10.0
 
 ### Minor Changes
