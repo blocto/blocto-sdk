@@ -2,7 +2,7 @@ import { Wallet, WalletDetailsParams } from '@rainbow-me/rainbowkit';
 import { blocto, createConnector } from '@blocto/wagmi-connector';
 
 export const bloctoWallet =
-  ({ appId } = { appId: undefined }) =>
+  ({ appId }: { appId?: string } = {}) =>
   (): Wallet => {
     return {
       id: 'blocto',
