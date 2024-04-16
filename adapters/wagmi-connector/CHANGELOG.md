@@ -1,5 +1,11 @@
 # @blocto/wagmi-connector
 
+## 2.0.3
+
+### Patch Changes
+
+- d120795: export wagmi createConnector function
+
 ## 2.0.2
 
 ### Patch Changes
