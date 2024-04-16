@@ -163,3 +163,5 @@ export function blocto({ appId }: BloctoParameters = {}) {
     },
   }));
 }
+
+export { createConnector };
