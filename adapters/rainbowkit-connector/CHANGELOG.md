@@ -1,5 +1,16 @@
 # @blocto/rainbowkit-connector
 
+## 2.0.0
+
+### Major Changes
+
+- ef72999: support rainbowkt v2
+
+### Patch Changes
+
+- Updated dependencies [d120795]
+  - @blocto/wagmi-connector@2.0.3
+
 ## 1.0.0
 
 ### Major Changes
