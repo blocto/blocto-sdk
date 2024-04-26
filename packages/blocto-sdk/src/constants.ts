@@ -27,8 +27,8 @@ export const ETH_RPC_LIST: Mapping = {
 
   // Polygon Mainnet
   137: 'https://rpc-mainnet.maticvigil.com/',
-  // Polygon Testnet
-  80001: 'https://rpc-mumbai.matic.today/',
+  // Polygon Amoy Testnet
+  80002: 'https://rpc-amoy.polygon.technology/',
 
   // Avalanche Mainnet
   43114: 'https://api.avax.network/ext/bc/C/rpc',
