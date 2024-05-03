@@ -13,6 +13,8 @@ jobs:
         with:
           asana-secret: ${{ secrets.ASANA_SECRET }}
           allowed-projects: |
-            1201812548509877
+            1207145524635866
+            1207160002492686
+            1203400194794992
       - name: Log output status
         run: echo "Status is ${{ steps.postAttachment.outputs.status }}"
