@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.10.2
+
+### Patch Changes
+
+- e8251f0: migration testnet polygon_mumbai to polygon_amoy
+
 ## 0.10.1
 
 ### Patch Changes
