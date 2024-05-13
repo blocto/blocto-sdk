@@ -69,7 +69,12 @@ export const ETH_RPC_LIST: Mapping = {
   // Blast
   81457: 'https://rpc.blast.io',
   // Blast Sepolia Testnet
-  168587773: 'https://sepolia.blast.io'
+  168587773: 'https://sepolia.blast.io',
+
+  // Merlin Chain
+  4200: 'https://rpc.merlinchain.io',
+  // Merlin Testnet
+  686868: 'https://testnet-rpc.merlinchain.io',
 };
 
 export const ETH_ENV_WALLET_SERVER_MAPPING: Mapping = {
