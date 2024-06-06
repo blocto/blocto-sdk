@@ -1,5 +1,19 @@
 # @blocto/wagmi-connector
 
+## 2.0.4
+
+### Patch Changes
+
+- Updated dependencies [e066144]
+  - @blocto/sdk@0.10.3
+
+## 2.0.4-beta.0
+
+### Patch Changes
+
+- Updated dependencies [e066144]
+  - @blocto/sdk@0.10.3-beta.0
+
 ## 2.0.3
 
 ### Patch Changes

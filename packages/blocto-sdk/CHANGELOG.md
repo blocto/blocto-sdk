@@ -1,5 +1,17 @@
 # @blocto/sdk
 
+## 0.10.3
+
+### Patch Changes
+
+- e066144: support Merlin Chain (BTC L2)
+
+## 0.10.3-beta.0
+
+### Patch Changes
+
+- e066144: support Merlin Chain (BTC L2)
+
 ## 0.10.2
 
 ### Patch Changes
