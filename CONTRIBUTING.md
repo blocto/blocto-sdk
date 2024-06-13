@@ -2,7 +2,7 @@
 
 Thanks for showing interest to contribute to Blocto JavaScript SDK, you rock!
 
-## When it comes to open source, there are different ways you can contribute, all of which are valuable. Here's a few guidelines that should help you as you prepare your contribution.
+## When it comes to open source, there are different ways you can contribute, all of which are valuable. Here are a few guidelines that should help you as you prepare your contribution.
 
 ## Setup the Project
 
@@ -56,14 +56,14 @@ https://www.conventionalcommits.org/ or check out the
 
 ### Creating a Pull Request
 
-You are welcome to create a pull reuqest against the `develop` branch. The beta release channel goes here. When it's stable, we will pack it all and release in stable channel.
+You are welcome to create a pull request against the `develop` branch. The beta release channel goes here. When it's stable, we will pack it all and release in stable channel.
 
 Before creating a PR
 
 1. Make sure your branch is up to date with the `develop` branch
 2. On the `root` folder, run `yarn`
 3. On the `root` folder, run `yarn build`
-4. If a pull request created needs to bump a package version, please see [Changesets](#Changesets) part and add a changesets.
+4. If a pull request created needs to bump a package version, please see [Changesets](#Changesets) part and add a changeset.
 
 If everything passes, you should be able to create a PR.
 
@@ -77,4 +77,4 @@ If a pull request created needs to bump a package version, please follow those s
 2. Under `.changeset/` you will notice a new markdown file (its name is randomly generated), with the change-type and summary.
 3. Push the file along with the rest of the changes
 
-Once your PR will be merged, our Github action will create a new PR with that generated changelog for us to merge, once the generated PR is merged a new version will be published to npm.
+Once your PR is merged, our Github action will create a new PR with that generated changelog for us to merge, once the generated PR is merged a new version will be published to npm.
