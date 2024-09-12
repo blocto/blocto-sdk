@@ -180,7 +180,6 @@ export default class EthereumProvider
     chainId: `${number}`;
     rpcUrls: string[];
   }): Promise<void> {
-    await this.#getBloctoProperties();
     const supportNetworkList = await getEvmSupport().catch((e) => {
       throw ethErrors.provider.custom({
         code: 1001,
