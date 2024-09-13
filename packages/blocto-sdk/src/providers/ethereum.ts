@@ -1041,7 +1041,7 @@ export default class EthereumProvider
     );
   }
   /**
-   * @deprecated This method is deprecated and will be removed in future versions.
+   * @internal This method is internal and will be removed in future versions.
    * Please use request({method: "wallet_addEthereumChain"}) instead to add new networks.
    * 
    * @example
