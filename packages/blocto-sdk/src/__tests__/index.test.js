@@ -85,9 +85,15 @@ describe('Testing BloctoSDK ethereum provider', () => {
     expect(ethereum.rpc).toBe('https://bsc-dataseed.binance.org');
   });
   test('should setup _blocto', async () => {
-    await ethereum.loadSwitchableNetwork([
-      { chainId: '0x5', rpcUrls: ['https://goerli.infura.io/v3/'] },
-    ]);
+    await ethereum.request({
+      method:"eth_addEthereumChain",
+      params: [
+        {
+          chainId: '0xaa36a7',
+          rpcUrls: ['https://ethereum-sepolia.blockpi.network/v1/rpc/public']
+        }
+      ]
+    });
     expect(ethereum._blocto.networkType).toBe('mainnet');
   });
   test('should request chainId work', async () => {

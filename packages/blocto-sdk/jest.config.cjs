@@ -6,7 +6,7 @@ module.exports = {
     '^.+\\.(ts|tsx)?$': 'ts-jest',
     '^.+\\.(js|jsx)$': 'babel-jest',
   },
-  transformIgnorePatterns: ['node_modules/(?!variables/.*)'],
+  testPathIgnorePatterns: ['node_modules/(?!variables/.*)', '/fixtures/'],
   automock: false,
   resetMocks: false,
 };
