@@ -1,0 +1,19 @@
+{
+  "mode": "exit",
+  "tag": "beta",
+  "initialVersions": {
+    "@blocto/aptos-wallet-adapter-plugin": "0.2.10",
+    "@blocto/connectkit-connector": "0.2.3",
+    "@blocto/rainbowkit-connector": "2.0.2",
+    "@blocto/wagmi-connector": "2.0.4",
+    "@blocto/web3-react-connector": "1.0.8",
+    "@blocto/web3modal-connector": "0.1.4",
+    "@blocto/sdk": "0.10.3",
+    "@blocto/dappauth": "2.2.2",
+    "eslint-config-custom": "0.0.0",
+    "tsconfig": "0.0.0"
+  },
+  "changesets": [
+    "nasty-cats-greet"
+  ]
+}
