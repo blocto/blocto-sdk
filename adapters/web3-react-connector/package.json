@@ -1,6 +1,6 @@
 {
   "name": "@blocto/web3-react-connector",
-  "version": "1.0.8",
+  "version": "1.0.9-beta.0",
   "description": "A Blocto SDK connector for web3-react",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -43,7 +43,7 @@
     "url": "git://github.com/portto/blocto-sdk.git"
   },
   "dependencies": {
-    "@blocto/sdk": "^0.10.3",
+    "@blocto/sdk": "^0.10.4-beta.0",
     "@web3-react/types": "^8.1.2-beta.0"
   },
   "devDependencies": {

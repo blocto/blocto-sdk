@@ -1,5 +1,11 @@
 # @blocto/sdk
 
+## 0.10.4-beta.0
+
+### Patch Changes
+
+- ec87223: support Story testnet
+
 ## 0.10.3
 
 ### Patch Changes
