@@ -180,7 +180,6 @@ export default class EthereumProvider
     chainId: `${number}`;
     rpcUrls: string[];
   }): Promise<void> {
-    await this.#getBloctoProperties();
     const supportNetworkList = await getEvmSupport().catch((e) => {
       throw ethErrors.provider.custom({
         code: 1001,
@@ -1041,7 +1040,23 @@ export default class EthereumProvider
       listener(ethErrors.provider.disconnected())
     );
   }
-
+  /**
+   * @internal This method is internal and will be removed in future versions.
+   * Please use request({method: "wallet_addEthereumChain"}) instead to add new networks.
+   * 
+   * @example
+   * // Instead of using loadSwitchableNetwork, use:
+   * await provider.request({
+   *   method: 'wallet_addEthereumChain',
+   *   params: [{
+   *     chainId: '0xaa36a7',
+   *     rpcUrls: ['https://ethereum-sepolia.blockpi.network/v1/rpc/public'],
+   *   }]
+   * });
+   * 
+   * @param networkList - List of networks to add
+   * @returns Promise<null>
+   */
   async loadSwitchableNetwork(
     networkList: AddEthereumChainParameter[]
   ): Promise<null> {
