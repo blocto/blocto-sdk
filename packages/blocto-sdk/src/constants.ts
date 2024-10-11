@@ -77,7 +77,7 @@ export const ETH_RPC_LIST: Mapping = {
   686868: 'https://testnet-rpc.merlinchain.io',
 
   // Story Testnet
-  1513: 'https://testnet.storyrpc.io/',
+  1513: 'https://testnet.storyrpc.io',
 };
 
 export const ETH_ENV_WALLET_SERVER_MAPPING: Mapping = {
