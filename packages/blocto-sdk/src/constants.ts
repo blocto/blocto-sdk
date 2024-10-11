@@ -26,7 +26,7 @@ export const ETH_RPC_LIST: Mapping = {
   97: 'https://data-seed-prebsc-1-s1.binance.org:8545',
 
   // Polygon Mainnet
-  137: 'https://rpc-mainnet.maticvigil.com/',
+  137: 'https://polygon-rpc.com/',
   // Polygon Amoy Testnet
   80002: 'https://rpc-amoy.polygon.technology/',
 
