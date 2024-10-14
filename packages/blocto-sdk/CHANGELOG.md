@@ -1,5 +1,13 @@
 # @blocto/sdk
 
+## 0.10.4
+
+### Patch Changes
+
+- 79dade9: fix story tesnet url, fix multiple chain setting, update polygon url
+- ec87223: support Story testnet
+- 2e2164e: fix multiple chain setting
+
 ## 0.10.4-beta.1
 
 ### Patch Changes
