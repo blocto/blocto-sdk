@@ -26,7 +26,7 @@ export const ETH_RPC_LIST: Mapping = {
   97: 'https://data-seed-prebsc-1-s1.binance.org:8545',
 
   // Polygon Mainnet
-  137: 'https://rpc-mainnet.maticvigil.com/',
+  137: 'https://polygon-rpc.com/',
   // Polygon Amoy Testnet
   80002: 'https://rpc-amoy.polygon.technology/',
 
@@ -75,6 +75,9 @@ export const ETH_RPC_LIST: Mapping = {
   4200: 'https://rpc.merlinchain.io',
   // Merlin Testnet
   686868: 'https://testnet-rpc.merlinchain.io',
+
+  // Story Testnet
+  1513: 'https://testnet.storyrpc.io',
 };
 
 export const ETH_ENV_WALLET_SERVER_MAPPING: Mapping = {

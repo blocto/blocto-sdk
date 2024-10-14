@@ -1,5 +1,17 @@
 # @blocto/sdk
 
+## 0.10.4-beta.1
+
+### Patch Changes
+
+- 2e2164e: fix multiple chain setting
+
+## 0.10.4-beta.0
+
+### Patch Changes
+
+- ec87223: support Story testnet
+
 ## 0.10.3
 
 ### Patch Changes
