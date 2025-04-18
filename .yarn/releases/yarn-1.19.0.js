@@ -128518,8 +128518,8 @@ function compare (a, b) {
 }
 
 function generateBase (httpMethod, base_uri, params) {
-  // adapted from https://dev.twitter.com/docs/auth/oauth and 
-  // https://dev.twitter.com/docs/auth/creating-signature
+  // adapted from https://dev.x.com/docs/auth/oauth and 
+  // https://dev.x.com/docs/auth/creating-signature
 
   // Parameter normalization
   // http://tools.ietf.org/html/rfc5849#section-3.4.1.3.2
