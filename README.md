@@ -1,3 +1,5 @@
+# PLEASE NOTE, THIS PROJECT IS NO LONGER BEING MAINTAINED
+
 <p align="center">
    <a href="https://github.com/portto/blocto-sdk">
     <img src="https://github.com/portto/blocto-sdk/assets/4176802/0de20f6e-4733-4970-b442-3344e44cc6a2" alt="Blocto logo" />
@@ -6,24 +8,19 @@
 
 # Blocto JavaScript SDK
 
-[![npm (lastest)](https://img.shields.io/npm/v/@blocto/sdk/latest)](https://www.npmjs.com/package/@blocto/sdk)
-[![npm (beta)](https://img.shields.io/npm/v/@blocto/sdk/beta)](https://www.npmjs.com/package/@blocto/sdk)
-[![npm bundle size](https://img.shields.io/bundlephobia/minzip/@blocto/sdk)](https://www.npmjs.com/package/@blocto/sdk)
-[![Github Checks](https://github.com/portto/blocto-sdk/actions/workflows/test.yml/badge.svg)](https://github.com/portto/blocto-sdk/actions/workflows/test.yml)
-[![npm downloads](https://img.shields.io/npm/dw/@blocto/sdk)](https://www.npmjs.com/package/@blocto/sdk)
-[![LICENSE](https://img.shields.io/github/license/portto/blocto-sdk)](https://github.com/portto/blocto-sdk/blob/main/LICENSE)
-[![Discord](https://img.shields.io/discord/720454370650619984.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.com/invite/QRZTr6yHmY)
+> ⚠️ **Deprecation Notice**
+>
+> This repository is **no longer maintained** and has been officially deprecated.
+>
+> We recommend NOT using this SDK in new projects.
+>
+> For existing integrations, please be aware that no further updates, bug fixes, or support will be provided.
+>
+> **IMPORTANT**: As of June 11, 2025, all services associated with this SDK will be completely discontinued and existing integrations will cease to function.
+>
+> Thank you for your support and for being part of the Blocto developer community.
 
-This is a monorepo of Blocto JavaScript SDK. Check out the docs here: [docs.blocto.app](https://docs.blocto.app/).
-
-There are some adapters to make it easier to integrate:
-|lib name|npm|
-|-|-|
-|[@blocto/aptos-wallet-adapter-plugin](./adapters/aptos-wallet-adapter-plugin/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/aptos-wallet-adapter-plugin/latest)](https://www.npmjs.com/package/@blocto/aptos-wallet-adapter-plugin)|
-|[@blocto/web3-react-connector](./adapters/web3-react-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/web3-react-connector/latest)](https://www.npmjs.com/package/@blocto/web3-react-connector)|
-|[@blocto/wagmi-connector](./adapters/wagmi-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/wagmi-connector/latest)](https://www.npmjs.com/package/@blocto/wagmi-connector)|
-|[@blocto/rainbowkit-connector](./adapters/rainbowkit-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/rainbowkit-connector/latest)](https://www.npmjs.com/package/@blocto/rainbowkit-connector)|
-|[@blocto/web3modal-connector](./adapters/web3modal-connector/)|[![npm (lastest)](https://img.shields.io/npm/v/@blocto/web3modal-connector/latest)](https://www.npmjs.com/package/@blocto/web3modal-connector)|
+This is a monorepo of Blocto JavaScript SDK.
 
 ## What's inside?
 
